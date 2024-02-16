@@ -9,11 +9,11 @@ import SwiftUI
 import MusicKit
 
 @Observable class SongService {
-//    let songID = "1690445568"
+    var songID = "1712222236"
     var activeSong: Song?
     var searchResultSongs = MusicItemCollection<Song>()
     var searchTerm = ""
-    var searchActive = true
+    var searchActive = false
     
     public func fetchSong(id: String) async throws {
         do {
