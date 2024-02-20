@@ -11,6 +11,7 @@ import MusicKit
 struct Home: View {
     @Environment(SongService.self) var songService
     @State private var moveSet: CGFloat = .zero
+    @State private var filterActive = false
     let cancion: Song
     
     var body: some View {
@@ -23,6 +24,10 @@ struct Home: View {
                     .clipShape(.rect(cornerRadius: 24, style: .continuous))
                     .ignoresSafeArea()
                     .frame(height: geo.size.height / (moveSet.isZero ? 2.5 : 1), alignment: .top)
+                    .overlay(filterActive ? .black.opacity(0.1) : .clear)
+                    .onTapGesture {
+                        filterActive = false
+                    }
                 
                 ZStack {
                     VStack {
@@ -30,7 +35,7 @@ struct Home: View {
                         VStack {
                             if let artwork = cancion.artwork {
                                 albumElement(geo.size)
-                                    .padding(.vertical, geo.size.height * 0.05)
+                                    .padding(.top, geo.size.height * 0.05)
                                 VStack {
                                     Text(cancion.title)
                                         .lineLimit(1)
@@ -44,17 +49,18 @@ struct Home: View {
                                     favDateCapsule(geo.size)
                                 }
                                 .foregroundStyle(.white)
-//                                .padding(.bottom, geo.size.height * 0.01)
+                                .padding(.vertical, geo.size.height * 0.03)
                                 Spacer()
                                 tabs(geo.size, artwork: artwork)
                             }
                         }
                         .offset(x: moveSet, y: 0)
                     }
-                    .padding([.horizontal, .bottom])
+                    .padding()
                     
-                    SearchView()
+                    SongList(filterActive: $filterActive)
                         .offset(x: moveSet + geo.size.width, y: 0)
+                        .environment(songService)
                 }
             }
         }
@@ -63,29 +69,16 @@ struct Home: View {
     @ViewBuilder
     private func albumElement(_ size: CGSize) -> some View {
         VStack(spacing: 40) {
-            ZStack(alignment: .bottomTrailing) {
-                if let artwork = cancion.artwork {
-                    ArtworkImage(artwork, width: size.width * 0.9)
-//                        .resizable()
-//                        .aspectRatio(contentMode: .fit)
-                        .clipShape(.rect(cornerRadius: 24, style: .continuous))
-                        .shadow(radius: 5)
-                    
-                    Image(systemName: "play.circle.fill")
-                        .font(.system(size: 48, weight: .bold))
-                        .foregroundStyle(.white)
-                        .background(Circle().fill(.oreo))
-                        .padding(8)
-                        .shadow(radius: 2)
-                }
+            if let artwork = cancion.artwork {
+                ArtworkImage(artwork, width: size.width * 0.9)
+                    .clipShape(.rect(cornerRadius: 24, style: .continuous))
+                    .shadow(radius: 5)
             }
         }
-        .foregroundStyle(.white)
-        .fontDesign(.rounded)
     }
     private func navHeader(_ size: CGSize) -> some View {
         HStack {
-            Text("Hello, Desmond")
+            Text("Now Playing")
                 .multilineTextAlignment(.leading)
                 .kerning(1.1)
                 .offset(x: moveSet, y: 0)
@@ -100,21 +93,39 @@ struct Home: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(.oreo)
+                        .fill(.oreo.opacity(0.9))
                         .frame(width: 44)
                         .shadow(radius: 5)
-                    Image(systemName: "plus")
+                    Image(systemName: moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
                         .foregroundStyle(.white)
-                        .font(.title3)
+                        .font(.headline)
                         .fontWeight(.heavy)
                 }
             }
             .offset(x: moveSet.isZero ? (moveSet) : moveSet + size.width / 4, y: 0)
+            .padding(.leading, moveSet.isZero ? .zero : 2)
+            .blur(radius: filterActive ? 5 : 0)
         }
         .font(.title.bold())
         .foregroundStyle(.oreo)
         .fontDesign(.rounded)
         .padding(.horizontal)
+    }
+    private func favDateCapsule(_ size: CGSize) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "star.fill")
+            Text("27 Plays")
+        }
+        .font(.caption)
+        .foregroundStyle(.primary)
+        .fontWeight(.semibold)
+        .padding(.horizontal)
+        .padding(.vertical, 12)
+        .background(
+            Capsule()
+                .fill(.oreo)
+                .shadow(color: .white.opacity(0.1), radius: 6)
+        )
     }
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
         HStack {
@@ -122,6 +133,11 @@ struct Home: View {
             tabIcon(icon: "star.fill", active: true)
             Spacer()
             tabIcon(icon: "play.fill", active: false)
+                .onTapGesture {
+                    withAnimation(.bouncy) {
+                        self.moveSet = self.moveSet.isZero ? -size.width : .zero
+                    }
+                }
             Spacer()
             tabIcon(icon: "rectangle.stack.fill", active: false)
             Spacer()
@@ -136,47 +152,6 @@ struct Home: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) // Clip to rounded rectangle
                 .shadow(radius: 5)
         )
-    }
-    private func favDateCapsule(_ size: CGSize) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: "star.fill")
-            Text("Feb. 18, 2024")
-        }
-        .font(.caption)
-        .foregroundStyle(.primary)
-        .fontWeight(.semibold)
-        .padding(.horizontal)
-        .padding(.vertical, 12)
-        .background(
-            Capsule()
-                .fill(.oreo)
-                .shadow(color: .white.opacity(0.1), radius: 6)
-        )
-        .padding(.vertical)
-    }
-    private func moreSongsElement(_ size: CGSize) -> some View {
-        HStack(spacing: 16) {
-            [Image(.uzi), Image(.uzi)].randomElement()!
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .clipShape(.rect(cornerRadius: 8, style: .continuous))
-                .frame(width: 44)
-                .shadow(color: .white.opacity(0.2), radius: 5)
-            VStack(alignment: .leading) {
-                Text("Leh Go")
-                    .bold()
-                Text("Osamason")
-                    .foregroundStyle(.secondary)
-            }
-            
-            Spacer()
-            
-            Text("3:12")
-                .foregroundStyle(.secondary)
-                .font(.subheadline)
-        }
-        .foregroundStyle(.white)
-        .fontDesign(.rounded)
     }
 }
 
