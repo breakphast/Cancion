@@ -46,8 +46,8 @@ struct Dropdown: View {
                 .frame(width: size.width - 1, height: size.height)
                 .background(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.accent)
-//                        .stroke(.accent, lineWidth: 3)
+                        .fill(.naranja)
+//                        .stroke(.naranja, lineWidth: 3)
                         .frame(height: 44)
                 )
                 .onTapGesture {
@@ -69,7 +69,7 @@ struct Dropdown: View {
             }
             .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
             .contentShape(.rect(cornerRadius: cornerRadius, style: .continuous))
-            .background(.accent.shadow(.drop(color: .primary.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
+            .background(.naranja.shadow(.drop(color: .primary.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
             .shadow(color: .gray.opacity(filterActive ? 0.0 : 0.1), radius: 7)
         }
@@ -80,17 +80,15 @@ struct Dropdown: View {
     @ViewBuilder
     func optionsView() -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            ForEach(options, id: \.self) { option in
-                HStack(spacing: 0) {
-                    TextField(option, text: $artist)
-                        .textFieldStyle(CustomTextFieldStyle(text: $artist, icon: "plus"))
-                }
-                .bold()
-                .foregroundStyle(.white)
-                .animation(.none, value: selection)
-                .frame(height: 40)
-                .contentShape(.rect)
+            HStack(spacing: 0) {
+                TextField("Add filter", text: $artist)
+                    .textFieldStyle(CustomTextFieldStyle(text: $artist, placeholder: "", icon: "plus"))
             }
+            .bold()
+            .foregroundStyle(.white)
+            .animation(.none, value: selection)
+            .frame(height: 40)
+            .contentShape(.rect)
         }
         .padding(.horizontal, 15)
         .padding(.vertical, 8)
@@ -102,4 +100,8 @@ struct Dropdown: View {
         case top
         case bottom
     }
+}
+
+#Preview {
+    Dropdown(hint: "Hello", options: ["One", "Two"], anchor: .bottom, cornerRadius: 24, filter: true, selection: .constant("One"), filterActive: .constant(true))
 }

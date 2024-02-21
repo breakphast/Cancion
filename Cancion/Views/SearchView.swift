@@ -53,34 +53,11 @@ struct SearchView: View {
     private func searchBox(_ text: Binding<String>) -> some View {
         VStack {
             TextField("", text: text)
-                .textFieldStyle(CustomTextFieldStyle(text: text, icon: "magnifyingglass"))
+                .textFieldStyle(CustomTextFieldStyle(text: text, placeholder: "Search for song", icon: "magnifyingglass"))
         }
     }
 }
 
 #Preview {
     SearchView(moveSet: .constant(.zero))
-        .environment(SongService())
-}
-
-struct CustomTextFieldStyle: TextFieldStyle {
-    @Binding var text: String
-    let icon: String
-    
-    func _body(configuration: TextField<Self._Label>) -> some View {
-        HStack {
-            Image(systemName: icon)
-            configuration
-        }
-        .bold()
-        .foregroundStyle(.accent)
-        .padding(.leading)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 44)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.white)
-//                .shadow(radius: 5)
-        )
-    }
 }

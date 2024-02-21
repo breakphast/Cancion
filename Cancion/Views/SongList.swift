@@ -11,6 +11,7 @@ import MusicKit
 struct SongList: View {
     @Environment(SongService.self) var songService
     @State private var selectedFilter: String? = nil
+    @State private var text: String = ""
     @Binding var filterActive: Bool
     
     var body: some View {
@@ -41,15 +42,18 @@ struct SongList: View {
                         .bold()
                         .foregroundStyle(.white)
                 }
+                .onTapGesture {
+                    
+                }
             }
             .padding(.top)
             .padding(.bottom, 8)
             .blur(radius: filterActive ? 5 : 0)
             
-            Dropdown(hint: "Smart Filters", options: ["Date", "Artist", "Plays"], filter: false, selection: $selectedFilter, filterActive: $filterActive)
-            .zIndex(100)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 40)
+            TextField("", text: $text)
+                .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
+                .autocorrectionDisabled()
+                .padding(.vertical, 8)
             ScrollView {
                 VStack(alignment: .leading) {
                     headerItems
@@ -70,6 +74,8 @@ struct SongList: View {
                 .frame(width: 44)
             Spacer()
             Text("PLAYS")
+            Image(systemName: "chevron.down")
+                .bold()
         }
         .font(.subheadline.bold())
         .opacity(0.7)
@@ -104,14 +110,14 @@ struct SongList: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .foregroundStyle(selectedFilter == title ? .white : .accent)
+        .foregroundStyle(selectedFilter == title ? .white : .naranja)
         .font(.headline)
         .bold()
         .frame(maxWidth: .infinity)
         .background(
             Capsule()
-                .fill(selectedFilter == title ? .accent.opacity(0.8) : .white)
-                .stroke(.accent, lineWidth: 2)
+                .fill(selectedFilter == title ? .naranja.opacity(0.8) : .white)
+                .stroke(.naranja, lineWidth: 2)
                 .frame(height: 44)
         )
         .onTapGesture {
@@ -126,7 +132,7 @@ struct SongList: View {
 #Preview {
     SongList(filterActive: .constant(false))
         .environment(SongService())
-        .environment(AuthService())
+//        .environment(AuthService())
 }
 
 struct SongListRow: View {
@@ -139,7 +145,7 @@ struct SongListRow: View {
                 ZStack {
                     Image(systemName: "seal.fill")
                         .font(.title)
-                        .foregroundStyle(index == 0 ? .accent : .clear)
+                        .foregroundStyle(index == 0 ? .naranja : .clear)
                     Text("\(index + 1)")
                         .fontWeight(.semibold)
                         .foregroundStyle(index == 0 ? .white : .primary)
@@ -178,5 +184,36 @@ struct SongListRow: View {
                 .foregroundStyle(.secondary.opacity(0.2))
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+struct CustomTextFieldStyle: TextFieldStyle {
+    @Binding var text: String
+    let placeholder: String
+    let icon: String
+    
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        HStack {
+            Image(systemName: icon)
+            ZStack {
+                Text(placeholder)
+                    .foregroundStyle(.white.opacity(0.6))
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .opacity(text.isEmpty ? 1.0 : 0)
+                configuration
+                    .foregroundStyle(.white)
+            }
+        }
+        .bold()
+        .foregroundStyle(.white)
+        .padding(.leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(.naranja)
+                .shadow(color: .gray.opacity(0.4), radius: 2)
+        )
     }
 }
