@@ -10,50 +10,15 @@ import MusicKit
 
 struct SongList: View {
     @Environment(SongService.self) var songService
-    @State private var selectedFilter: String? = nil
+    @Environment(SongListViewModel.self) var viewModel
     @State private var text: String = ""
-    @Binding var filterActive: Bool
+    @Binding var moveSet: CGFloat
     
     var body: some View {
         VStack {
-            HStack {
-                ZStack {
-                    Circle()
-                        .fill(.clear)
-                        .frame(width: 44)
-                }
-                
-                Spacer()
-                
-                Text("Desmond's Songs")
-                    .foregroundStyle(.oreo.opacity(0.9))
-                    .font(.title2.bold())
-                    .fontDesign(.rounded)
-                    .frame(maxWidth: .infinity)
-                
-                Spacer()
-                
-                ZStack {
-                    Circle()
-                        .fill(.oreo.opacity(0.9))
-                        .frame(width: 44)
-                        .shadow(radius: 5)
-                    Image(systemName: "folder.fill.badge.gearshape")
-                        .bold()
-                        .foregroundStyle(.white)
-                }
-                .onTapGesture {
-                    
-                }
-            }
-            .padding(.top)
-            .padding(.bottom, 8)
-            .blur(radius: filterActive ? 5 : 0)
+            navHeaderItems
+            songSearchTextField
             
-            TextField("", text: $text)
-                .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
-                .autocorrectionDisabled()
-                .padding(.vertical, 8)
             ScrollView {
                 VStack(alignment: .leading) {
                     headerItems
@@ -61,21 +26,77 @@ struct SongList: View {
                 }
             }
             .scrollIndicators(.never)
-            .disabled(filterActive)
-            .blur(radius: filterActive ? 5 : 0)
+            .disabled(viewModel.searchActive)
+            .blur(radius: viewModel.searchActive ? 5 : 0)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
     }
     
+    private var navHeaderItems: some View {
+        HStack {
+            ZStack {
+                Circle()
+                    .fill(.clear)
+                    .frame(width: 44)
+            }
+            
+            Spacer()
+            
+            Text("Desmond's Songs")
+                .foregroundStyle(.oreo.opacity(0.9))
+                .font(.title2.bold())
+                .fontDesign(.rounded)
+                .frame(maxWidth: .infinity)
+            
+            Spacer()
+            
+            ZStack {
+                Circle()
+                    .fill(.oreo.opacity(0.9))
+                    .frame(width: 44)
+                    .shadow(radius: 2)
+                Image(systemName: "folder.fill.badge.gearshape")
+                    .bold()
+                    .foregroundStyle(.white)
+            }
+            .onTapGesture {
+                withAnimation(.bouncy(duration: 0.4)) {
+                    moveSet -= UIScreen.main.bounds.width
+                }
+            }
+        }
+        .padding(.top)
+        .padding(.bottom, 8)
+        .blur(radius: viewModel.searchActive ? 5 : 0)
+    }
+    private var songSearchTextField: some View {
+        TextField("", text: $text)
+            .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
+            .autocorrectionDisabled()
+            .padding(.vertical, 8)
+            .onChange(of: text) { _, _ in
+                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs)
+            }
+    }
     private var headerItems: some View {
         HStack {
             Text("RANK")
-                .frame(width: 44)
+            
             Spacer()
-            Text("PLAYS")
-            Image(systemName: "chevron.down")
-                .bold()
+            
+            Button {
+                Task {
+                    await viewModel.togglePlayCountSort(songs: &songService.sortedSongs)
+                }
+            } label: {
+                HStack {
+                    Text("PLAYS")
+                    Image(systemName: "chevron.down")
+                        .bold()
+                        .rotationEffect(.degrees(viewModel.playCountAscending ? 180 : 0))
+                }
+            }
         }
         .font(.subheadline.bold())
         .opacity(0.7)
@@ -85,54 +106,15 @@ struct SongList: View {
     private var songList: some View {
         LazyVStack {
             ForEach(songService.sortedSongs.enumerated().filter { !$0.element.artistName.isEmpty }, id: \.offset) { index, song in
-                SongListRow(song: song, index: index)
-            }
-        }
-    }
-    private var filterStack: some View {
-        HStack {
-            Spacer()
-            filterCapsule(title: "Sort Options", icon: "line.3.horizontal.decrease.circle")
-            Spacer()
-            filterCapsule(title: "Smart Filters", icon: "gear")
-                .frame(maxWidth: .infinity)
-            Spacer()
-        }
-        .padding(.vertical, 16)
-        .padding(.horizontal)
-    }
-    
-    @ViewBuilder
-    private func filterCapsule(title: String, icon: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-            Text(title)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .foregroundStyle(selectedFilter == title ? .white : .naranja)
-        .font(.headline)
-        .bold()
-        .frame(maxWidth: .infinity)
-        .background(
-            Capsule()
-                .fill(selectedFilter == title ? .naranja.opacity(0.8) : .white)
-                .stroke(.naranja, lineWidth: 2)
-                .frame(height: 44)
-        )
-        .onTapGesture {
-            withAnimation {
-                self.selectedFilter = title
-                songService.sortedSongs = songService.sortedSongs.map { $0 }.sorted { $0.title.lowercased() < $1.title.lowercased() }
+                SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
             }
         }
     }
 }
 
 #Preview {
-    SongList(filterActive: .constant(false))
+    SongList(moveSet: .constant(.zero))
         .environment(SongService())
-//        .environment(AuthService())
 }
 
 struct SongListRow: View {
@@ -155,7 +137,7 @@ struct SongListRow: View {
                 if let artwork = song.artwork {
                     ArtworkImage(artwork, width: 44)
                         .clipShape(.rect(cornerRadius: 22, style: .continuous))
-                        .shadow(radius: 5)
+                        .shadow(radius: 2)
                 } else {
                     RoundedRectangle(cornerRadius: 22, style: .continuous)
                         .foregroundStyle(.gray.opacity(0.8))
@@ -202,17 +184,17 @@ struct CustomTextFieldStyle: TextFieldStyle {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .opacity(text.isEmpty ? 1.0 : 0)
                 configuration
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.oreo)
             }
         }
         .bold()
-        .foregroundStyle(.white)
+        .foregroundStyle(.oreo)
         .padding(.leading)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 44)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(.naranja)
+                .fill(.white)
                 .shadow(color: .gray.opacity(0.4), radius: 2)
         )
     }

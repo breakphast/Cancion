@@ -13,7 +13,7 @@ struct SmartFilterComponent: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.naranja)
+                .fill(.white)
                 .shadow(radius: 2)
             HStack {
                 Text(title)
@@ -24,7 +24,7 @@ struct SmartFilterComponent: View {
                     .font(.caption2)
             }
             .padding(.horizontal, 8)
-            .foregroundStyle(.white)
+            .foregroundStyle(.oreo)
             .bold()
         }
         .frame(height: 55)
@@ -38,12 +38,14 @@ struct SmartFilterTextField: View {
     var body: some View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(filterLocked ? .naranja : .clear)
-                .stroke(.naranja, lineWidth: 2)
-            TextField("|", text: $text)
+                .fill(filterLocked ? .oreo : .oreo.opacity(0.1))
+                .shadow(radius: 2)
+//                .stroke(.oreo, lineWidth: 2)
+            TextField("", text: $text)
                 .font(.caption.bold())
-                .foregroundStyle(filterLocked ? .white : .naranja)
-                .padding(.horizontal)
+                .foregroundStyle(filterLocked ? .white : .oreo)
+                .padding(.leading, 8)
+                .padding(.trailing)
         }
         .bold()
         .frame(height: 55)

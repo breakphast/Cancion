@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct CancionApp: App {
+    @State var songListViewModel = SongListViewModel()
+    
     var body: some Scene {
         WindowGroup {
-            PlaylistGenerator()
+            ContentView()
+                .environment(songListViewModel)
         }
     }
 }

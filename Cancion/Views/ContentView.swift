@@ -23,13 +23,6 @@ struct ContentView: View {
                     .environment(songService)
             }
         }
-        .task {
-            do {
-                try await songService.fetchSong(id: songService.songID)
-            } catch {
-                print("Err", error)
-            }
-        }
     }
 }
 

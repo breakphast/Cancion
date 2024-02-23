@@ -58,9 +58,12 @@ struct Home: View {
                     }
                     .padding()
                     
-                    SongList(filterActive: $filterActive)
+                    SongList(moveSet: $moveSet)
                         .offset(x: moveSet + geo.size.width, y: 0)
                         .environment(songService)
+                    
+                    PlaylistGenerator(moveSet: $moveSet)
+                        .offset(x: moveSet + geo.size.width + geo.size.width, y: 0)
                 }
             }
         }
@@ -72,7 +75,7 @@ struct Home: View {
             if let artwork = cancion.artwork {
                 ArtworkImage(artwork, width: size.width * 0.9)
                     .clipShape(.rect(cornerRadius: 24, style: .continuous))
-                    .shadow(radius: 5)
+                    .shadow(radius: 2)
             }
         }
     }
@@ -86,7 +89,6 @@ struct Home: View {
             Spacer()
             
             Button {
-                songService.searchActive = true
                 withAnimation(.bouncy(duration: 0.4)) {
                     self.moveSet = self.moveSet.isZero ? -size.width : .zero
                 }
@@ -95,7 +97,7 @@ struct Home: View {
                     Circle()
                         .fill(.oreo.opacity(0.9))
                         .frame(width: 44)
-                        .shadow(radius: 5)
+                        .shadow(radius: 2)
                     Image(systemName: moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
                         .foregroundStyle(.white)
                         .font(.headline)
@@ -150,7 +152,7 @@ struct Home: View {
                 .overlay(.ultraThinMaterial.opacity(0.99)) // Use Color overlay for material effect
                 .overlay(.primary.opacity(0.2)) // Additional black overlay for depth
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) // Clip to rounded rectangle
-                .shadow(radius: 5)
+                .shadow(radius: 2)
         )
     }
 }

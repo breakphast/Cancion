@@ -12,30 +12,47 @@ struct FilterCheckbox: View {
     let icon: String?
     let cornerRadius: CGFloat
     let strokeColor: Color
-    var selected = false
+    
+    @State private var selected = false
+    @Binding var smartRules: Bool
     
     var body: some View {
         HStack {
-            ZStack {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(strokeColor, lineWidth: 3)
-                    .frame(width: 22, height: 22)
-                
-                Image(systemName: "checkmark")
-                    .fontWeight(.black)
-                    .font(.caption2)
-                    .foregroundStyle(.naranja)
-                    .opacity(selected ? 1 : 0)
-            }
+            checkbox
+            
             Text(title)
-                .foregroundStyle(.oreo)
+                .foregroundStyle(.oreo.opacity(0.9))
                 .fontWeight(.semibold)
-                .bold()
+                .font(.title2)
             
             if let icon {
                 Image(systemName: icon)
-                    .foregroundStyle(strokeColor)
-                    .font(.title3.bold())
+                    .foregroundStyle(.oreo.opacity(0.9))
+                    .font(.title2.bold())
+            }
+        }
+    }
+    
+    private var checkbox: some View {
+        Button {
+            withAnimation {
+                if let icon {
+                    smartRules.toggle()
+                }
+                selected.toggle()
+            }
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(selected ? .oreo.opacity(0.9) : .white)
+                    .frame(width: 44, height: 44)
+                    .shadow(radius: 2)
+                
+                Image(systemName: "checkmark")
+                    .font(.headline)
+                    .fontWeight(.black)
+                    .foregroundStyle(.white)
+                    .opacity(selected ? 1 : 0)
             }
         }
     }
@@ -43,6 +60,6 @@ struct FilterCheckbox: View {
 
 #Preview {
     ZStack {
-        FilterCheckbox(title: "Artist", icon: nil, cornerRadius: 12, strokeColor: .naranja)
+        FilterCheckbox(title: "Artist", icon: nil, cornerRadius: 12, strokeColor: .oreo, smartRules: .constant(true))
     }
 }

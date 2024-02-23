@@ -9,73 +9,52 @@ import SwiftUI
 import MusicKit
 
 @Observable class SongService {
-    var songID = "1684365931"
-    
     var activeSong: Song?
     var searchResultSongs = MusicItemCollection<Song>()
     var sortedSongs = [Song]()
-    var searchTerm = ""
-    var searchActive = false
     
     init() {
         Task {
-            try await randommmm()
+            try await smartFilterSongs(limit: 100, by: .playCount)
+            try await fetchSong()
         }
     }
     
-    public func fetchSong(id: String) async throws {
+    public func fetchSong() async throws {
         do {
-            let songRequest = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: MusicItemID(rawValue: id))
-            let songResponse = try await songRequest.response()
-            if let songResult = songResponse.items.first {
-                self.activeSong = songResult
-            }
-        } catch {
-            print("Failed.")
-        }
-    }
-    
-    public func requestUpdatedSearchResults(for searchTerm: String) async throws {
-        if searchTerm.isEmpty {
-            await self.reset()
-        } else {
-            do {
-                var searchRequest = MusicLibrarySearchRequest(term: searchTerm, types: [Song.self])
-                searchRequest.limit = 25
-                let searchResponse = try await searchRequest.response()
-                
-                // Update the user interface with the search response.
-                await self.apply(searchResponse, for: searchTerm)
-            } catch {
-                print("Search request failed with error: \(error).")
-                await self.reset()
+            if let song = sortedSongs.randomElement() {
+                activeSong = song
             }
         }
     }
     
-    public func randommmm() async throws {
-        var libraryRequest = MusicLibraryRequest<Song>()
-        libraryRequest.sort(by: \.playCount, ascending: false)
-        libraryRequest.limit = 50
-        let libraryResponse = try await libraryRequest.response()
-        
-        self.searchResultSongs = libraryResponse.items
-        self.sortedSongs = libraryResponse.items.sorted(by: { $0.artistName.lowercased() > $1.artistName.lowercased() })
-        for song in self.searchResultSongs {
-            print(song.title, song.playCount ?? "nil")
-        }
+    public enum LibrarySongSortProperties: String {
+        case playCount
+        case artistName
     }
 
-    @MainActor
-    private func apply(_ searchResponse: MusicLibrarySearchResponse, for searchTerm: String) {
-        if self.searchTerm == searchTerm {
-            self.searchResultSongs = searchResponse.songs
+    public func smartFilterSongs(limit: Int, by sortProperty: LibrarySongSortProperties, artist: String? = nil) async throws {
+        var libraryRequest = MusicLibraryRequest<Song>()
+        
+        switch sortProperty {
+        case .playCount:
+            libraryRequest.sort(by: \.playCount, ascending: false)
+        case .artistName:
+            libraryRequest.sort(by: \.artistName, ascending: true)
         }
+        
+        libraryRequest.limit = limit
+        if let artist {
+            libraryRequest.filter(matching: \.artistName, equalTo: artist)
+        }
+        
+        let libraryResponse = try await libraryRequest.response()
+        await self.apply(libraryResponse)
     }
     
-    
     @MainActor
-    private func reset() {
-        self.searchResultSongs = []
+    private func apply(_ libraryResponse: MusicLibraryResponse<Song>) {
+        self.searchResultSongs = libraryResponse.items
+        self.sortedSongs = Array(libraryResponse.items)
     }
 }
