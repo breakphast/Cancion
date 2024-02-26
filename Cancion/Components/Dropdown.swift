@@ -8,19 +8,21 @@
 import SwiftUI
 
 struct Dropdown: View {
-    var hint: String
+    @Environment(SongService.self) var songService
+    @State var filter: SongFilterModel = ArtistFilter(value: "", condition: .equals)
+    var conditional: Bool?
+    
     var options: [String]
     var anchor: Anchor = .bottom
-    var cornerRadius: CGFloat = 24
-    let filter: Bool
-    @Binding var selection: String?
+    var cornerRadius: CGFloat = 12
+    
+    @State var selection = ""
     @State private var showOptions = false
     @SceneStorage("dropDownZIndex") private var index = 1000.0
     @State private var zIndex: Double = 1000.0
     
-    @State private var artist: String = ""
-    @Binding var filterActive: Bool
-    
+    let type: DropdownType
+        
     var body: some View {
         GeometryReader {
             let size = $0.size
@@ -30,48 +32,25 @@ struct Dropdown: View {
                     optionsView()
                 }
                 
-                HStack(spacing: 0) {
-                    Text(selection ?? hint)
-                        .lineLimit(1)
-                    
-                    Spacer(minLength: 0)
-                    
-                    Image(systemName: "gear")
-                        .font(.title3)
-                        .rotationEffect(.degrees(showOptions ? -180.0 : 0))
-                }
-                .fontWeight(.heavy)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 15)
-                .frame(width: size.width - 1, height: size.height)
-                .background(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.naranja)
-//                        .stroke(.naranja, lineWidth: 3)
-                        .frame(height: 44)
-                )
-                .onTapGesture {
-                    index += 1
-                    zIndex = index
-                    withAnimation(.bouncy) {
-                        filterActive.toggle()
-//                        if showOptions {
-//                            selection = options.first ?? ""
-//                        }
-                        showOptions.toggle()
+                SmartFilterComponent(title: $selection, type: type)
+                    .frame(width: size.width - 1, height: size.height)
+                    .onTapGesture {
+                        index += 100
+                        zIndex = index
+                        withAnimation(.bouncy) {
+                            showOptions.toggle()
+                        }
                     }
-                }
-                .zIndex(10)
+                    .zIndex(10)
                 
                 if showOptions && anchor == .bottom {
                     optionsView()
                 }
             }
+            .clipped()
             .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
-            .contentShape(.rect(cornerRadius: cornerRadius, style: .continuous))
-            .background(.naranja.shadow(.drop(color: .primary.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
+            .background((type == .smartFilter ? Color.white : .oreo).shadow(.drop(color: .oreo.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
-            .shadow(color: .gray.opacity(filterActive ? 0.0 : 0.1), radius: 7)
         }
         .frame(height: 44)
         .zIndex(zIndex)
@@ -79,21 +58,63 @@ struct Dropdown: View {
     
     @ViewBuilder
     func optionsView() -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 0) {
-                TextField("Add filter", text: $artist)
-                    .textFieldStyle(CustomTextFieldStyle(text: $artist, placeholder: "", icon: "plus"))
+        VStack(spacing: 10) {
+            ForEach(options.filter({$0 != selection}), id: \.self) { option in
+                HStack() {
+                    Text(option)
+                        .lineLimit(2)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                }
+                .foregroundStyle(selection == option ? Color.primary : (type == .smartFilter ? Color.gray : .white.opacity(0.8)))
+                .fontWeight(selection == option ? .heavy : .regular)
+                .animation(.none, value: selection)
+                .frame(height: 40)
+                .contentShape(.rect)
+                .onTapGesture {
+                    withAnimation(.snappy) {
+                        selection = option
+                        showOptions = false
+                        type == .smartFilter ? handleSmartFilters(option: option) : handleLimitFilters(option: option)
+                    }
+                }
             }
-            .bold()
-            .foregroundStyle(.white)
-            .animation(.none, value: selection)
-            .frame(height: 40)
-            .contentShape(.rect)
         }
-        .padding(.horizontal, 15)
-        .padding(.vertical, 8)
-        .padding(.bottom, 4)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
         .transition(.move(edge: anchor == .top ? .bottom : .top))
+    }
+    
+    func handleSmartFilters(option: String) {
+        songService.filters.enumerated().forEach { index, filterModel in
+            if filterModel.id == filter.id {
+                switch option {
+                case FilterTitle.artist.rawValue:
+                    songService.filters[index] = ArtistFilter(id: filterModel.id, value: "", condition: .equals)
+                case FilterTitle.title.rawValue:
+                    songService.filters[index] = TitleFilter(id: filterModel.id, value: "Queen Latifah", condition: .equals)
+                case FilterTitle.playCount.rawValue:
+                    songService.filters[index] = PlayCountFilter(id: filterModel.id, playCount: 0, condition: .greaterThan, value: "")
+                case ConditionalTitle.doesNotContain.rawValue:
+                    songService.filters[index].condition = .doesNotContain
+                default:
+                    print("No type found.")
+                }
+            }
+        }
+    }
+    
+    func handleLimitFilters(option: String) {
+        switch option {
+        case "items":
+            songService.limitFilter.limitTypeSelection = "items"
+        case "most played":
+            songService.limitFilter.limitTypeSelection = "most played"
+        default:
+            print("No type found.")
+        }
     }
     
     enum Anchor {
@@ -102,6 +123,7 @@ struct Dropdown: View {
     }
 }
 
-#Preview {
-    Dropdown(hint: "Hello", options: ["One", "Two"], anchor: .bottom, cornerRadius: 24, filter: true, selection: .constant("One"), filterActive: .constant(true))
+enum DropdownType {
+    case smartFilter
+    case limit
 }

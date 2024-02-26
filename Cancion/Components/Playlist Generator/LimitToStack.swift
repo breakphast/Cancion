@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct LimitToStack: View {
-    let limit: Int
+    @Environment(SongService.self) var songService
     @State var selected = false
+    @State var limitTypeSelection = "items"
+    @State var limitSortSelection = "sorted by"
+    let filter: LimitFilter
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -17,7 +20,9 @@ struct LimitToStack: View {
                 checkbox
                 limitToStack
             }
+            .zIndex(10)
             selectedByStack
+                .zIndex(1)
         }
     }
     
@@ -28,9 +33,9 @@ struct LimitToStack: View {
             }
         } label: {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(selected ? .oreo.opacity(0.9) : .white)
+                .fill(selected ? .naranja.opacity(0.9) : .white)
                 .shadow(radius: 2)
-                .frame(width: 44, height: 44)
+                .frame(width: 33, height: 33)
                 .overlay {
                     Image(systemName: "checkmark")
                         .font(.headline)
@@ -44,72 +49,44 @@ struct LimitToStack: View {
         HStack {
             Text("Limit to")
                 .fontWeight(.semibold)
-                .font(.title2)
+                .font(.title3)
             
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.oreo.opacity(0.9))
-                    .shadow(radius: 2)
-                Text("\(limit)")
-                    .font(.caption)
-                    .fontWeight(.heavy)
-                    .foregroundStyle(.white)
-            }
-            .frame(width: 44, height: 44)
-            
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.oreo.opacity(0.9))
-                    .shadow(radius: 4)
-                HStack {
-                    Text("items")
+            Button {
+                
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(.oreo)
+                        .shadow(radius: 2)
+                    Text("\(songService.limitFilter.limit)")
                         .font(.caption)
-                    Spacer()
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(.white)
                 }
-                .padding(.horizontal)
-                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
             }
-            .fontWeight(.heavy)
-            .frame(height: 44)
-            .frame(maxWidth: .infinity)
+            Dropdown(options: ["items", "other"], selection: filter.limitTypeSelection, type: .limit)
         }
         .foregroundStyle(.oreo)
     }
     
     private var selectedByStack: some View {
+        
         HStack {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(.clear, lineWidth: 3)
-                .frame(width: 44, height: 22)
+            Rectangle()
+                .fill(.clear)
+                .frame(width: 33, height: 33)
             HStack {
-                Text("selected by")
+                Text("most played")
                     .fontWeight(.semibold)
-                    .font(.title2)
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.oreo.opacity(0.9))
-                        .shadow(radius: 4)
-                    HStack {
-                        Text("most played")
-                            .font(.caption)
-                        Spacer()
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.caption2)
-                    }
-                    .padding(.horizontal)
-                    .foregroundStyle(.white)
-                }
-                .fontWeight(.heavy)
-                .frame(height: 44)
-                .frame(maxWidth: .infinity)
+                    .font(.title3)
+                Dropdown(options: ["least played", "other"], selection: filter.limitSortSelection, type: .limit)
             }
             .foregroundStyle(.oreo)
         }
     }
 }
 
-#Preview {
-    LimitToStack(limit: 24)
-}
+//#Preview {
+//    LimitToStack(filter: .constant(LimitFilter(active: true, limit: 25, limitTypeSelection: "items", limitSortSelection: "most played", condition: .equals)))
+//}

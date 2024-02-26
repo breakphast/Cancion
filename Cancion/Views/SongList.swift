@@ -17,10 +17,11 @@ struct SongList: View {
     var body: some View {
         VStack {
             navHeaderItems
-            songSearchTextField
             
             ScrollView {
                 VStack(alignment: .leading) {
+                    songSearchTextField
+                        .padding(.horizontal)
                     headerItems
                     songList
                 }
@@ -44,7 +45,7 @@ struct SongList: View {
             Spacer()
             
             Text("Desmond's Songs")
-                .foregroundStyle(.oreo.opacity(0.9))
+                .foregroundStyle(.oreo)
                 .font(.title2.bold())
                 .fontDesign(.rounded)
                 .frame(maxWidth: .infinity)
@@ -53,10 +54,10 @@ struct SongList: View {
             
             ZStack {
                 Circle()
-                    .fill(.oreo.opacity(0.9))
+                    .fill(.oreo)
                     .frame(width: 44)
                     .shadow(radius: 2)
-                Image(systemName: "folder.fill.badge.gearshape")
+                Image(systemName: "folder.fill.badge.plus")
                     .bold()
                     .foregroundStyle(.white)
             }
@@ -105,7 +106,7 @@ struct SongList: View {
     }
     private var songList: some View {
         LazyVStack {
-            ForEach(songService.sortedSongs.enumerated().filter { !$0.element.artistName.isEmpty }, id: \.offset) { index, song in
+            ForEach(Array(songService.sortedSongs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
             }
         }
@@ -115,6 +116,7 @@ struct SongList: View {
 #Preview {
     SongList(moveSet: .constant(.zero))
         .environment(SongService())
+        .environment(SongListViewModel())
 }
 
 struct SongListRow: View {

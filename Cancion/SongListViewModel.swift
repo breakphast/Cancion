@@ -27,7 +27,7 @@ import MusicKit
     
     func filterSongsByText(text: String, songs: inout [Song], songItems: MusicItemCollection<Song>) {
         if !text.isEmpty {
-            songs = songs.filter { $0.title.contains(text) }
+            songs = songs.filter { $0.title.contains(text) || $0.artistName.contains(text) }
         } else {
             songs = Array(songItems)
         }

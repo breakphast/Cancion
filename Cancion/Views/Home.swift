@@ -12,7 +12,10 @@ struct Home: View {
     @Environment(SongService.self) var songService
     @State private var moveSet: CGFloat = .zero
     @State private var filterActive = false
-    let cancion: Song
+    @State var cancion: Song
+    let player = ApplicationMusicPlayer.shared
+    @State private var isPlaying = false
+    @State private var nextIndex = 1
     
     var body: some View {
         GeometryReader { geo in
@@ -20,41 +23,12 @@ struct Home: View {
                 LinearGradient(colors: [.black, .black.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
                     .ignoresSafeArea()
                 
-                Color.white.opacity(0.97)
-                    .clipShape(.rect(cornerRadius: 24, style: .continuous))
-                    .ignoresSafeArea()
-                    .frame(height: geo.size.height / (moveSet.isZero ? 2.5 : 1), alignment: .top)
-                    .overlay(filterActive ? .black.opacity(0.1) : .clear)
-                    .onTapGesture {
-                        filterActive = false
-                    }
+                backgroundCard(geo.size)
                 
                 ZStack {
                     VStack {
                         navHeader(geo.size)
-                        VStack {
-                            if let artwork = cancion.artwork {
-                                albumElement(geo.size)
-                                    .padding(.top, geo.size.height * 0.05)
-                                VStack {
-                                    Text(cancion.title)
-                                        .lineLimit(1)
-                                        .font(.title.bold())
-                                    
-                                    Text(cancion.artistName)
-                                        .font(.title3)
-                                        .fontWeight(.medium)
-                                        .foregroundStyle(.secondary)
-                                    
-                                    favDateCapsule(geo.size)
-                                }
-                                .foregroundStyle(.white)
-                                .padding(.vertical, geo.size.height * 0.03)
-                                Spacer()
-                                tabs(geo.size, artwork: artwork)
-                            }
-                        }
-                        .offset(x: moveSet, y: 0)
+                        mainSongElement(geo.size)
                     }
                     .padding()
                     
@@ -75,7 +49,7 @@ struct Home: View {
             if let artwork = cancion.artwork {
                 ArtworkImage(artwork, width: size.width * 0.9)
                     .clipShape(.rect(cornerRadius: 24, style: .continuous))
-                    .shadow(radius: 2)
+                    .shadow(radius: 5)
             }
         }
     }
@@ -95,7 +69,7 @@ struct Home: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(.oreo.opacity(0.9))
+                        .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
                     Image(systemName: moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
@@ -113,35 +87,72 @@ struct Home: View {
         .fontDesign(.rounded)
         .padding(.horizontal)
     }
-    private func favDateCapsule(_ size: CGSize) -> some View {
+    private func backgroundCard(_ size: CGSize) -> some View {
+        Color.white.opacity(0.97)
+            .clipShape(.rect(cornerRadius: 24, style: .continuous))
+            .ignoresSafeArea()
+            .frame(height: size.height / (moveSet.isZero ? 2.5 : 1), alignment: .top)
+            .overlay(filterActive ? .black.opacity(0.1) : .clear)
+            .onTapGesture {
+                filterActive = false
+            }
+    }
+    private func mainSongElement(_ size: CGSize) -> some View {
+        VStack {
+            if let artwork = cancion.artwork {
+                albumElement(size)
+                    .padding(.top, size.height * 0.05)
+                VStack {
+                    Text(cancion.title)
+                        .lineLimit(1)
+                        .font(.title.bold())
+                    
+                    Text(cancion.artistName)
+                        .font(.title3)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                    
+                    playsCapsule(size)
+                }
+                .foregroundStyle(.white)
+                .padding(.vertical, size.height * 0.03)
+                Spacer()
+                tabs(size, artwork: artwork)
+            }
+        }
+        .offset(x: moveSet, y: 0)
+    }
+    private func playsCapsule(_ size: CGSize) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "star.fill")
             Text("27 Plays")
         }
         .font(.caption)
-        .foregroundStyle(.primary)
+        .foregroundStyle(.secondary)
         .fontWeight(.semibold)
         .padding(.horizontal)
         .padding(.vertical, 12)
         .background(
             Capsule()
                 .fill(.oreo)
-                .shadow(color: .white.opacity(0.1), radius: 6)
+                .shadow(color: .white.opacity(0.1), radius: 3)
         )
     }
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
         HStack {
             Spacer()
-            tabIcon(icon: "star.fill", active: true)
+            tabIcon(icon: "backward.fill", active: false)
             Spacer()
-            tabIcon(icon: "play.fill", active: false)
+            tabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", active: true)
                 .onTapGesture {
-                    withAnimation(.bouncy) {
-                        self.moveSet = self.moveSet.isZero ? -size.width : .zero
-                    }
+                    handlePlayButton()
                 }
             Spacer()
-            tabIcon(icon: "rectangle.stack.fill", active: false)
+            tabIcon(icon: "forward.fill", active: false)
+                .onTapGesture {
+                    self.cancion = songService.randomSongs[nextIndex]
+                    nextIndex += 1
+                }
             Spacer()
         }
         .frame(height: 120)
@@ -155,6 +166,27 @@ struct Home: View {
                 .shadow(radius: 2)
         )
     }
+    
+    private func handlePlayButton() {
+        Task {
+            player.queue = [cancion]
+            if !isPlaying {
+                do {
+                    try await player.play()
+                    withAnimation(.bouncy) {
+                        isPlaying = true
+                    }
+                } catch {
+                    print("error", error.localizedDescription)
+                }
+            } else {
+                withAnimation(.bouncy) {
+                    isPlaying = false
+                    player.pause()
+                }
+            }
+        }
+    }
 }
 
 struct tabIcon: View {
@@ -164,15 +196,16 @@ struct tabIcon: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(active ? Color.white.opacity(0.9) : .oreo.opacity(0.9))
+                .fill(active ? Color.white.opacity(0.9) : .oreo)
                 .shadow(radius: 10)
             Image(systemName: icon)
                 .bold()
-                .foregroundStyle(active ? .oreo.opacity(0.9) : Color.white)
+                .foregroundStyle(active ? .oreo : Color.white)
         }
         .frame(width: 55)
     }
 }
+
 //
 //#Preview {
 //    Home()

@@ -21,14 +21,14 @@ struct FilterCheckbox: View {
             checkbox
             
             Text(title)
-                .foregroundStyle(.oreo.opacity(0.9))
+                .foregroundStyle(.oreo)
                 .fontWeight(.semibold)
-                .font(.title2)
+                .font(.title3)
             
             if let icon {
                 Image(systemName: icon)
-                    .foregroundStyle(.oreo.opacity(0.9))
-                    .font(.title2.bold())
+                    .foregroundStyle(.oreo)
+                    .font(.subheadline.bold())
             }
         }
     }
@@ -36,23 +36,20 @@ struct FilterCheckbox: View {
     private var checkbox: some View {
         Button {
             withAnimation {
-                if let icon {
-                    smartRules.toggle()
-                }
+                if icon != nil { smartRules.toggle() }
                 selected.toggle()
             }
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(selected ? .oreo.opacity(0.9) : .white)
-                    .frame(width: 44, height: 44)
+                    .fill((icon != nil ? smartRules : selected) ? .naranja.opacity(0.9) : .white)
+                    .frame(width: 33, height: 33)
                     .shadow(radius: 2)
-                
                 Image(systemName: "checkmark")
                     .font(.headline)
                     .fontWeight(.black)
                     .foregroundStyle(.white)
-                    .opacity(selected ? 1 : 0)
+                    .opacity((icon != nil ? smartRules : selected) ? 1 : 0)
             }
         }
     }
@@ -60,6 +57,6 @@ struct FilterCheckbox: View {
 
 #Preview {
     ZStack {
-        FilterCheckbox(title: "Artist", icon: nil, cornerRadius: 12, strokeColor: .oreo, smartRules: .constant(true))
+        FilterCheckbox(title: "Artist", icon: "plus", cornerRadius: 12, strokeColor: .oreo, smartRules: .constant(true))
     }
 }

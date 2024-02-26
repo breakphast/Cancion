@@ -8,18 +8,21 @@
 import SwiftUI
 
 struct SmartFilterStack: View {
-    @Binding var text: String
-    @Binding var filters: [FilterModel]
-    @State var filterLocked = false
-    var filterTitle: String
-    var conditionalTitle: String
+    @Environment(SongService.self) var songService
+    let filter: SongFilterModel
+    
+    @State var filterText = ""
+    @State var filterSet: Bool = false
     
     var body: some View {
         ZStack {
             HStack {
-                SmartFilterComponent(title: filterTitle)
-                SmartFilterComponent(title: conditionalTitle)
-                SmartFilterTextField(text: $text, filterLocked: $filterLocked)
+                Dropdown(filter: filter, conditional: false, options: PlaylistGeneratorViewModel.options, selection: FilterTitle.artist.rawValue, type: .smartFilter)
+                Dropdown(filter: filter, conditional: true, options: PlaylistGeneratorViewModel.conditionals, selection: ConditionalTitle.equal.rawValue, type: .smartFilter)
+                SmartFilterTextField(text: $filterText, filterSet: $filterSet)
+                    .onChange(of: filterText) { oldValue, newValue in
+                        handleSmartFilterText()
+                    }
                 addFilterButton
             }
         }
@@ -27,40 +30,50 @@ struct SmartFilterStack: View {
     
     private var addFilterButton: some View {
         HStack(spacing: 4) {
-            if !filterLocked {
+            if !filterSet {
                 Button {
                     withAnimation(.bouncy) {
-                        filterLocked = true
+                        songService.filters.append(ArtistFilter(value: "", condition: .equals))
                     }
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(.oreo.opacity(0.9))
+                            .fill(.oreo)
                             .shadow(radius: 1)
-                        Image(systemName: filterLocked ? "minus" : "plus")
+                        Image(systemName: "plus")
                             .font(.caption)
                             .foregroundStyle(.white)
                             .fontWeight(.black)
                     }
-                    .frame(width: 22, height: 33)
+                    .frame(width: 22, height: 44)
                 }
+                .animation(.none, value: songService.filters.count)
             }
             
             Button {
                 withAnimation(.bouncy) {
-                    filters.removeLast(1)
+                    songService.filters.removeAll(where: { $0.id == filter.id })
                 }
             } label: {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(.oreo.opacity(0.9))
+                        .fill(.oreo)
                         .shadow(radius: 1)
                     Image(systemName: "minus")
                         .font(.caption)
                         .foregroundStyle(.white)
                         .fontWeight(.black)
                 }
-                .frame(width: 22, height: 33)
+                .frame(width: 22, height: 44)
+            }
+        }
+    }
+    
+    private func handleSmartFilterText() {
+        songService.filters.enumerated().forEach { index, filterModel in
+            if filterModel.id == filter.id {
+                songService.filters[index].value = filterText
+                print(songService.filters.map {$0.value})
             }
         }
     }

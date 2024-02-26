@@ -9,22 +9,16 @@ import SwiftUI
 import MusicKit
 
 @Observable class SongService {
-    var activeSong: Song?
+    var randomSongs = [Song]()
     var searchResultSongs = MusicItemCollection<Song>()
     var sortedSongs = [Song]()
+    var limitFilter = LimitFilter(active: false, limit: 25, limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
+    var filters: [any SongFilterModel] = [ArtistFilter(value: "", condition: .equals)]
+    var fetchLimit: Int = 100
     
     init() {
         Task {
-            try await smartFilterSongs(limit: 100, by: .playCount)
-            try await fetchSong()
-        }
-    }
-    
-    public func fetchSong() async throws {
-        do {
-            if let song = sortedSongs.randomElement() {
-                activeSong = song
-            }
+            try await smartFilterSongs(limit: fetchLimit, by: .playCount)
         }
     }
     
@@ -56,5 +50,6 @@ import MusicKit
     private func apply(_ libraryResponse: MusicLibraryResponse<Song>) {
         self.searchResultSongs = libraryResponse.items
         self.sortedSongs = Array(libraryResponse.items)
+        self.randomSongs = Array(libraryResponse.items).shuffled()
     }
 }

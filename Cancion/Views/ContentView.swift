@@ -18,9 +18,11 @@ struct ContentView: View {
             
             if authService.status != .authorized {
                 AuthView(musicAuthorizationStatus: $authService.status)
-            } else if let activeSong = songService.activeSong {
-                Home(cancion: activeSong)
-                    .environment(songService)
+            } else {
+                if let song = songService.randomSongs.first {
+                    Home(cancion: song)
+                        .environment(songService)
+                }
             }
         }
     }

@@ -12,7 +12,7 @@ struct PlaylistModel {
     var id = UUID()
     var title = ""
     var smartRules = true
-    var filters = [FilterModel]()
+    var filters = [SongFilterModel]()
     var limit: Int = 25
     var liveUpdating = true
     var sortOption = ""
