@@ -14,7 +14,7 @@ import MusicKit
     var sortedSongs = [Song]()
     var limitFilter = LimitFilter(active: false, limit: 25, limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
     var filters: [any SongFilterModel] = [ArtistFilter(value: "", condition: .equals)]
-    var fetchLimit: Int = 100
+    var fetchLimit: Int = 500
     
     init() {
         Task {
@@ -22,11 +22,6 @@ import MusicKit
         }
     }
     
-    public enum LibrarySongSortProperties: String {
-        case playCount
-        case artistName
-    }
-
     public func smartFilterSongs(limit: Int, by sortProperty: LibrarySongSortProperties, artist: String? = nil) async throws {
         var libraryRequest = MusicLibraryRequest<Song>()
         
@@ -46,10 +41,15 @@ import MusicKit
         await self.apply(libraryResponse)
     }
     
+    public enum LibrarySongSortProperties: String {
+        case playCount
+        case artistName
+    }
+    
     @MainActor
     private func apply(_ libraryResponse: MusicLibraryResponse<Song>) {
         self.searchResultSongs = libraryResponse.items
         self.sortedSongs = Array(libraryResponse.items)
-        self.randomSongs = Array(libraryResponse.items).shuffled()
+        self.randomSongs = self.sortedSongs.filter { $0.artwork != nil }.shuffled()
     }
 }

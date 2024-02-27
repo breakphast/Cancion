@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import MusicKit
 
 struct PlaylistModel {
     var id = UUID()
@@ -16,5 +17,5 @@ struct PlaylistModel {
     var limit: Int = 25
     var liveUpdating = true
     var sortOption = ""
-    var songs = [String]()
+    var songs = [Song]()
 }

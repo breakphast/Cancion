@@ -10,12 +10,8 @@ import MusicKit
 
 struct Home: View {
     @Environment(SongService.self) var songService
-    @State private var moveSet: CGFloat = .zero
-    @State private var filterActive = false
+    @Bindable var viewModel = HomeViewModel()
     @State var cancion: Song
-    let player = ApplicationMusicPlayer.shared
-    @State private var isPlaying = false
-    @State private var nextIndex = 1
     
     var body: some View {
         GeometryReader { geo in
@@ -32,12 +28,24 @@ struct Home: View {
                     }
                     .padding()
                     
-                    SongList(moveSet: $moveSet)
-                        .offset(x: moveSet + geo.size.width, y: 0)
+                    SongList(moveSet: $viewModel.moveSet)
+                        .offset(x: viewModel.moveSet + geo.size.width, y: 0)
                         .environment(songService)
                     
-                    PlaylistGenerator(moveSet: $moveSet)
-                        .offset(x: moveSet + geo.size.width + geo.size.width, y: 0)
+                    PlaylistList(moveSet: $viewModel.moveSet)
+                }
+            }
+            .task {
+                setQueue()
+            }
+            .onChange(of: viewModel.player.queue.currentEntry?.id) { oldValue, newValue in
+                Task {
+                    do {
+                        try await changeCancion()
+                        print("Changed. Now:", cancion.title)
+                    } catch {
+                        print(error.localizedDescription)
+                    }
                 }
             }
         }
@@ -50,6 +58,10 @@ struct Home: View {
                 ArtworkImage(artwork, width: size.width * 0.9)
                     .clipShape(.rect(cornerRadius: 24, style: .continuous))
                     .shadow(radius: 5)
+            } else {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .frame(width: size.width * 0.9)
+                    .shadow(radius: 5)
             }
         }
     }
@@ -58,13 +70,13 @@ struct Home: View {
             Text("Now Playing")
                 .multilineTextAlignment(.leading)
                 .kerning(1.1)
-                .offset(x: moveSet, y: 0)
+                .offset(x: viewModel.moveSet, y: 0)
             
             Spacer()
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    self.moveSet = self.moveSet.isZero ? -size.width : .zero
+                    viewModel.moveSet = viewModel.moveSet.isZero ? -size.width : .zero
                 }
             } label: {
                 ZStack {
@@ -72,15 +84,15 @@ struct Home: View {
                         .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
-                    Image(systemName: moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
+                    Image(systemName: viewModel.moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
                         .foregroundStyle(.white)
                         .font(.headline)
                         .fontWeight(.heavy)
                 }
             }
-            .offset(x: moveSet.isZero ? (moveSet) : moveSet + size.width / 4, y: 0)
-            .padding(.leading, moveSet.isZero ? .zero : 2)
-            .blur(radius: filterActive ? 5 : 0)
+            .offset(x: viewModel.moveSet.isZero ? (viewModel.moveSet) : viewModel.moveSet + size.width / 4, y: 0)
+            .padding(.leading, viewModel.moveSet.isZero ? .zero : 2)
+            .blur(radius: viewModel.filterActive ? 5 : 0)
         }
         .font(.title.bold())
         .foregroundStyle(.oreo)
@@ -91,10 +103,10 @@ struct Home: View {
         Color.white.opacity(0.97)
             .clipShape(.rect(cornerRadius: 24, style: .continuous))
             .ignoresSafeArea()
-            .frame(height: size.height / (moveSet.isZero ? 2.5 : 1), alignment: .top)
-            .overlay(filterActive ? .black.opacity(0.1) : .clear)
+            .frame(height: size.height / (viewModel.moveSet.isZero ? 2.5 : 1), alignment: .top)
+            .overlay(viewModel.filterActive ? .black.opacity(0.1) : .clear)
             .onTapGesture {
-                filterActive = false
+                viewModel.filterActive = false
             }
     }
     private func mainSongElement(_ size: CGSize) -> some View {
@@ -116,16 +128,17 @@ struct Home: View {
                 }
                 .foregroundStyle(.white)
                 .padding(.vertical, size.height * 0.03)
+                .padding(.horizontal, 24)
                 Spacer()
                 tabs(size, artwork: artwork)
             }
         }
-        .offset(x: moveSet, y: 0)
+        .offset(x: viewModel.moveSet, y: 0)
     }
     private func playsCapsule(_ size: CGSize) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "star.fill")
-            Text("27 Plays")
+            Text("\(cancion.playCount ?? 0) Plays")
         }
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -141,72 +154,94 @@ struct Home: View {
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
         HStack {
             Spacer()
-            tabIcon(icon: "backward.fill", active: false)
-            Spacer()
-            tabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", active: true)
+            TabIcon(icon: "backward.fill", active: false, progress: $viewModel.progress, isPlaying: viewModel.isPlaying)
+                .overlay {
+                    Circle()
+                        .fill(viewModel.nextIndex <= 0 ? Color.oreo.opacity(0.6) : .clear)
+                }
+                .disabled(viewModel.nextIndex <= 0)
                 .onTapGesture {
-                    handlePlayButton()
+                    Task {
+                        guard viewModel.nextIndex > 0 else { return }
+                        try await handleSongChange(forward: false)
+                    }
                 }
             Spacer()
-            tabIcon(icon: "forward.fill", active: false)
+            TabIcon(icon: viewModel.secondaryPlaying ?  "pause.fill" : "play.fill", active: true, progress: $viewModel.progress, isPlaying: viewModel.secondaryPlaying)
                 .onTapGesture {
-                    self.cancion = songService.randomSongs[nextIndex]
-                    nextIndex += 1
+                    withAnimation(.bouncy) {
+                        viewModel.handlePlayButton()
+                        viewModel.secondaryPlaying = viewModel.isPlaying ? false : true
+                    }
+                }
+            Spacer()
+            TabIcon(icon: "forward.fill", active: false, progress: $viewModel.progress, isPlaying: viewModel.isPlaying)
+                .onTapGesture {
+                    Task {
+                        try await handleSongChange(forward: true)
+                        try await changeCancion()
+                    }
                 }
             Spacer()
         }
         .frame(height: 120)
         .background(
             ArtworkImage(artwork, width: size.width * 0.9, height: 120)
-                .aspectRatio(contentMode: .fill) // Fill the background, ensuring it covers the area
+                .aspectRatio(contentMode: .fill)
                 .blur(radius: 2, opaque: false)
-                .overlay(.ultraThinMaterial.opacity(0.99)) // Use Color overlay for material effect
-                .overlay(.primary.opacity(0.2)) // Additional black overlay for depth
+                .overlay(.ultraThinMaterial.opacity(0.99))
+                .overlay(.primary.opacity(0.2))
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) // Clip to rounded rectangle
                 .shadow(radius: 2)
         )
+        .sensoryFeedback(.selection, trigger: viewModel.nextIndex)
+        .sensoryFeedback(.selection, trigger: viewModel.secondaryPlaying)
     }
     
-    private func handlePlayButton() {
+    @MainActor
+    func handleSongChange(forward: Bool) async throws {
+        do {
+            forward ? try await viewModel.player.skipToNextEntry() : try await viewModel.player.skipToPreviousEntry()
+            viewModel.nextIndex = viewModel.nextIndex + (forward ? 1 : -1)
+        } catch {
+            print("Failed to change song", error.localizedDescription)
+        }
+    }
+    
+    @MainActor
+    private func changeCancion() async throws {
+        self.cancion = songService.randomSongs[viewModel.nextIndex]
+        viewModel.player.queue = [songService.randomSongs[viewModel.nextIndex]]
+        try await viewModel.player.prepareToPlay()
+        guard viewModel.player.isPreparedToPlay else { return }
+        if viewModel.secondaryPlaying {
+            try await viewModel.player.play()
+        }
+    }
+    
+    func setQueue() {
+        viewModel.player.queue = [cancion]
+        startObservingCurrentTrack()
         Task {
-            player.queue = [cancion]
-            if !isPlaying {
-                do {
-                    try await player.play()
-                    withAnimation(.bouncy) {
-                        isPlaying = true
-                    }
-                } catch {
-                    print("error", error.localizedDescription)
+            try await viewModel.player.prepareToPlay()
+        }
+    }
+    
+    func startObservingCurrentTrack() {
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            
+            let currentPlaybackTime = viewModel.player.playbackTime
+            let totalDuration = cancion.duration ?? .zero
+            
+            if !totalDuration.isZero {
+                withAnimation(.linear) {
+                    viewModel.progress = CGFloat(currentPlaybackTime / totalDuration)
                 }
-            } else {
-                withAnimation(.bouncy) {
-                    isPlaying = false
-                    player.pause()
-                }
+            }
+            
+            if viewModel.progress >= 1.0 {
+                timer.invalidate()
             }
         }
     }
 }
-
-struct tabIcon: View {
-    let icon: String
-    let active: Bool
-    
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(active ? Color.white.opacity(0.9) : .oreo)
-                .shadow(radius: 10)
-            Image(systemName: icon)
-                .bold()
-                .foregroundStyle(active ? .oreo : Color.white)
-        }
-        .frame(width: 55)
-    }
-}
-
-//
-//#Preview {
-//    Home()
-//}

@@ -10,11 +10,13 @@ import MusicKit
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
+    @Environment(PlaylistGeneratorViewModel.self) var viewModel
     @Binding var moveSet: CGFloat
     @State var mainZIndex: CGFloat = 1000
     @State private var playlistName = ""
     @State private var smartRulesActive = true
     @State var filterText = ""
+    @State private var keyboardHeight: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -40,11 +42,32 @@ struct PlaylistGenerator: View {
                     }
                 }
                 .scrollIndicators(.never)
-                .safeAreaPadding(.bottom, 24)
+                .safeAreaPadding(.bottom, 24 + keyboardHeight)
+                .scrollDismissesKeyboard(.interactively)
+                .onAppear {
+                    trackKeyboardHeight()
+                }
             }
             .padding(.top)
         }
     }
+    
+    private func trackKeyboardHeight() {
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+                withAnimation {
+                    keyboardHeight = keyboardSize.height
+                }
+            }
+        }
+        
+        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
+            withAnimation {
+                keyboardHeight = 0
+            }
+        }
+    }
+    
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
             FilterCheckbox(title: "Smart Rules", icon: "questionmark.circle.fill", cornerRadius: 12, strokeColor: .oreo, smartRules: $smartRulesActive)
@@ -90,9 +113,16 @@ struct PlaylistGenerator: View {
                 withAnimation(.bouncy(duration: 0.4)) {
                     moveSet += UIScreen.main.bounds.width
                     let combinedFilter = CompositeFilter(filters: songService.filters)
-                    print(songService.filters.map { $0.value })
                     let filteredSongs = smartFilterSongs(songs: songService.sortedSongs, using: combinedFilter)
-                    print(filteredSongs.map {$0.title})
+                    
+                    var model = viewModel.model
+                    model.filters.append(combinedFilter)
+                    model.smartRules = smartRulesActive
+                    model.songs = filteredSongs
+                    model.title = playlistName
+                    model.limit = songService.limitFilter.limit
+                    
+                    viewModel.playlists.append(model)
                 }
             } label: {
                 Image(systemName: "checkmark")
