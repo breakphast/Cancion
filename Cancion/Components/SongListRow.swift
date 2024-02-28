@@ -28,7 +28,6 @@ struct SongListRow: View {
             
             CustomDivider()
         }
-        .frame(maxWidth: .infinity)
     }
     private var songBadge: some View {
         ZStack {
@@ -57,8 +56,13 @@ struct SongListRow: View {
     
     private var songInfo: some View {
         VStack(alignment: .leading) {
-            Text(song.title)
-                .fontWeight(.semibold)
+            HStack {
+                Text(song.title)
+                    .fontWeight(.semibold)
+                Image(systemName: "e.square.fill").opacity(song.contentRating == .explicit ? 1 : 0)
+                    .font(.caption)
+                    .foregroundStyle(.oreo)
+            }
             Text(song.artistName)
                 .foregroundStyle(.secondary)
         }

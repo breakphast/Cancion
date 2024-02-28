@@ -31,18 +31,14 @@ struct PlaylistListRow: View {
                         .frame(width: 44, height: 44)
                 }
                 
-                VStack(alignment: .leading) {
-                    Text(song?.title ?? "")
-                        .fontWeight(.semibold)
-                    Text(song?.artistName ?? "")
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 4)
-                .lineLimit(1)
+                Text(playlist.title)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, 4)
+                    .lineLimit(1)
                 
                 Spacer()
                 
-                Text("\(song?.playCount ?? 0)")
+                Image(systemName: "ellipsis")
                     .fontWeight(.bold)
             }
             .frame(height: 55)

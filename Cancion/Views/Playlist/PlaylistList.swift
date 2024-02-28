@@ -31,9 +31,12 @@ struct PlaylistList: View {
                             
                             ForEach(viewModel.playlists, id: \.id) { playlist in
                                 PlaylistListRow(playlist: playlist)
-                                    .padding(.vertical)
+                                    .onTapGesture {
+                                        viewModel.setActivePlaylist(playlist: playlist)
+                                    }
                             }
                         }
+                        .padding(.vertical, 8)
                     }
                 }
                 Spacer()
@@ -41,9 +44,14 @@ struct PlaylistList: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
             .offset(x: moveSet + (UIScreen.main.bounds.width * 2))
+            .fullScreenCover(isPresented: $viewModel.showView) {
+                if let activePlaylist = viewModel.activePlaylist {
+                    PlaylistView(moveSet: $moveSet, showView: $viewModel.showView, playlist: activePlaylist)
+                }
+            }
             
             VStack {
-                PlaylistGenerator(moveSet: $moveSet)
+                PlaylistGenerator(viewModel: viewModel, moveSet: $moveSet)
                     .environment(viewModel)
             }
             .offset(x: moveSet + (UIScreen.main.bounds.width * 3))
@@ -126,7 +134,6 @@ struct PlaylistList: View {
                 
             }
     }
-
 }
 
 #Preview {

@@ -11,7 +11,7 @@ struct CustomDivider: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 1)
             .frame(height: 1)
-            .padding(.leading, 72)
+//            .padding(.leading, 72)
             .foregroundStyle(.secondary.opacity(0.2))
     }
 }

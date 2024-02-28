@@ -10,13 +10,8 @@ import MusicKit
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
-    @Environment(PlaylistGeneratorViewModel.self) var viewModel
+    @Bindable var viewModel: PlaylistGeneratorViewModel
     @Binding var moveSet: CGFloat
-    @State var mainZIndex: CGFloat = 1000
-    @State private var playlistName = ""
-    @State private var smartRulesActive = true
-    @State var filterText = ""
-    @State private var keyboardHeight: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -35,50 +30,34 @@ struct PlaylistGenerator: View {
                                 smartFilters
                                 LimitToStack(filter: songService.limitFilter)
                                 divider
-                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, smartRules: $smartRulesActive)
+                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, smartRules: $viewModel.smartRulesActive)
                             }
                             .padding(.horizontal, 24)
                             .padding(.top)
                     }
                 }
                 .scrollIndicators(.never)
-                .safeAreaPadding(.bottom, 24 + keyboardHeight)
+                .safeAreaPadding(.bottom, 24 + viewModel.keyboardHeight)
                 .scrollDismissesKeyboard(.interactively)
                 .onAppear {
-                    trackKeyboardHeight()
+                    viewModel.trackKeyboardHeight()
                 }
             }
             .padding(.top)
         }
     }
     
-    private func trackKeyboardHeight() {
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
-            if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-                withAnimation {
-                    keyboardHeight = keyboardSize.height
-                }
-            }
-        }
-        
-        NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { _ in
-            withAnimation {
-                keyboardHeight = 0
-            }
-        }
-    }
-    
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
-            FilterCheckbox(title: "Smart Rules", icon: "questionmark.circle.fill", cornerRadius: 12, strokeColor: .oreo, smartRules: $smartRulesActive)
+            FilterCheckbox(title: "Smart Rules", icon: "questionmark.circle.fill", cornerRadius: 12, strokeColor: .oreo, smartRules: $viewModel.smartRulesActive)
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(songService.filters.indices, id: \.self) { index in
                     SmartFilterStack(filter: songService.filters[index])
-                        .disabled(!smartRulesActive)
+                        .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                 }
-                .blur(radius: !smartRulesActive ? 2 : 0)
+                .blur(radius: !viewModel.smartRulesActive ? 2 : 0)
                 
                 RoundedRectangle(cornerRadius: 1)
                     .frame(height: 1)
@@ -91,7 +70,7 @@ struct PlaylistGenerator: View {
     }
     
     private var playlistCover: some View {
-        Image(.wap)
+        Image(.ken)
             .resizable()
             .scaledToFill()
             .frame(height: 200)
@@ -104,25 +83,39 @@ struct PlaylistGenerator: View {
     
     private var headerTitle: some View {
         ZStack {
+            Button {
+                withAnimation(.bouncy(duration: 0.4)) {
+                    moveSet -= UIScreen.main.bounds.width
+                    viewModel.model = PlaylistModel()
+                }
+            } label: {
+                Image(systemName: "xmark")
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .fontWeight(.black)
+                    .foregroundStyle(.white)
+                    .background(
+                        Circle()
+                            .fill(.oreo)
+                            .shadow(radius: 2)
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .tint(.white)
+            }
+            
             Text("Playlist Generator")
                 .foregroundStyle(.oreo)
                 .font(.title2.bold())
-                .frame(maxWidth: .infinity, alignment: .center)
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     moveSet += UIScreen.main.bounds.width
                     let combinedFilter = CompositeFilter(filters: songService.filters)
-                    let filteredSongs = smartFilterSongs(songs: songService.sortedSongs, using: combinedFilter)
-                    
-                    var model = viewModel.model
-                    model.filters.append(combinedFilter)
-                    model.smartRules = smartRulesActive
-                    model.songs = filteredSongs
-                    model.title = playlistName
-                    model.limit = songService.limitFilter.limit
+                    let filteredSongs = viewModel.smartFilterSongs(songs: songService.sortedSongs, using: combinedFilter)
+                    let model = viewModel.generatePlaylist(filters: combinedFilter, songs: filteredSongs, limit: songService.fetchLimit)
                     
                     viewModel.playlists.append(model)
+                    viewModel.model = PlaylistModel()
                 }
             } label: {
                 Image(systemName: "checkmark")
@@ -144,7 +137,7 @@ struct PlaylistGenerator: View {
     
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField("Playlist Name", text: $playlistName)
+            TextField("Playlist Name", text: $viewModel.playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)
@@ -165,22 +158,10 @@ struct PlaylistGenerator: View {
             .padding(.vertical, 12)
             .foregroundStyle(.secondary.opacity(0.2))
     }
-    
-    private func smartFilterSongs(songs: [Song], using filter: SongFilterModel) -> [Song] {
-        return songs.filter { filter.matches(song: $0) }
-    }
-    
-    private func calculateScrollViewHeight() -> CGFloat {
-        let filterHeight: CGFloat = 48 + 64
-        let spacing: CGFloat = 8
-        let totalHeight = CGFloat(songService.filters.count) * filterHeight + CGFloat(songService.filters.count - 1) * spacing
-        print(UIScreen.main.bounds.height)
-        return min(totalHeight, UIScreen.main.bounds.height * 0.25)
-    }
 }
 
 #Preview {
-    PlaylistGenerator(moveSet: .constant(.zero))
+    PlaylistGenerator(viewModel: PlaylistGeneratorViewModel(), moveSet: .constant(.zero))
         .environment(SongService())
 }
 
