@@ -51,20 +51,8 @@ struct LimitToStack: View {
                 .fontWeight(.semibold)
                 .font(.title3)
             
-            Button {
-                
-            } label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(.oreo)
-                        .shadow(radius: 2)
-                    Text("\(songService.limitFilter.limit)")
-                        .font(.caption)
-                        .fontWeight(.heavy)
-                        .foregroundStyle(.white)
-                }
+            Dropdown(options: ["50", "75", "100"], selection: filter.limit, type: .limitInt)
                 .frame(width: 44, height: 44)
-            }
             Dropdown(options: ["items", "other"], selection: filter.limitTypeSelection, type: .limit)
         }
         .foregroundStyle(.oreo)
@@ -77,7 +65,7 @@ struct LimitToStack: View {
                 .fill(.clear)
                 .frame(width: 33, height: 33)
             HStack {
-                Text("most played")
+                Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
                 Dropdown(options: ["least played", "other"], selection: filter.limitSortSelection, type: .limit)

@@ -66,7 +66,9 @@ struct Dropdown: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                     
-                    Spacer()
+                    if type != .limitInt {
+                        Spacer()
+                    }
                 }
                 .foregroundStyle(selection == option ? Color.primary : (type == .smartFilter ? Color.gray : .white.opacity(0.8)))
                 .fontWeight(selection == option ? .heavy : .regular)
@@ -82,7 +84,7 @@ struct Dropdown: View {
                 }
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, (type != .limitInt ? 8 : 4))
         .padding(.vertical, 5)
         .transition(.move(edge: anchor == .top ? .bottom : .top))
     }
@@ -112,6 +114,10 @@ struct Dropdown: View {
             songService.limitFilter.limitTypeSelection = "items"
         case "most played":
             songService.limitFilter.limitTypeSelection = "most played"
+        case "50":
+            songService.limitFilter.limit = "50"
+        case "75":
+            songService.limitFilter.limit = "75"
         default:
             print("No type found.")
         }
@@ -125,5 +131,6 @@ struct Dropdown: View {
 
 enum DropdownType {
     case smartFilter
+    case limitInt
     case limit
 }

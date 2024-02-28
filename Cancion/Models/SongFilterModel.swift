@@ -54,7 +54,7 @@ struct TitleFilter: SongFilterModel {
 struct LimitFilter: SongFilterModel {
     var id = UUID()
     var active: Bool
-    var limit: Int
+    var limit: String
     var limitTypeSelection: String
     var limitSortSelection: String
     var condition: Condition

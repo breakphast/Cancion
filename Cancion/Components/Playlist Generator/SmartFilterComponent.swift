@@ -20,9 +20,11 @@ struct SmartFilterComponent: View {
                 Text(title)
                     .font(.caption2)
                     .fontWeight(.black)
-                Spacer()
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
+                if type != .limitInt {
+                    Spacer()
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                }
             }
             .padding(.horizontal, 8)
             .foregroundStyle(type == .smartFilter ? .oreo : .white)

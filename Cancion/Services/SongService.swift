@@ -12,7 +12,7 @@ import MusicKit
     var randomSongs = [Song]()
     var searchResultSongs = MusicItemCollection<Song>()
     var sortedSongs = [Song]()
-    var limitFilter = LimitFilter(active: false, limit: 25, limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
+    var limitFilter = LimitFilter(active: false, limit: "25", limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
     var filters: [any SongFilterModel] = [ArtistFilter(value: "", condition: .equals)]
     var fetchLimit: Int = 500
     

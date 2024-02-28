@@ -32,7 +32,7 @@ import MusicKit
         try await player.prepareToPlay()
         guard player.isPreparedToPlay else { return }
         if secondaryPlaying {
-            try await playAndObserve(song: cancion)
+            handlePlayButton()
             startObservingCurrentTrack(cancion: cancion)
         }
     }
@@ -45,13 +45,6 @@ import MusicKit
             nextIndex = nextIndex + (forward ? 1 : -1)
         } catch {
             print("Failed to change song", error.localizedDescription)
-        }
-    }
-    func playAndObserve(song: Song) async throws {
-        do {
-            try await player.play()
-        } catch {
-            print("Could not play or observe.")
         }
     }
     func setQueue(cancion: Song, custom: Bool = false) {
@@ -90,11 +83,13 @@ import MusicKit
             if !isPlaying {
                 do {
                     try await player.play()
+                    secondaryPlaying = true
                 } catch {
                     print("error", error.localizedDescription)
                 }
             } else {
                 player.pause()
+                secondaryPlaying = false
             }
         }
     }

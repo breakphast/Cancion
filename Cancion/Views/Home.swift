@@ -38,14 +38,12 @@ struct Home: View {
             }
             .task {
                 viewModel.setQueue(cancion: cancion)
+                viewModel.startObservingCurrentTrack(cancion: cancion)
             }
             .onChange(of: viewModel.player.queue.currentEntry?.id, { oldValue, newValue in
                 if let song = viewModel.customQueueSong {
                     self.cancion = song
-                    Task {
-                        try await viewModel.player.play()
-                        viewModel.secondaryPlaying = true
-                    }
+                    viewModel.handlePlayButton()
                 }
             })
             .onChange(of: viewModel.nextIndex) { oldValue, newValue in
@@ -58,10 +56,13 @@ struct Home: View {
                     }
                 }
             }
-            .onChange(of: viewModel.secondaryPlaying) { _, newValue in
+            .onChange(of: viewModel.isPlaying) { _, newValue in
                 if newValue == true {
-                    viewModel.startObservingCurrentTrack(cancion: cancion)
+                    viewModel.secondaryPlaying = true
+                } else {
+                    viewModel.secondaryPlaying = false
                 }
+                viewModel.startObservingCurrentTrack(cancion: cancion)
             }
         }
     }
