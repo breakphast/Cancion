@@ -31,6 +31,7 @@ struct Home: View {
                     SongList(moveSet: $viewModel.moveSet)
                         .offset(x: viewModel.moveSet + geo.size.width, y: 0)
                         .environment(songService)
+                        .environment(viewModel)
                     
                     PlaylistList(moveSet: $viewModel.moveSet)
                 }
@@ -38,7 +39,16 @@ struct Home: View {
             .task {
                 viewModel.setQueue(cancion: cancion)
             }
-            .onChange(of: viewModel.player.queue.currentEntry?.id) { oldValue, newValue in
+            .onChange(of: viewModel.player.queue.currentEntry?.id, { oldValue, newValue in
+                if let song = viewModel.customQueueSong {
+                    self.cancion = song
+                    Task {
+                        try await viewModel.player.play()
+                        viewModel.secondaryPlaying = true
+                    }
+                }
+            })
+            .onChange(of: viewModel.nextIndex) { oldValue, newValue in
                 Task {
                     do {
                         try await viewModel.changeCancion(cancion: &cancion, songs: songService.randomSongs)
@@ -46,6 +56,11 @@ struct Home: View {
                     } catch {
                         print(error.localizedDescription)
                     }
+                }
+            }
+            .onChange(of: viewModel.secondaryPlaying) { _, newValue in
+                if newValue == true {
+                    viewModel.startObservingCurrentTrack(cancion: cancion)
                 }
             }
         }
@@ -191,7 +206,7 @@ struct Home: View {
                 .blur(radius: 2, opaque: false)
                 .overlay(.ultraThinMaterial.opacity(0.99))
                 .overlay(.primary.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous)) // Clip to rounded rectangle
+                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .shadow(radius: 2)
         )
         .sensoryFeedback(.selection, trigger: viewModel.nextIndex)

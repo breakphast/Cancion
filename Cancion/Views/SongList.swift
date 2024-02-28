@@ -11,6 +11,7 @@ import MusicKit
 struct SongList: View {
     @Environment(SongService.self) var songService
     @Environment(SongListViewModel.self) var viewModel
+    @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
     @Binding var moveSet: CGFloat
     @State var scrollID: Int?
@@ -115,6 +116,13 @@ struct SongList: View {
         LazyVStack {
             ForEach(Array(songService.sortedSongs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
+                    .onTapGesture {
+                        Task {
+                            homeViewModel.player.stop()
+                            homeViewModel.player.queue = []
+                            homeViewModel.setQueue(cancion: song, custom: true)
+                        }
+                    }
             }
         }
     }
