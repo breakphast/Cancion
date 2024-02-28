@@ -49,7 +49,7 @@ import MusicKit
     @MainActor
     private func apply(_ libraryResponse: MusicLibraryResponse<Song>) {
         self.searchResultSongs = libraryResponse.items
-        self.sortedSongs = Array(libraryResponse.items)
+        self.sortedSongs = Array(libraryResponse.items).filter { $0.artwork != nil }
         self.randomSongs = self.sortedSongs.filter { $0.artwork != nil }.shuffled()
     }
 }

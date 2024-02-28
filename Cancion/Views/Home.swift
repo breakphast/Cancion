@@ -36,12 +36,12 @@ struct Home: View {
                 }
             }
             .task {
-                setQueue()
+                viewModel.setQueue(cancion: cancion)
             }
             .onChange(of: viewModel.player.queue.currentEntry?.id) { oldValue, newValue in
                 Task {
                     do {
-                        try await changeCancion()
+                        try await viewModel.changeCancion(cancion: &cancion, songs: songService.randomSongs)
                         print("Changed. Now:", cancion.title)
                     } catch {
                         print(error.localizedDescription)
@@ -163,7 +163,7 @@ struct Home: View {
                 .onTapGesture {
                     Task {
                         guard viewModel.nextIndex > 0 else { return }
-                        try await handleSongChange(forward: false)
+                        try await viewModel.handleSongChange(forward: false)
                     }
                 }
             Spacer()
@@ -178,8 +178,8 @@ struct Home: View {
             TabIcon(icon: "forward.fill", active: false, progress: $viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await handleSongChange(forward: true)
-                        try await changeCancion()
+                        try await viewModel.handleSongChange(forward: true)
+                        try await viewModel.changeCancion(cancion: &cancion, songs: songService.randomSongs)
                     }
                 }
             Spacer()
@@ -196,52 +196,5 @@ struct Home: View {
         )
         .sensoryFeedback(.selection, trigger: viewModel.nextIndex)
         .sensoryFeedback(.selection, trigger: viewModel.secondaryPlaying)
-    }
-    
-    @MainActor
-    func handleSongChange(forward: Bool) async throws {
-        do {
-            forward ? try await viewModel.player.skipToNextEntry() : try await viewModel.player.skipToPreviousEntry()
-            viewModel.nextIndex = viewModel.nextIndex + (forward ? 1 : -1)
-        } catch {
-            print("Failed to change song", error.localizedDescription)
-        }
-    }
-    
-    @MainActor
-    private func changeCancion() async throws {
-        self.cancion = songService.randomSongs[viewModel.nextIndex]
-        viewModel.player.queue = [songService.randomSongs[viewModel.nextIndex]]
-        try await viewModel.player.prepareToPlay()
-        guard viewModel.player.isPreparedToPlay else { return }
-        if viewModel.secondaryPlaying {
-            try await viewModel.player.play()
-        }
-    }
-    
-    func setQueue() {
-        viewModel.player.queue = [cancion]
-        startObservingCurrentTrack()
-        Task {
-            try await viewModel.player.prepareToPlay()
-        }
-    }
-    
-    func startObservingCurrentTrack() {
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            
-            let currentPlaybackTime = viewModel.player.playbackTime
-            let totalDuration = cancion.duration ?? .zero
-            
-            if !totalDuration.isZero {
-                withAnimation(.linear) {
-                    viewModel.progress = CGFloat(currentPlaybackTime / totalDuration)
-                }
-            }
-            
-            if viewModel.progress >= 1.0 {
-                timer.invalidate()
-            }
-        }
     }
 }

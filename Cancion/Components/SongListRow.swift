@@ -56,7 +56,7 @@ struct SongListRow: View {
     
     private var songInfo: some View {
         VStack(alignment: .leading) {
-            HStack {
+            HStack(spacing: 4) {
                 Text(song.title)
                     .fontWeight(.semibold)
                 Image(systemName: "e.square.fill").opacity(song.contentRating == .explicit ? 1 : 0)
