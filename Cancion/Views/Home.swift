@@ -21,21 +21,30 @@ struct Home: View {
                 
                 backgroundCard(geo.size)
                 
-                ZStack {
+                ZStack(alignment: .bottom) {
                     VStack {
                         navHeader(geo.size)
                         mainSongElement(geo.size)
+                        Spacer()
                     }
                     .padding()
                     
                     SongList(moveSet: $viewModel.moveSet)
                         .offset(x: viewModel.moveSet + geo.size.width, y: 0)
                         .environment(songService)
-                        .environment(viewModel)
                     
                     PlaylistList(moveSet: $viewModel.moveSet)
+                    
+                    Spacer()
+                    
+                    if let art = cancion.artwork {
+                        tabs(geo.size, artwork: art)
+                            .offset(x: !viewModel.secondaryPlaying ? viewModel.moveSet : .zero)
+                            .opacity(viewModel.generatorActive ? 0 : 1)
+                    }
                 }
             }
+            .environment(viewModel)
             .task {
                 viewModel.setQueue(cancion: cancion)
                 viewModel.startObservingCurrentTrack(cancion: cancion)
@@ -145,8 +154,6 @@ struct Home: View {
                 .foregroundStyle(.white)
                 .padding(.vertical, size.height * 0.03)
                 .padding(.horizontal, 24)
-                Spacer()
-                tabs(size, artwork: artwork)
             }
         }
         .offset(x: viewModel.moveSet, y: 0)
@@ -187,7 +194,6 @@ struct Home: View {
                 .onTapGesture {
                     withAnimation(.bouncy) {
                         viewModel.handlePlayButton()
-                        viewModel.secondaryPlaying = viewModel.isPlaying ? false : true
                     }
                 }
             Spacer()
@@ -206,7 +212,7 @@ struct Home: View {
                 .aspectRatio(contentMode: .fill)
                 .blur(radius: 2, opaque: false)
                 .overlay(.ultraThinMaterial.opacity(0.99))
-                .overlay(.primary.opacity(0.2))
+                .overlay(viewModel.generatorActive ? .white.opacity(0.2) : .primary.opacity(0.2))
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .shadow(radius: 2)
         )

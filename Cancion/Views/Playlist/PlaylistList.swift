@@ -10,6 +10,7 @@ import MusicKit
 
 struct PlaylistList: View {
     @State var viewModel = PlaylistGeneratorViewModel()
+    @Environment(HomeViewModel.self) var homeViewModel
     @Binding var moveSet: CGFloat
     @State private var text: String = ""
     
@@ -61,6 +62,7 @@ struct PlaylistList: View {
         Button {
             withAnimation(.bouncy(duration: 0.4)) {
                 moveSet -= UIScreen.main.bounds.width
+                homeViewModel.generatorActive = true
             }
         } label: {
             HStack(spacing: 16) {

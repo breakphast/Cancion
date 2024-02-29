@@ -12,13 +12,14 @@ struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
     @Bindable var viewModel: PlaylistGeneratorViewModel
     @Binding var moveSet: CGFloat
+    @Environment(HomeViewModel.self) var homeViewModel
     
     var body: some View {
         ZStack {
             VStack {
                 headerTitle
                     .fontDesign(.rounded)
-                    .padding(.horizontal, 12)
+                    .padding(.horizontal, 24)
                 ScrollView {
                     VStack {
                         playlistCover
@@ -81,31 +82,38 @@ struct PlaylistGenerator: View {
             .padding(.horizontal, 24)
     }
     
+    func handleCancelPlaylist() {
+        homeViewModel.generatorActive = false
+        moveSet += UIScreen.main.bounds.width
+        viewModel.model = PlaylistModel()
+    }
+    
     private var headerTitle: some View {
-        ZStack {
+        HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    moveSet -= UIScreen.main.bounds.width
-                    viewModel.model = PlaylistModel()
+                    handleCancelPlaylist()
                 }
             } label: {
-                Image(systemName: "xmark")
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .fontWeight(.black)
-                    .foregroundStyle(.white)
-                    .background(
-                        Circle()
-                            .fill(.oreo)
-                            .shadow(radius: 2)
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .tint(.white)
+                ZStack {
+                    Circle()
+                        .fill(.oreo)
+                        .frame(width: 44)
+                        .shadow(radius: 2)
+                    Image(systemName: "xmark")
+                        .foregroundStyle(.white)
+                        .font(.headline)
+                        .fontWeight(.heavy)
+                }
             }
+            
+            Spacer()
             
             Text("Playlist Generator")
                 .foregroundStyle(.oreo)
                 .font(.title2.bold())
+            
+            Spacer()
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
@@ -116,23 +124,21 @@ struct PlaylistGenerator: View {
                     
                     viewModel.playlists.append(model)
                     viewModel.model = PlaylistModel()
+    //                    homeViewModel.generatorActive = false
                 }
             } label: {
-                Image(systemName: "checkmark")
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .fontWeight(.black)
-                    .foregroundStyle(.white)
-                    .background(
-                        Circle()
-                            .fill(.naranja.opacity(0.9))
-                            .shadow(radius: 2)
-                    )
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .tint(.white)
+                ZStack {
+                    Circle()
+                        .fill(.oreo)
+                        .frame(width: 44)
+                        .shadow(radius: 2)
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(.naranja)
+                        .font(.headline)
+                        .fontWeight(.heavy)
+                }
             }
         }
-        .frame(maxWidth: .infinity)
     }
     
     private var playlistTitle: some View {
@@ -163,5 +169,6 @@ struct PlaylistGenerator: View {
 #Preview {
     PlaylistGenerator(viewModel: PlaylistGeneratorViewModel(), moveSet: .constant(.zero))
         .environment(SongService())
+        .environment(HomeViewModel())
 }
 

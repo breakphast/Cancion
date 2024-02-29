@@ -65,7 +65,7 @@ import MusicKit
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
             if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
                 withAnimation {
-                    self.keyboardHeight = keyboardSize.height
+                    self.keyboardHeight = keyboardSize.height * 0.65
                 }
             }
         }

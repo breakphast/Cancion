@@ -24,6 +24,7 @@ import MusicKit
     }
     var customQueueSong: Song? = nil
     var currentTimer: Timer? = nil
+    var generatorActive = false
     
     @MainActor
     func changeCancion(cancion: inout Song, songs: [Song]) async throws {
