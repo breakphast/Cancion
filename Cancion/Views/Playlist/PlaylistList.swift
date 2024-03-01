@@ -7,12 +7,15 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 struct PlaylistList: View {
     @State var viewModel = PlaylistGeneratorViewModel()
     @Environment(HomeViewModel.self) var homeViewModel
     @Binding var moveSet: CGFloat
     @State private var text: String = ""
+    @Environment(\.modelContext) var modelContext
+    @Query var playlistas: [Playlista]
     
     var body: some View {
         ZStack {
@@ -30,11 +33,9 @@ struct PlaylistList: View {
                             }
                             CustomDivider()
                             
-                            ForEach(viewModel.playlists, id: \.id) { playlist in
+                            ForEach(playlistas, id: \.id) { playlist in
                                 PlaylistListRow(playlist: playlist)
-                                    .onTapGesture {
-                                        viewModel.setActivePlaylist(playlist: playlist)
-                                    }
+                                    .environment(viewModel)
                             }
                         }
                         .padding(.vertical, 8)

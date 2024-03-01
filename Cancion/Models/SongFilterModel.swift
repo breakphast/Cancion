@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 protocol SongFilterModel {
     var id: UUID { get }
@@ -15,21 +16,19 @@ protocol SongFilterModel {
     func matches(song: Song) -> Bool
 }
 
-struct ArtistFilter: SongFilterModel {
-    var id = UUID()
-    
-    var value: String
-    var condition: Condition
-    
-    func matches(song: Song) -> Bool {
-        switch condition {
-        case .equals:
-            return song.artistName == value
-        case .contains:
-            return song.artistName.contains(value)
-        default:
-            return false
-        }
+protocol ArtistFilterr {
+    var id: UUID { get }
+    var value: String { get set }
+    var condition: String { get set }
+//    func match(song: Song, value: String, condition: String) -> Bool
+}
+
+func artistMatch(song: Song, value: String, condition: String) -> Bool {
+    switch condition {
+    case "equals":
+        return song.artistName == value
+    default:
+        return false
     }
 }
 
@@ -118,6 +117,10 @@ enum Condition {
     case doesNotContain
     case greaterThan
     case lessThan
+}
+
+enum Conditionn: String {
+    case equals = "equals"
 }
 
 extension SongFilterModel {

@@ -7,12 +7,15 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
     @Bindable var viewModel: PlaylistGeneratorViewModel
     @Binding var moveSet: CGFloat
     @Environment(HomeViewModel.self) var homeViewModel
+    @Environment(\.modelContext) var modelContext
+    @Query var playlistas: [Playlista]
     
     var body: some View {
         ZStack {
@@ -57,6 +60,7 @@ struct PlaylistGenerator: View {
                     SmartFilterStack(filter: songService.filters[index])
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
+                        .environment(viewModel)
                 }
                 .blur(radius: !viewModel.smartRulesActive ? 2 : 0)
                 
@@ -85,7 +89,7 @@ struct PlaylistGenerator: View {
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
         moveSet += UIScreen.main.bounds.width
-        viewModel.model = PlaylistModel()
+        viewModel.model = Playlista()
     }
     
     private var headerTitle: some View {
@@ -118,13 +122,9 @@ struct PlaylistGenerator: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     moveSet += UIScreen.main.bounds.width
-                    let combinedFilter = CompositeFilter(filters: songService.filters)
-                    let filteredSongs = viewModel.smartFilterSongs(songs: songService.sortedSongs, using: combinedFilter)
-                    let model = viewModel.generatePlaylist(filters: combinedFilter, songs: filteredSongs, limit: songService.fetchLimit)
+                    addPlaylistToDatabase()
                     
-                    viewModel.playlists.append(model)
-                    viewModel.model = PlaylistModel()
-    //                    homeViewModel.generatorActive = false
+                    homeViewModel.generatorActive = false
                 }
             } label: {
                 ZStack {
@@ -137,6 +137,17 @@ struct PlaylistGenerator: View {
                         .font(.headline)
                         .fontWeight(.heavy)
                 }
+            }
+        }
+    }
+    
+    private func addPlaylistToDatabase() {
+        Task {
+            if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
+                modelContext.insert(model)
+                model.filters = viewModel.filters2
+                
+                viewModel.filters2 = [ArtistFilterModel()]
             }
         }
     }

@@ -17,7 +17,7 @@ struct PlaylistView: View {
     @Binding var showView: Bool
     @State var scrollID: Int? = 0
     
-    var playlist: PlaylistModel
+    var playlist: Playlista
     
     var body: some View {
         VStack(spacing: 16) {
@@ -122,34 +122,38 @@ struct PlaylistView: View {
     }
     private var art: some View {
         ZStack {
-            if let artwork1 = playlist.songs.first?.artwork, let artwork2 = playlist.songs.last?.artwork  {
-                HStack(spacing: 0) {
-                    ArtworkImage(artwork1, width: 200)
-                    ArtworkImage(artwork2, width: 200)
+            if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
+                if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
+                    HStack(spacing: 0) {
+                        ArtworkImage(artwork1, width: 200)
+                        ArtworkImage(artwork2, width: 200)
+                    }
+                    .frame(width: UIScreen.main.bounds.width * 0.8, height: 200)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.white)
+                            .shadow(radius: 3)
+                    )
+                    .padding()
+                    .id(33)
+                } else {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(.oreo.opacity(0.6))
+                        .shadow(radius: 5)
+                        .frame(width: UIScreen.main.bounds.width * 0.9, height: 200)
+                        .padding(.vertical)
                 }
-                .frame(width: UIScreen.main.bounds.width * 0.8, height: 200)
-                .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(.white)
-                        .shadow(radius: 3)
-                )
-                .padding()
-                .id(33)
-            } else {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.oreo.opacity(0.6))
-                    .shadow(radius: 5)
-                    .frame(width: UIScreen.main.bounds.width * 0.9, height: 200)
-                    .padding(.vertical)
             }
         }
     }
     private var songList: some View {
         LazyVStack {
             ForEach(Array(playlist.songs.enumerated()), id: \.offset) { index, song in
-                SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
+                if let songModel = songService.sortedSongs.first(where: {$0.id.rawValue == song}) {
+                    SongListRow(song: songModel, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
+                }
             }
         }
     }

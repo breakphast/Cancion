@@ -7,12 +7,17 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 struct PlaylistListRow: View {
-    let playlist: PlaylistModel
+    let playlist: Playlista
+    @Environment(SongService.self) var songService
+    @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    @Environment(\.modelContext) var modelContext
+    @State private var showMenu = false
     
     var song: Song? {
-        if let song = playlist.songs.first {
+        if let songID = playlist.songs.first, let song = songService.sortedSongs.first(where: {$0.id.rawValue == songID}) {
             return song
         }
         return nil
@@ -21,27 +26,42 @@ struct PlaylistListRow: View {
     var body: some View {
         VStack {
             HStack {
-                if let song, let artwork = song.artwork {
-                    ArtworkImage(artwork, width: 44, height: 44)
-                        .clipShape(.rect(cornerRadius: 12, style: .continuous))
-                        .shadow(radius: 2)
-                } else {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .foregroundStyle(.gray.opacity(0.8))
-                        .frame(width: 44, height: 44)
+                HStack {
+                    if let song, let artwork = song.artwork {
+                        ArtworkImage(artwork, width: 44, height: 44)
+                            .clipShape(.rect(cornerRadius: 12, style: .continuous))
+                            .shadow(radius: 2)
+                    } else {
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .foregroundStyle(.gray.opacity(0.8))
+                            .frame(width: 44, height: 44)
+                    }
+                    
+                    Text(playlist.title)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 4)
+                        .lineLimit(1)
+
                 }
-                
-                Text(playlist.title)
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 4)
-                    .lineLimit(1)
+                .onTapGesture {
+                    playlistViewModel.setActivePlaylist(playlist: playlist)
+                }
                 
                 Spacer()
                 
-                Image(systemName: "ellipsis")
-                    .fontWeight(.bold)
+                Menu {
+                    Button {
+                        self.deletePlaylist()
+                    } label: {
+                        Label("Delete Playlist", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.title.bold())
+                        .contentShape(Rectangle())
+                        .frame(width: 55, height: 55)
+                }
             }
-            .frame(height: 55)
             
             RoundedRectangle(cornerRadius: 1)
                 .frame(height: 1)
@@ -49,5 +69,9 @@ struct PlaylistListRow: View {
                 .foregroundStyle(.secondary.opacity(0.2))
         }
         .frame(maxWidth: .infinity)
+    }
+    
+    private func deletePlaylist() {
+        modelContext.delete(playlist)
     }
 }

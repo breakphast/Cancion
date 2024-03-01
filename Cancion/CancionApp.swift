@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct CancionApp: App {
@@ -16,5 +17,6 @@ struct CancionApp: App {
             ContentView()
                 .environment(songListViewModel)
         }
+        .modelContainer(for: Playlista.self)
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Dropdown: View {
     @Environment(SongService.self) var songService
-    @State var filter: SongFilterModel = ArtistFilter(value: "", condition: .equals)
+    @State var filter: SongFilterModel = TitleFilter(value: "", condition: .contains)
     var conditional: Bool?
     
     var options: [String]
@@ -94,7 +94,7 @@ struct Dropdown: View {
             if filterModel.id == filter.id {
                 switch option {
                 case FilterTitle.artist.rawValue:
-                    songService.filters[index] = ArtistFilter(id: filterModel.id, value: "", condition: .equals)
+                    songService.filters[index] = TitleFilter(id: filterModel.id, value: "Queen Latifah", condition: .equals)
                 case FilterTitle.title.rawValue:
                     songService.filters[index] = TitleFilter(id: filterModel.id, value: "Queen Latifah", condition: .equals)
                 case FilterTitle.playCount.rawValue:

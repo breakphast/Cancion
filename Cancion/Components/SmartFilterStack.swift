@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SmartFilterStack: View {
     @Environment(SongService.self) var songService
+    @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     let filter: SongFilterModel
     
     @State var filterText = ""
@@ -33,7 +35,7 @@ struct SmartFilterStack: View {
             if !filterSet {
                 Button {
                     withAnimation(.bouncy) {
-                        songService.filters.append(ArtistFilter(value: "", condition: .equals))
+                        songService.filters.append(TitleFilter(value: "", condition: .contains))
                     }
                 } label: {
                     ZStack {
@@ -70,11 +72,13 @@ struct SmartFilterStack: View {
     }
     
     private func handleSmartFilterText() {
-        songService.filters.enumerated().forEach { index, filterModel in
+        playlistViewModel.filters2.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 songService.filters[index].value = filterText
-                print(songService.filters.map {$0.value})
             }
+        }
+        if let filter = playlistViewModel.filters2.first {
+            filter.value = filterText
         }
     }
 }
