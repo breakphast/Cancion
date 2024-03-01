@@ -49,6 +49,13 @@ struct Home: View {
                 viewModel.setQueue(cancion: cancion)
                 viewModel.startObservingCurrentTrack(cancion: cancion)
             }
+            .onChange(of: viewModel.progress, { oldValue, newValue in
+                if newValue == .zero {
+                    Task {
+                        try await viewModel.handleSongChange(forward: true)
+                    }
+                }
+            })
             .onChange(of: viewModel.player.queue.currentEntry?.id, { oldValue, newValue in
                 if let song = viewModel.customQueueSong {
                     self.cancion = song
@@ -201,7 +208,6 @@ struct Home: View {
                 .onTapGesture {
                     Task {
                         try await viewModel.handleSongChange(forward: true)
-                        try await viewModel.changeCancion(cancion: &cancion, songs: songService.randomSongs)
                     }
                 }
             Spacer()

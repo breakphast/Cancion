@@ -35,6 +35,10 @@ import MusicKit
         if secondaryPlaying {
             handlePlayButton()
             startObservingCurrentTrack(cancion: cancion)
+        } else if currentTimer != nil {
+            try await player.play()
+            secondaryPlaying = true
+            startObservingCurrentTrack(cancion: cancion)
         }
     }
     
