@@ -11,6 +11,7 @@ import MusicKit
 struct ContentView: View {
     @State private var authService = AuthService.shared
     @State private var songService = SongService()
+    @Environment(HomeViewModel.self) var homeViewModel
     
     var body: some View {
         ZStack {
@@ -20,7 +21,7 @@ struct ContentView: View {
                 AuthView(musicAuthorizationStatus: $authService.status)
             } else {
                 if let song = songService.randomSongs.first {
-                    Home(cancion: song)
+                    Home()
                         .environment(songService)
                 }
             }

@@ -9,16 +9,16 @@ import SwiftUI
 
 struct TabIcon: View {
     let icon: String
-    let active: Bool
-    @Binding var progress: CGFloat
+    var playButton = false
+    var progress: CGFloat
     var isPlaying: Bool
     
     var body: some View {
         ZStack {
             Circle()
-                .fill(active ? Color.white.opacity(0.9) : .oreo)
+                .fill(playButton ? Color.white.opacity(0.9) : .oreo)
                 .shadow(radius: 10)
-            if active {
+            if playButton {
                 Circle()
                     .trim(from: 0.0, to: progress)
                     .stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
@@ -28,9 +28,9 @@ struct TabIcon: View {
             }
             Image(systemName: icon)
                 .bold()
-                .foregroundStyle(active ? isPlaying ? .naranja : .oreo : Color.white)
-                .font(active ? .title2 : .body)
+                .foregroundStyle(playButton ? isPlaying ? .naranja : .oreo : Color.white)
+                .font(playButton ? .title2 : .body)
         }
-        .frame(width: active ? 66 : 55)
+        .frame(width: playButton ? 66 : 55)
     }
 }

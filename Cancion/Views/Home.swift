@@ -10,75 +10,67 @@ import MusicKit
 
 struct Home: View {
     @Environment(SongService.self) var songService
-    @Bindable var viewModel = HomeViewModel()
-    @State var cancion: Song
+    @Environment(HomeViewModel.self) var viewModel
+    var cancion: Song? {
+        return viewModel.cancion
+    }
+    
+    @ObservedObject private var playerState = ApplicationMusicPlayer.shared.state
+    private var isPlaying: Bool {
+        return (playerState.playbackStatus == .playing)
+    }
     
     var body: some View {
         GeometryReader { geo in
-            ZStack(alignment: .top) {
-                LinearGradient(colors: [.black, .black.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .ignoresSafeArea()
-                
-                backgroundCard(geo.size)
-                
-                ZStack(alignment: .bottom) {
-                    VStack {
-                        navHeader(geo.size)
-                        mainSongElement(geo.size)
+            if viewModel.cancion == nil {
+                ZStack {
+                    Color.white.ignoresSafeArea()
+                }
+            } else {
+                ZStack(alignment: .top) {
+                    LinearGradient(colors: [.black, .black.opacity(0.8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        .ignoresSafeArea()
+                    
+                    backgroundCard(geo.size)
+                    
+                    ZStack(alignment: .bottom) {
+                        VStack {
+                            navHeader(geo.size)
+                            mainSongElement(geo.size)
+                            Spacer()
+                        }
+                        .padding()
+                        
+                        SongList()
+                            .environment(songService)
+                        
+                        PlaylistList()
+                        
                         Spacer()
-                    }
-                    .padding()
-                    
-                    SongList(moveSet: $viewModel.moveSet)
-                        .offset(x: viewModel.moveSet + geo.size.width, y: 0)
-                        .environment(songService)
-                    
-                    PlaylistList(moveSet: $viewModel.moveSet)
-                    
-                    Spacer()
-                    
-                    if let art = cancion.artwork {
-                        tabs(geo.size, artwork: art)
-                            .offset(x: !viewModel.secondaryPlaying ? viewModel.moveSet : .zero)
-                            .opacity(viewModel.generatorActive ? 0 : 1)
+                        
+                        if let art = viewModel.cancion?.artwork {
+                            tabs(geo.size, artwork: art)
+                                .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
+                                .opacity(viewModel.generatorActive ? 0 : 1)
+                        }
                     }
                 }
             }
-            .environment(viewModel)
-            .task {
-                viewModel.setQueue(cancion: cancion)
-                viewModel.startObservingCurrentTrack(cancion: cancion)
-            }
-            .onChange(of: viewModel.progress, { oldValue, newValue in
-                if newValue == .zero {
-                    Task {
-                        try await viewModel.handleSongChange(forward: true)
-                    }
+        }
+        .environment(viewModel)
+        .task {
+            do {
+                if let song = songService.randomSongs.first {
+                    viewModel.cancion = song
                 }
-            })
-            .onChange(of: viewModel.player.queue.currentEntry?.id, { oldValue, newValue in
-                if let song = viewModel.customQueueSong {
-                    self.cancion = song
-                    viewModel.handlePlayButton()
+                viewModel.player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: songService.randomSongs[0])
+                try await viewModel.player.prepareToPlay()
+                viewModel.isPlaybackQueueSet = true
+                if let cancion {
+                    viewModel.startObservingCurrentTrack(cancion: cancion)
                 }
-            })
-            .onChange(of: viewModel.nextIndex) { oldValue, newValue in
-                Task {
-                    do {
-                        try await viewModel.changeCancion(cancion: &cancion, songs: songService.randomSongs)
-                        print("Changed. Now:", cancion.title)
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                }
-            }
-            .onChange(of: viewModel.isPlaying) { _, newValue in
-                if newValue == true {
-                    viewModel.secondaryPlaying = true
-                } else {
-                    viewModel.secondaryPlaying = false
-                }
-                viewModel.startObservingCurrentTrack(cancion: cancion)
+            } catch {
+                
             }
         }
     }
@@ -86,7 +78,7 @@ struct Home: View {
     @ViewBuilder
     private func albumElement(_ size: CGSize) -> some View {
         VStack(spacing: 40) {
-            if let artwork = cancion.artwork {
+            if let artwork = viewModel.cancion?.artwork {
                 ArtworkImage(artwork, width: size.width * 0.9)
                     .clipShape(.rect(cornerRadius: 24, style: .continuous))
                     .shadow(radius: 5)
@@ -131,6 +123,7 @@ struct Home: View {
         .fontDesign(.rounded)
         .padding(.horizontal)
     }
+    
     private func backgroundCard(_ size: CGSize) -> some View {
         Color.white.opacity(0.97)
             .clipShape(.rect(cornerRadius: 24, style: .continuous))
@@ -143,7 +136,7 @@ struct Home: View {
     }
     private func mainSongElement(_ size: CGSize) -> some View {
         VStack {
-            if let artwork = cancion.artwork {
+            if let cancion, let _ = cancion.artwork {
                 albumElement(size)
                     .padding(.top, size.height * 0.05)
                 VStack {
@@ -168,7 +161,7 @@ struct Home: View {
     private func playsCapsule(_ size: CGSize) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "star.fill")
-            Text("\(cancion.playCount ?? 0) Plays")
+            Text("\(cancion?.playCount ?? 0) Plays")
         }
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -184,7 +177,7 @@ struct Home: View {
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
         HStack {
             Spacer()
-            TabIcon(icon: "backward.fill", active: false, progress: $viewModel.progress, isPlaying: viewModel.isPlaying)
+            TabIcon(icon: "backward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .overlay {
                     Circle()
                         .fill(viewModel.nextIndex <= 0 ? Color.oreo.opacity(0.6) : .clear)
@@ -192,22 +185,22 @@ struct Home: View {
                 .disabled(viewModel.nextIndex <= 0)
                 .onTapGesture {
                     Task {
-                        guard viewModel.nextIndex > 0 else { return }
-                        try await viewModel.handleSongChange(forward: false)
+//                        guard viewModel.nextIndex > 0 else { return }
+//                        try await viewModel.handleSongChange(forward: false)
                     }
                 }
             Spacer()
-            TabIcon(icon: viewModel.secondaryPlaying ?  "pause.fill" : "play.fill", active: true, progress: $viewModel.progress, isPlaying: viewModel.secondaryPlaying)
+            TabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", playButton: true, progress: viewModel.progress, isPlaying: isPlaying)
                 .onTapGesture {
                     withAnimation(.bouncy) {
-                        viewModel.handlePlayButton()
+                        viewModel.handlePlayButtonSelected()
                     }
                 }
             Spacer()
-            TabIcon(icon: "forward.fill", active: false, progress: $viewModel.progress, isPlaying: viewModel.isPlaying)
+            TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleSongChange(forward: true)
+                        try await viewModel.handleForwardPress(songs: songService.randomSongs)
                     }
                 }
             Spacer()
@@ -223,6 +216,6 @@ struct Home: View {
                 .shadow(radius: 2)
         )
         .sensoryFeedback(.selection, trigger: viewModel.nextIndex)
-        .sensoryFeedback(.selection, trigger: viewModel.secondaryPlaying)
+        .sensoryFeedback(.selection, trigger: viewModel.isPlaying)
     }
 }

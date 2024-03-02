@@ -13,7 +13,6 @@ struct SongList: View {
     @Environment(SongListViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
-    @Binding var moveSet: CGFloat
     @State var scrollID: Int?
     var body: some View {
         VStack {
@@ -40,6 +39,7 @@ struct SongList: View {
                 scrollID = 33
             }
         }
+        .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width, y: 0)
         .padding(.horizontal)
     }
     
@@ -72,7 +72,7 @@ struct SongList: View {
             }
             .onTapGesture {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    moveSet -= UIScreen.main.bounds.width
+                    homeViewModel.moveSet -= UIScreen.main.bounds.width
                 }
             }
         }
@@ -118,9 +118,20 @@ struct SongList: View {
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {
-                            homeViewModel.player.stop()
-                            homeViewModel.player.queue = []
-                            homeViewModel.setQueue(cancion: song, custom: true)
+                            homeViewModel.player.queue = [song]
+                            homeViewModel.progress = .zero
+                            homeViewModel.cancion = song
+                            do {
+                                try await homeViewModel.player.play()
+                                if let cancion = homeViewModel.cancion {
+                                    homeViewModel.startObservingCurrentTrack(cancion: cancion)
+                                }
+                                homeViewModel.nextIndex += 1
+                                homeViewModel.player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: songService.randomSongs[homeViewModel.nextIndex])
+                                homeViewModel.altQueueActive = true
+                            } catch {
+                                print("Failed to prepare to play with error: \(error).")
+                            }
                         }
                     }
             }
@@ -129,7 +140,7 @@ struct SongList: View {
 }
 
 #Preview {
-    SongList(moveSet: .constant(.zero))
+    SongList()
         .environment(SongService())
         .environment(SongListViewModel())
 }

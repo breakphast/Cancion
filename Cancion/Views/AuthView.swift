@@ -40,7 +40,6 @@ struct AuthView: View {
         case .notDetermined:
             Task {
                 let status = await MusicAuthorization.request()
-                print(status.rawValue)
                 await update(status: status)
             }
         case .denied:

@@ -13,7 +13,6 @@ struct PlaylistView: View {
     @Environment(SongListViewModel.self) var viewModel
     @Environment(\.dismiss) var dismiss
     @State private var text: String = ""
-    @Binding var moveSet: CGFloat
     @Binding var showView: Bool
     @State var scrollID: Int? = 0
     

@@ -15,9 +15,8 @@ import MusicKit
     var queueCount = 0
     var filterActive = false
     var moveSet: CGFloat = .zero
-    var nextIndex = 0
+    var nextIndex = 1
     var playerState = ApplicationMusicPlayer.shared.state
-    var secondaryPlaying = false
     var progress: CGFloat = .zero
     var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
@@ -25,40 +24,16 @@ import MusicKit
     var customQueueSong: Song? = nil
     var currentTimer: Timer? = nil
     var generatorActive = false
+    var observing = false
+    var isPlaybackQueueSet = false
     
-    @MainActor
-    func changeCancion(cancion: inout Song, songs: [Song]) async throws {
-        cancion = songs[nextIndex]
-        player.queue = [songs[nextIndex]]
-        try await player.prepareToPlay()
-        guard player.isPreparedToPlay else { return }
-        if secondaryPlaying {
-            handlePlayButton()
-            startObservingCurrentTrack(cancion: cancion)
-        } else if currentTimer != nil {
-            try await player.play()
-            secondaryPlaying = true
-            startObservingCurrentTrack(cancion: cancion)
-        }
-    }
+    var cancion: Song?
+    var altQueueActive = false
     
-    @MainActor
-    func handleSongChange(forward: Bool) async throws {
-        do {
-            progress = .zero
-            forward ? try await player.skipToNextEntry() : try await player.skipToPreviousEntry()
-            nextIndex = nextIndex + (forward ? 1 : -1)
-        } catch {
-            print("Failed to change song", error.localizedDescription)
-        }
-    }
-    func setQueue(cancion: Song, custom: Bool = false) {
+    func setQueue(cancion: Song) {
         player.queue = [cancion]
         Task {
             try await player.prepareToPlay()
-            if custom {
-                self.customQueueSong = cancion
-            }
         }
     }
     
@@ -66,8 +41,9 @@ import MusicKit
         currentTimer?.invalidate()
         
         currentTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
-            guard let self = self, secondaryPlaying == true else { return }
-            print("Observing", cancion.title)
+            guard let self = self, isPlaying else {
+                return
+            }
             let currentPlaybackTime = self.player.playbackTime
             let totalDuration = cancion.duration ?? .zero
             
@@ -83,19 +59,59 @@ import MusicKit
         }
     }
     
-    func handlePlayButton() {
+    @MainActor
+    func handlePlayButtonSelected() {
         Task {
             if !isPlaying {
-                do {
-                    try await player.play()
-                    secondaryPlaying = true
-                } catch {
-                    print("error", error.localizedDescription)
+                if !isPlaybackQueueSet, let cancion {
+                    player.queue = [cancion]
+                    isPlaybackQueueSet = true
+                    beginPlaying()
+                } else if let cancion = cancion {
+                    Task {
+                        do {
+                            try await player.play()
+                            startObservingCurrentTrack(cancion: cancion)
+                        } catch {
+                            print("Failed to resume playing with error: \(error).")
+                        }
+                    }
                 }
             } else {
                 player.pause()
-                secondaryPlaying = false
             }
+        }
+    }
+    
+    private func beginPlaying() {
+        Task {
+            do {
+                try await player.play()
+                if let cancion {
+                    startObservingCurrentTrack(cancion: cancion)
+                }
+            } catch {
+                print("Failed to prepare to play with error: \(error).")
+            }
+        }
+    }
+    
+    @MainActor
+    func handleForwardPress(songs: [Song]) async throws {
+        do {
+            progress = .zero
+            try await player.skipToNextEntry()
+            cancion = songs[nextIndex]
+            nextIndex += 1
+            if let cancion {
+                if altQueueActive {
+                    try await player.play()
+                    altQueueActive = false
+                }
+                startObservingCurrentTrack(cancion: cancion)
+            }
+        } catch {
+            
         }
     }
 }

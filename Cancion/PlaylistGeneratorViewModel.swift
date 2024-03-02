@@ -74,7 +74,6 @@ import MusicKit
         let filterHeight: CGFloat = 48 + 64
         let spacing: CGFloat = 8
         let totalHeight = CGFloat(filterCount) * filterHeight + CGFloat(filterCount - 1) * spacing
-        print(UIScreen.main.bounds.height)
         return min(totalHeight, UIScreen.main.bounds.height * 0.25)
     }
     

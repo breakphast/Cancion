@@ -12,7 +12,6 @@ import SwiftData
 struct PlaylistList: View {
     @State var viewModel = PlaylistGeneratorViewModel()
     @Environment(HomeViewModel.self) var homeViewModel
-    @Binding var moveSet: CGFloat
     @State private var text: String = ""
     @Environment(\.modelContext) var modelContext
     @Query var playlistas: [Playlista]
@@ -45,24 +44,24 @@ struct PlaylistList: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
-            .offset(x: moveSet + (UIScreen.main.bounds.width * 2))
+            .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 2))
             .fullScreenCover(isPresented: $viewModel.showView) {
                 if let activePlaylist = viewModel.activePlaylist {
-                    PlaylistView(moveSet: $moveSet, showView: $viewModel.showView, playlist: activePlaylist)
+                    PlaylistView(showView: $viewModel.showView, playlist: activePlaylist)
                 }
             }
             
             VStack {
-                PlaylistGenerator(viewModel: viewModel, moveSet: $moveSet)
+                PlaylistGenerator(viewModel: viewModel)
                     .environment(viewModel)
             }
-            .offset(x: moveSet + (UIScreen.main.bounds.width * 3))
+            .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 3))
         }
     }
     private var newPlaylistButton: some View {
         Button {
             withAnimation(.bouncy(duration: 0.4)) {
-                moveSet -= UIScreen.main.bounds.width
+                homeViewModel.moveSet -= UIScreen.main.bounds.width
                 homeViewModel.generatorActive = true
             }
         } label: {
@@ -84,7 +83,7 @@ struct PlaylistList: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    moveSet += UIScreen.main.bounds.width
+                    homeViewModel.moveSet += UIScreen.main.bounds.width
                 }
             } label: {
                 ZStack {
@@ -110,7 +109,7 @@ struct PlaylistList: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    moveSet += UIScreen.main.bounds.width
+                    homeViewModel.moveSet += UIScreen.main.bounds.width
                 }
             } label: {
                 ZStack {
@@ -140,7 +139,7 @@ struct PlaylistList: View {
 }
 
 #Preview {
-    PlaylistList(moveSet: .constant(UIScreen.main.bounds.width * -2))
+    PlaylistList()
         .environment(PlaylistGeneratorViewModel())
         .environment(SongService())
 }

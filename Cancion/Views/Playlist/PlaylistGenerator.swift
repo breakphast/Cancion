@@ -12,7 +12,6 @@ import SwiftData
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
     @Bindable var viewModel: PlaylistGeneratorViewModel
-    @Binding var moveSet: CGFloat
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @Query var playlistas: [Playlista]
@@ -88,7 +87,7 @@ struct PlaylistGenerator: View {
     
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
-        moveSet += UIScreen.main.bounds.width
+        homeViewModel.moveSet += UIScreen.main.bounds.width
         viewModel.model = Playlista()
     }
     
@@ -121,7 +120,7 @@ struct PlaylistGenerator: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    moveSet += UIScreen.main.bounds.width
+                    homeViewModel.moveSet += UIScreen.main.bounds.width
                     addPlaylistToDatabase()
                     
                     homeViewModel.generatorActive = false
@@ -178,7 +177,7 @@ struct PlaylistGenerator: View {
 }
 
 #Preview {
-    PlaylistGenerator(viewModel: PlaylistGeneratorViewModel(), moveSet: .constant(.zero))
+    PlaylistGenerator(viewModel: PlaylistGeneratorViewModel())
         .environment(SongService())
         .environment(HomeViewModel())
 }
