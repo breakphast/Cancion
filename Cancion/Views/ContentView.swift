@@ -9,28 +9,24 @@ import SwiftUI
 import MusicKit
 
 struct ContentView: View {
-    @State private var authService = AuthService.shared
-    @State private var songService = SongService()
     @Environment(HomeViewModel.self) var homeViewModel
+    @Environment(AuthService.self) var authService
     
     var body: some View {
         ZStack {
+            @Bindable var authServicee = authService
             Color.gray.opacity(0.1).ignoresSafeArea()
             
             if authService.status != .authorized {
-                AuthView(musicAuthorizationStatus: $authService.status)
+                AuthView(musicAuthorizationStatus: $authServicee.status)
             } else {
-                if let song = songService.randomSongs.first {
+                if let _ = homeViewModel.songService.randomSongs.first {
                     Home()
-                        .environment(songService)
                 }
             }
         }
+        .environment(homeViewModel)
+        .environment(authService)
     }
 }
 
-#Preview {
-    ContentView()
-        .environment(AuthService.shared)
-        .environment(SongService())
-}

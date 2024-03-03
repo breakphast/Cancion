@@ -9,7 +9,6 @@ import SwiftUI
 import MusicKit
 
 struct Home: View {
-    @Environment(SongService.self) var songService
     @Environment(HomeViewModel.self) var viewModel
     var cancion: Song? {
         return viewModel.cancion
@@ -37,21 +36,8 @@ struct Home: View {
             }
         }
         .environment(viewModel)
-        .environment(songService)
         .task {
-            do {
-                if let song = songService.randomSongs.first {
-                    viewModel.cancion = song
-                }
-                viewModel.player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: songService.randomSongs[0])
-                try await viewModel.player.prepareToPlay()
-                viewModel.isPlaybackQueueSet = true
-                if let cancion {
-                    viewModel.startObservingCurrentTrack(cancion: cancion)
-                }
-            } catch {
-                
-            }
+            viewModel.initializeQueue(songs: viewModel.songService.randomSongs)
         }
     }
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
@@ -74,7 +60,7 @@ struct Home: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleForwardPress(songs: songService.randomSongs)
+                        try await viewModel.handleForwardPress(songs: viewModel.songService.randomSongs)
                     }
                 }
             Spacer()

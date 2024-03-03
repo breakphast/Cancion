@@ -9,7 +9,6 @@ import SwiftUI
 import MusicKit
 
 struct PlayerView: View {
-    @Environment(SongService.self) var songService
     @Environment(HomeViewModel.self) var viewModel
     var cancion: Song? {
         return viewModel.cancion
@@ -156,7 +155,7 @@ struct PlayerView: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleForwardPress(songs: songService.randomSongs)
+                        try await viewModel.handleForwardPress(songs: viewModel.songService.randomSongs)
                     }
                 }
             Spacer()

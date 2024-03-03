@@ -9,7 +9,6 @@ import SwiftUI
 import MusicKit
 
 struct SongList: View {
-    @Environment(SongService.self) var songService
     @Environment(SongListViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
@@ -86,7 +85,7 @@ struct SongList: View {
             .autocorrectionDisabled()
             .padding(.vertical, 8)
             .onChange(of: text) { _, _ in
-                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs)
+                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, songItems: homeViewModel.songService.searchResultSongs)
             }
     }
     private var headerItems: some View {
@@ -97,7 +96,7 @@ struct SongList: View {
             
             Button {
                 Task {
-                    await viewModel.togglePlayCountSort(songs: &songService.sortedSongs)
+                    await viewModel.togglePlayCountSort(songs: &homeViewModel.songService.sortedSongs)
                 }
             } label: {
                 HStack {
@@ -114,25 +113,10 @@ struct SongList: View {
     }
     private var songList: some View {
         LazyVStack {
-            ForEach(Array(songService.sortedSongs.enumerated()), id: \.offset) { index, song in
-                SongListRow(song: song, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
+            ForEach(Array(homeViewModel.songService.sortedSongs.enumerated()), id: \.offset) { index, song in
+                SongListRow(song: song, index: viewModel.playCountAscending ? ((homeViewModel.songService.sortedSongs.count - 1) - index) : index)
                     .onTapGesture {
-                        Task {
-                            homeViewModel.player.queue = [song]
-                            homeViewModel.progress = .zero
-                            homeViewModel.cancion = song
-                            do {
-                                try await homeViewModel.player.play()
-                                if let cancion = homeViewModel.cancion {
-                                    homeViewModel.startObservingCurrentTrack(cancion: cancion)
-                                }
-                                homeViewModel.nextIndex += 1
-                                homeViewModel.player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: songService.randomSongs[homeViewModel.nextIndex])
-                                homeViewModel.altQueueActive = true
-                            } catch {
-                                print("Failed to prepare to play with error: \(error).")
-                            }
-                        }
+                        homeViewModel.handleSongSelected(song: song)
                     }
             }
         }
