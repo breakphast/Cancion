@@ -39,7 +39,7 @@ struct SongList: View {
                 scrollID = 33
             }
         }
-        .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width, y: 0)
+        .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width)
         .padding(.horizontal)
     }
     
