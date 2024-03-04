@@ -29,21 +29,14 @@ import MusicKit
     var generatorActive = false
     var isPlaybackQueueSet = true
     var altQueueActive = false
-    var observing = false
     var songService = SongService()
-    
+    var changing = false
     
     func startObservingCurrentTrack(cancion: Song) {
         currentTimer?.invalidate()
-        if progress == .zero {
-            
-        }
         
-        currentTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+        currentTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
             guard let self = self, isPlaying else {
-                if self?.progress == .zero {
-                    
-                }
                 return
             }
             let currentPlaybackTime = self.player.playbackTime
@@ -54,10 +47,17 @@ import MusicKit
                     self.progress = CGFloat(currentPlaybackTime / totalDuration)
                 }
             }
-            
-            if self.progress >= 1.0 {
-                timer.invalidate()
-            }
+        }
+    }
+    
+    func handleAutoQueue() {
+        print("Queue auto progressing...")
+        changing = true
+        nextIndex += 1
+        cancion = songService.randomSongs[nextIndex]
+        startObservingCurrentTrack(cancion: songService.randomSongs[nextIndex])
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            self?.changing = false
         }
     }
     

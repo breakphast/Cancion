@@ -22,16 +22,26 @@ struct Home: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .bottom) {
-                PlayerView()
-                
-                SongList()
-                
-                PlaylistList()
+                Color.white.ignoresSafeArea()
                 
                 if let art = viewModel.cancion?.artwork {
+                    PlayerView()
+                    
+                    SongList()
+                    
+                    PlaylistList()
+                    
                     tabs(UIScreen.main.bounds.size, artwork: art)
                         .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
                         .opacity(viewModel.generatorActive ? 0 : 1)
+                } else {
+                    ProgressView()
+                }
+            }
+            .onChange(of: viewModel.progress) { oldValue, newValue in
+                print(oldValue, newValue)
+                if newValue >= 0.99000000 && !viewModel.changing {
+                    viewModel.handleAutoQueue()
                 }
             }
         }
@@ -88,5 +98,15 @@ extension View {
         } else {
             self // Do not modify the view if isZero is false
         }
+    }
+}
+
+extension CGFloat {
+    func formatToThreeDecimals() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 3
+        formatter.maximumFractionDigits = 3
+        return formatter.string(from: NSNumber(value: self)) ?? ""
     }
 }
