@@ -34,6 +34,12 @@ struct Home: View {
                         .opacity(viewModel.generatorActive ? 0 : 1)
                 }
             }
+            .onChange(of: viewModel.progress) { oldValue, newValue in
+                print(oldValue, newValue)
+                if newValue >= 0.99000000 && !viewModel.changing {
+                    viewModel.handleAutoQueue()
+                }
+            }
         }
         .environment(viewModel)
         .task {
@@ -88,5 +94,15 @@ extension View {
         } else {
             self // Do not modify the view if isZero is false
         }
+    }
+}
+
+extension CGFloat {
+    func formatToThreeDecimals() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 3
+        formatter.maximumFractionDigits = 3
+        return formatter.string(from: NSNumber(value: self)) ?? ""
     }
 }
