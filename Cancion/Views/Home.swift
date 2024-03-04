@@ -44,6 +44,12 @@ struct Home: View {
                     viewModel.handleAutoQueue()
                 }
             }
+            .onChange(of: viewModel.progress) { oldValue, newValue in
+                print(oldValue, newValue)
+                if newValue >= 0.99000000 && !viewModel.changing {
+                    viewModel.handleAutoQueue()
+                }
+            }
         }
         .environment(viewModel)
         .task {
