@@ -39,14 +39,14 @@ struct Home: View {
                 }
             }
             .onChange(of: viewModel.progress) { oldValue, newValue in
-                print(oldValue, newValue)
                 if newValue >= 0.99000000 && !viewModel.changing {
                     viewModel.handleAutoQueue()
                 }
             }
-            .onChange(of: viewModel.progress) { oldValue, newValue in
-                print(oldValue, newValue)
-                if newValue >= 0.99000000 && !viewModel.changing {
+            .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
+                guard oldValue != nil else { return }
+//                viewModel.progress = .zero
+                if !viewModel.blockExternalChange {
                     viewModel.handleAutoQueue()
                 }
             }
@@ -76,6 +76,7 @@ struct Home: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
+                        viewModel.blockExternalChange = true
                         try await viewModel.handleForwardPress(songs: viewModel.songService.randomSongs)
                     }
                 }

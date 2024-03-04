@@ -31,6 +31,7 @@ import MusicKit
     var altQueueActive = false
     var songService = SongService()
     var changing = false
+    var blockExternalChange = false
     
     func startObservingCurrentTrack(cancion: Song) {
         currentTimer?.invalidate()
@@ -70,7 +71,6 @@ import MusicKit
                 }
                 player.queue = ApplicationMusicPlayer.Queue(for: songs, startingAt: songs[0])
                 try await player.prepareToPlay()
-//                print(player.queue.entries[0..<5].map { $0.title })
                 
                 isPlaybackQueueSet = true
                 if let cancion {
@@ -87,14 +87,12 @@ import MusicKit
         Task {
             if !isPlaying {
                 if !isPlaybackQueueSet, let cancion {
-                    print("HEREHRHE")
                     player.queue = [cancion]
                     isPlaybackQueueSet = true
                     beginPlaying()
                 } else if let cancion = cancion {
                     Task {
                         do {
-                            print("TRYING HERE")
                             try await player.play()
                             startObservingCurrentTrack(cancion: cancion)
                         } catch {
@@ -103,7 +101,6 @@ import MusicKit
                     }
                 }
             } else {
-                print("JUST PAUSING")
                 player.pause()
             }
         }
@@ -129,19 +126,16 @@ import MusicKit
             try await player.skipToNextEntry()
             nextIndex += 1
             cancion = songs[nextIndex]
-//            if let cancion {
-//                if altQueueActive {
-//                    try await player.play()
-//                    altQueueActive = false
-//                }
-//                startObservingCurrentTrack(cancion: cancion)
-//            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                self?.blockExternalChange = false
+            }
         } catch {
             
         }
     }
     
     func handleSongSelected(song: Song) {
+        blockExternalChange = true
         var songs = songService.randomSongs.shuffled()
         songs.removeAll(where: {$0.id == song.id})
         songs[0] = song
@@ -154,7 +148,9 @@ import MusicKit
             try await player.prepareToPlay()
             isPlaybackQueueSet = true
             try await player.play()
-            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.blockExternalChange = false
+            }
         }
     }
 }

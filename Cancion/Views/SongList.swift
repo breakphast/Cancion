@@ -13,6 +13,7 @@ struct SongList: View {
     @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
     @State var scrollID: Int?
+    
     var body: some View {
         VStack {
             navHeaderItems
@@ -85,7 +86,8 @@ struct SongList: View {
             .autocorrectionDisabled()
             .padding(.vertical, 8)
             .onChange(of: text) { _, _ in
-                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, songItems: homeViewModel.songService.searchResultSongs)
+                text = text
+                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, songItems: homeViewModel.songService.searchResultSongs, using: homeViewModel.songService.sortedSongs)
             }
     }
     private var headerItems: some View {
@@ -116,6 +118,7 @@ struct SongList: View {
             ForEach(Array(homeViewModel.songService.sortedSongs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((homeViewModel.songService.sortedSongs.count - 1) - index) : index)
                     .onTapGesture {
+                        homeViewModel.blockExternalChange = true
                         homeViewModel.handleSongSelected(song: song)
                     }
             }

@@ -92,7 +92,7 @@ struct PlaylistView: View {
             .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
             .autocorrectionDisabled()
             .onChange(of: text) { _, _ in
-                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs)
+                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs, using: songService.sortedSongs)
             }
             .padding(.horizontal)
     }

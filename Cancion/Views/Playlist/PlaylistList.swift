@@ -50,6 +50,9 @@ struct PlaylistList: View {
                     PlaylistView(showView: $viewModel.showView, playlist: activePlaylist)
                 }
             }
+            .onChange(of: text) { _, _ in
+                text = text
+            }
             
             VStack {
                 PlaylistGenerator(viewModel: viewModel)
@@ -132,9 +135,6 @@ struct PlaylistList: View {
             .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song in playlist", icon: "magnifyingglass"))
             .autocorrectionDisabled()
             .padding(.vertical, 8)
-            .onChange(of: text) { _, _ in
-                
-            }
     }
 }
 
