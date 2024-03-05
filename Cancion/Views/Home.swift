@@ -45,8 +45,7 @@ struct Home: View {
             }
             .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
                 guard oldValue != nil else { return }
-//                viewModel.progress = .zero
-                if !viewModel.blockExternalChange {
+                if !viewModel.blockExternalChange && !viewModel.changing {
                     viewModel.handleAutoQueue()
                 }
             }

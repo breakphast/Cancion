@@ -16,7 +16,7 @@ import MusicKit
     var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
     }
-    var cancion: Song?
+    @MainActor var cancion: Song?
     
     var filterActive = false
     var moveSet: CGFloat = .zero
@@ -51,6 +51,7 @@ import MusicKit
         }
     }
     
+    @MainActor
     func handleAutoQueue() {
         print("Queue auto progressing...")
         changing = true
@@ -107,7 +108,7 @@ import MusicKit
     }
     
     private func beginPlaying() {
-        Task {
+        Task { @MainActor in
             do {
                 try await player.play()
                 if let cancion {
@@ -134,6 +135,7 @@ import MusicKit
         }
     }
     
+    @MainActor
     func handleSongSelected(song: Song) {
         blockExternalChange = true
         var songs = songService.randomSongs.shuffled()

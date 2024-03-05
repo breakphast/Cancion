@@ -119,7 +119,9 @@ struct SongList: View {
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((homeViewModel.songService.sortedSongs.count - 1) - index) : index)
                     .onTapGesture {
                         homeViewModel.blockExternalChange = true
-                        homeViewModel.handleSongSelected(song: song)
+                        Task {
+                            await homeViewModel.handleSongSelected(song: song)
+                        }
                     }
             }
         }
