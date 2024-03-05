@@ -9,7 +9,7 @@ import SwiftUI
 
 struct Dropdown: View {
     @Environment(SongService.self) var songService
-    @State var filter: SongFilterModel = TitleFilter(value: "", condition: .contains)
+    @State var filter = ArtistFilterModel()
     var conditional: Bool?
     
     var options: [String]

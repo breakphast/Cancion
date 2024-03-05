@@ -56,7 +56,7 @@ struct PlaylistGenerator: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(songService.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: songService.filters[index])
+                    SmartFilterStack(filter: viewModel.filters2[index])
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -144,8 +144,7 @@ struct PlaylistGenerator: View {
         Task {
             if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
                 modelContext.insert(model)
-                model.filters = viewModel.filters2
-                
+                try modelContext.save()
                 viewModel.filters2 = [ArtistFilterModel()]
             }
         }

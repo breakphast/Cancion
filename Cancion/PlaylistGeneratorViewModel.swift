@@ -21,32 +21,16 @@ import MusicKit
     var filters2: [ArtistFilterModel] = [ArtistFilterModel()]
     var activePlaylist: Playlista? = nil
     var showView = false
-    
-    func generatePlaylista(filters: [ArtistFilterModel], songs: [String], limit: Int) -> Playlista {
-        let model = Playlista()
-        model.title = playlistName
-        model.smartRules = smartRulesActive
-        model.songs = songs
-        model.limit = limit
-        model.filters = filters
-        
-        return model
-    }
-    
+    var songIDS = [String]()
     func generatePlaylist(songs: [Song]) async -> Playlista? {
+        self.songIDS = songs.filter { matchess(song: $0, value: filters2[0].value, condition: filters2[0].condition, type: .artist) }.map {$0.id.rawValue}
         do {
             let model = Playlista()
             model.title = playlistName
             model.smartRules = smartRulesActive
-            if let filter = filters2.first {
-                let filteredSongs = songs.filter { artistMatch(song: $0, value: "Yeat", condition: "equals")}
-                if filteredSongs.isEmpty {
-                    return nil
-                } else {
-                    model.songs = filteredSongs.map { $0.id.rawValue }
-                    return model
-                }
-            }
+            model.filters = filters2
+            model.songs = songIDS
+            
             return model
         }
     }

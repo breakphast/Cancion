@@ -16,17 +16,15 @@ protocol SongFilterModel {
     func matches(song: Song) -> Bool
 }
 
-protocol ArtistFilterr {
-    var id: UUID { get }
-    var value: String { get set }
-    var condition: String { get set }
-//    func match(song: Song, value: String, condition: String) -> Bool
-}
-
-func artistMatch(song: Song, value: String, condition: String) -> Bool {
+func matchess(song: Song, value: String, condition: String, type: FilterType) -> Bool {
     switch condition {
     case "equals":
-        return song.artistName == value
+        switch type {
+        case .artist:
+            return song.artistName == value
+        case .title:
+            return song.title == value
+        }
     default:
         return false
     }
@@ -106,9 +104,8 @@ enum ConditionalTitle: String {
 }
 
 enum FilterType {
-    case artist(String)
-    case title(String)
-    case playCount(Int)
+    case artist
+    case title
 }
 
 enum Condition {
