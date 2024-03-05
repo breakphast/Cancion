@@ -121,7 +121,9 @@ struct PlaylistGenerator: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     homeViewModel.moveSet += UIScreen.main.bounds.width
-                    addPlaylistToDatabase()
+                    Task {
+                        await addPlaylistToDatabase()
+                    }
                     
                     homeViewModel.generatorActive = false
                 }
@@ -140,14 +142,14 @@ struct PlaylistGenerator: View {
         }
     }
     
-    private func addPlaylistToDatabase() {
-        Task {
-            if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
-                modelContext.insert(model)
-                try modelContext.save()
-                viewModel.filters2 = [ArtistFilterModel()]
-            }
+    @MainActor
+    private func addPlaylistToDatabase() async -> Bool {
+        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
+            modelContext.insert(model)
+            viewModel.filters2 = [ArtistFilterModel()]
+            return true
         }
+        return false
     }
     
     private var playlistTitle: some View {
