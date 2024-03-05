@@ -12,23 +12,31 @@ import MusicKit
 @Observable class PlaylistGeneratorViewModel {
     static let options = ["Artist", "Title", "Play Count"]
     static let conditionals = ["is", "contains", "does not contain"]
-    var model = Playlista()
     var keyboardHeight: CGFloat = 0
     var playlistName = ""
     var smartRulesActive = true
     var mainZIndex: CGFloat = 1000
     var filterText = ""
-    var filters2: [ArtistFilterModel] = [ArtistFilterModel()]
+    var activeFilters: [FilterModel] = [FilterModel()]
     var activePlaylist: Playlista? = nil
     var showView = false
-    var songIDS = [String]()
+    
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]) async -> [String] {
+        var filteredSongs = songs
+        
+        for filter in filters {
+            filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
+        }
+        return filteredSongs.map { $0.id.rawValue }
+    }
+    
     func generatePlaylist(songs: [Song]) async -> Playlista? {
-        self.songIDS = songs.filter { matchess(song: $0, value: filters2[0].value, condition: filters2[0].condition, type: .artist) }.map {$0.id.rawValue}
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters)
         do {
             let model = Playlista()
             model.title = playlistName
             model.smartRules = smartRulesActive
-            model.filters = filters2
+            model.filters = activeFilters
             model.songs = songIDS
             
             return model

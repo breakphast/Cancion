@@ -9,7 +9,8 @@ import SwiftUI
 
 struct Dropdown: View {
     @Environment(SongService.self) var songService
-    @State var filter = ArtistFilterModel()
+    @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    @State var filter = FilterModel()
     var conditional: Bool?
     
     var options: [String]
@@ -90,17 +91,17 @@ struct Dropdown: View {
     }
     
     func handleSmartFilters(option: String) {
-        songService.filters.enumerated().forEach { index, filterModel in
+        playlistViewModel.activeFilters.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 switch option {
                 case FilterTitle.artist.rawValue:
-                    songService.filters[index] = TitleFilter(id: filterModel.id, value: "Queen Latifah", condition: .equals)
+                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.artist.rawValue)
                 case FilterTitle.title.rawValue:
-                    songService.filters[index] = TitleFilter(id: filterModel.id, value: "Queen Latifah", condition: .equals)
+                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.title.rawValue)
                 case FilterTitle.playCount.rawValue:
-                    songService.filters[index] = PlayCountFilter(id: filterModel.id, playCount: 0, condition: .greaterThan, value: "")
+                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.artist.rawValue)
                 case ConditionalTitle.doesNotContain.rawValue:
-                    songService.filters[index].condition = .doesNotContain
+                    playlistViewModel.activeFilters[index].condition = "contains"
                 default:
                     print("No type found.")
                 }

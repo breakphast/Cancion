@@ -11,7 +11,7 @@ import SwiftData
 struct SmartFilterStack: View {
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
-    let filter: ArtistFilterModel
+    let filter: FilterModel
     
     @State var filterText = ""
     @State var filterSet: Bool = false
@@ -36,7 +36,7 @@ struct SmartFilterStack: View {
                 Button {
                     withAnimation(.bouncy) {
                         songService.filters.append(TitleFilter(value: "", condition: .contains))
-                        playlistViewModel.filters2.append(ArtistFilterModel())
+                        playlistViewModel.activeFilters.append(FilterModel())
                     }
                 } label: {
                     ZStack {
@@ -73,7 +73,7 @@ struct SmartFilterStack: View {
     }
     
     private func handleSmartFilterText() {
-        if let filter = playlistViewModel.filters2.first(where: {$0.id.uuidString == filter.id.uuidString}) {
+        if let filter = playlistViewModel.activeFilters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
             filter.value = filterText
         }
     }

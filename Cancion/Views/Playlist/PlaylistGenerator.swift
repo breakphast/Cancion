@@ -55,8 +55,8 @@ struct PlaylistGenerator: View {
             FilterCheckbox(title: "Smart Rules", icon: "questionmark.circle.fill", cornerRadius: 12, strokeColor: .oreo, smartRules: $viewModel.smartRulesActive)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(songService.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.filters2[index])
+                ForEach(viewModel.activeFilters.indices, id: \.self) { index in
+                    SmartFilterStack(filter: viewModel.activeFilters[index])
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -88,7 +88,6 @@ struct PlaylistGenerator: View {
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
         homeViewModel.moveSet += UIScreen.main.bounds.width
-        viewModel.model = Playlista()
     }
     
     private var headerTitle: some View {
@@ -146,7 +145,7 @@ struct PlaylistGenerator: View {
     private func addPlaylistToDatabase() async -> Bool {
         if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
             modelContext.insert(model)
-            viewModel.filters2 = [ArtistFilterModel()]
+            viewModel.activeFilters = [FilterModel()]
             return true
         }
         return false

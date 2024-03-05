@@ -15,7 +15,7 @@ class Playlista {
     var title: String
     var smartRules: Bool
     var limit: Int
-    var filters = [ArtistFilterModel]()
+    var filters = [FilterModel]()
     var liveUpdating: Bool
     var sortOption: String
     var songs: [String]
