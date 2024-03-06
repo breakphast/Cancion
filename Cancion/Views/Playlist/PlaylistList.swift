@@ -16,6 +16,8 @@ struct PlaylistList: View {
     @Environment(\.modelContext) var modelContext
     @Query var playlistas: [Playlista]
     
+    @State private var showGenerator = false
+    
     var body: some View {
         ZStack {
             VStack {
@@ -50,22 +52,20 @@ struct PlaylistList: View {
                     PlaylistView(showView: $viewModel.showView, playlist: activePlaylist)
                 }
             }
+            .fullScreenCover(isPresented: $showGenerator) {
+                PlaylistGenerator()
+                    .environment(viewModel)
+            }
             .onChange(of: text) { _, _ in
                 text = text
             }
-            
-            VStack {
-                PlaylistGenerator(viewModel: viewModel)
-                    .environment(viewModel)
-            }
-            .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 3))
         }
     }
     private var newPlaylistButton: some View {
         Button {
             withAnimation(.bouncy(duration: 0.4)) {
-                homeViewModel.moveSet -= UIScreen.main.bounds.width
                 homeViewModel.generatorActive = true
+                showGenerator = true
             }
         } label: {
             HStack {

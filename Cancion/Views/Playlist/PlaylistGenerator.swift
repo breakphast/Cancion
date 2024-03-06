@@ -11,10 +11,13 @@ import SwiftData
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
-    @Bindable var viewModel: PlaylistGeneratorViewModel
+    @Environment(PlaylistGeneratorViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
+    
+    @State private var playlistName = ""
     
     var body: some View {
         ZStack {
@@ -33,7 +36,7 @@ struct PlaylistGenerator: View {
                                 smartFilters
                                 LimitToStack(filter: songService.limitFilter)
                                 divider
-                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating, smartRules: $viewModel.smartRulesActive)
+                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating, smartRules: .constant(true))
                             }
                             .padding(.horizontal, 24)
                             .padding(.top)
@@ -53,7 +56,7 @@ struct PlaylistGenerator: View {
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
-                FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match, smartRules: $viewModel.smartRulesActive)
+                FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match, smartRules: .constant(true))
                 Dropdown(options: ["all", "any"], selection: "any", type: .matchRules)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
@@ -97,7 +100,7 @@ struct PlaylistGenerator: View {
     
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
-        homeViewModel.moveSet += UIScreen.main.bounds.width
+        dismiss()
     }
     
     private var headerTitle: some View {
@@ -129,12 +132,12 @@ struct PlaylistGenerator: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    homeViewModel.moveSet += UIScreen.main.bounds.width
                     Task {
                         await addPlaylistToDatabase()
                     }
                     
                     homeViewModel.generatorActive = false
+                    dismiss()
                 }
             } label: {
                 ZStack {
@@ -153,8 +156,9 @@ struct PlaylistGenerator: View {
     
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs) {
+        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: playlistName) {
             modelContext.insert(model)
+            viewModel.activeFilters = []
             viewModel.activeFilters = [FilterModel()]
             return true
         }
@@ -163,7 +167,7 @@ struct PlaylistGenerator: View {
     
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField("Playlist Name", text: $viewModel.playlistName)
+            TextField("Playlist Name", text: $playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)
@@ -187,7 +191,7 @@ struct PlaylistGenerator: View {
 }
 
 #Preview {
-    PlaylistGenerator(viewModel: PlaylistGeneratorViewModel())
+    PlaylistGenerator()
         .environment(SongService())
         .environment(HomeViewModel())
 }

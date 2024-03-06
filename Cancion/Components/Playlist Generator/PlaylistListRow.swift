@@ -59,7 +59,7 @@ struct PlaylistListRow: View {
                     Image(systemName: "ellipsis")
                         .font(.title.bold())
                         .contentShape(Rectangle())
-                        .frame(width: 55, height: 55)
+                        .frame(height: 55)
                 }
             }
             

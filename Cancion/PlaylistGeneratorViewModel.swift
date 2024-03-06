@@ -40,11 +40,11 @@ import MusicKit
         return filteredSongs.map { $0.id.rawValue }
     }
     
-    func generatePlaylist(songs: [Song]) async -> Playlista? {
+    func generatePlaylist(songs: [Song], name: String) async -> Playlista? {
         let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules)
         do {
             let model = Playlista()
-            model.title = playlistName
+            model.title = name
             model.smartRules = smartRulesActive
             model.filters = activeFilters
             model.songs = songIDS

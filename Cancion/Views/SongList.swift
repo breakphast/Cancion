@@ -30,11 +30,9 @@ struct SongList: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     songSearchTextField
-                        .id(0)
                     headerItems
                         .id(33)
                     songList
-                        .id(2)
                 }
                 .scrollTargetLayout()
             }
