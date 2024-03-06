@@ -19,8 +19,8 @@ struct SmartFilterStack: View {
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, conditional: false, options: PlaylistGeneratorViewModel.options, selection: FilterTitle.artist.rawValue, type: .smartFilter)
-                Dropdown(filter: filter, conditional: true, options: PlaylistGeneratorViewModel.conditionals, selection: ConditionalTitle.equal.rawValue, type: .smartCondition)
+                Dropdown(filter: filter, type: .smartFilter)
+                Dropdown(filter: filter, type: .smartCondition)
                 SmartFilterTextField(text: $filterText, filterSet: $filterSet)
                     .onChange(of: filterText) { oldValue, newValue in
                         handleSmartFilterText()

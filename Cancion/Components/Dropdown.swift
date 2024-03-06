@@ -11,9 +11,8 @@ struct Dropdown: View {
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     @State var filter = FilterModel()
-    var conditional: Bool?
     
-    var options: [String]
+    @State var options: [String] = []
     var anchor: Anchor = .bottom
     var cornerRadius: CGFloat = 12
     
@@ -52,6 +51,12 @@ struct Dropdown: View {
             .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
             .background(((type == .smartFilter || type == .smartCondition) ? Color.white : .oreo).shadow(.drop(color: .oreo.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
+            .onChange(of: filter.type) { oldValue, newValue in
+                handleFilterType(filter: filter)
+            }
+            .task {
+                handleFilterType(filter: filter)
+            }
         }
         .frame(height: 44)
         .zIndex(zIndex)
@@ -111,13 +116,7 @@ struct Dropdown: View {
                 case FilterTitle.title.rawValue:
                     playlistViewModel.activeFilters[index].type = FilterType.title.rawValue
                 case FilterTitle.playCount.rawValue:
-                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.artist.rawValue)
-                case Condition.equals.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.equals.rawValue
-                case Condition.contains.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.contains.rawValue
-                case Condition.doesNotContain.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.doesNotContain.rawValue
+                    playlistViewModel.activeFilters[index].type = FilterType.plays.rawValue
                 default:
                     print("No type found.")
                 }
@@ -135,12 +134,47 @@ struct Dropdown: View {
                     playlistViewModel.activeFilters[index].condition = Condition.contains.rawValue
                 case Condition.doesNotContain.rawValue:
                     playlistViewModel.activeFilters[index].condition = Condition.doesNotContain.rawValue
+                case Condition.greaterThan.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.greaterThan.rawValue
+                case Condition.lessThan.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.lessThan.rawValue
                 default:
                     print("No type found.")
                 }
             } else {
                 
             }
+        }
+    }
+    
+    func handleFilterType(filter: FilterModel) {
+        switch type {
+        case .smartFilter:
+            self.options = FilterType.allCases.map { $0.rawValue.capitalized }
+            self.selection = filter.type.capitalized
+            handleSmartFilters(option: filter.type)
+        case .smartCondition:
+            switch filter.type {
+            case FilterType.artist.rawValue, FilterType.title.rawValue:
+                self.options = [Condition.equals, Condition.contains, Condition.doesNotContain].map {$0.rawValue}
+                self.selection = Condition.equals.rawValue
+                handleSmartConditions(option: Condition.equals.rawValue)
+            case FilterType.plays.rawValue:
+                self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
+                self.selection = Condition.greaterThan.rawValue
+                handleSmartConditions(option: Condition.greaterThan.rawValue)
+            default:
+                return
+            }
+        case .matchRules:
+            self.options = ["all", "any"]
+            self.selection = "all"
+        case .limitInt:
+            self.options = ["25", "50", "75"]
+            self.selection = "25"
+        case .limit:
+            self.options = ["items", "other"]
+            self.selection = "items"
         }
     }
     

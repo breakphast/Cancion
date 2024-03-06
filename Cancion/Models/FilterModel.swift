@@ -44,12 +44,32 @@ func matches(song: Song, filter: FilterModel) -> Bool {
         default:
             return false
         }
+    case Condition.greaterThan.rawValue:
+        switch filter.type {
+        case FilterType.plays.rawValue:
+            if let plays = song.playCount, let value = Int(filter.value) {
+                return plays > value
+            }
+        default:
+            return false
+        }
+    case Condition.lessThan.rawValue:
+        switch filter.type {
+        case FilterType.plays.rawValue:
+            if let plays = song.playCount, let value = Int(filter.value) {
+                return plays < value
+            }
+        default:
+            return false
+        }
     default:
         return false
     }
+    return false
 }
 
-enum FilterType: String {
+enum FilterType: String, CaseIterable {
     case artist = "artist"
     case title = "title"
+    case plays = "play count"
 }

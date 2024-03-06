@@ -93,10 +93,8 @@ enum Condition: String {
     case equals = "is"
     case contains = "contains"
     case doesNotContain = "does not contain"
-}
-
-enum Conditionn: String {
-    case equals = "equals"
+    case greaterThan = "greater than"
+    case lessThan = "less than"
 }
 
 extension SongFilterModel {
