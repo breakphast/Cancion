@@ -101,9 +101,14 @@ struct PlayerView: View {
                 albumElement
                     .padding(.top, UIScreen.main.bounds.height * 0.05)
                 VStack {
-                    Text(cancion.title)
-                        .lineLimit(1)
-                        .font(.title.bold())
+                    HStack(spacing: 4) {
+                        Text(cancion.title)
+                            .lineLimit(1)
+                            .font(.title.bold())
+                        Image(systemName: "e.square.fill").opacity(cancion.contentRating == .explicit ? 1 : 0)
+                            .font(.subheadline)
+                            .foregroundStyle(.naranja)
+                    }
                     
                     Text(cancion.artistName)
                         .font(.title3)
@@ -134,44 +139,6 @@ struct PlayerView: View {
                 .fill(.oreo)
                 .shadow(color: .white.opacity(0.1), radius: 3)
         )
-    }
-    private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
-        HStack {
-            Spacer()
-            TabIcon(icon: "backward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
-                .overlay {
-                    Circle()
-                        .fill(viewModel.nextIndex <= 0 ? Color.oreo.opacity(0.6) : .clear)
-                }
-                .disabled(viewModel.nextIndex <= 0)
-            Spacer()
-            TabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", playButton: true, progress: viewModel.progress, isPlaying: isPlaying)
-                .onTapGesture {
-                    withAnimation(.bouncy) {
-                        viewModel.handlePlayButtonSelected()
-                    }
-                }
-            Spacer()
-            TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
-                .onTapGesture {
-                    Task {
-                        try await viewModel.handleForwardPress(songs: viewModel.songService.randomSongs)
-                    }
-                }
-            Spacer()
-        }
-        .frame(height: 120)
-        .background(
-            ArtworkImage(artwork, width: UIScreen.main.bounds.width * 0.9, height: 120)
-                .aspectRatio(contentMode: .fill)
-                .blur(radius: 2, opaque: false)
-                .overlay(.ultraThinMaterial.opacity(0.99))
-                .overlay(viewModel.generatorActive ? .white.opacity(0.2) : .primary.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .shadow(radius: 2)
-        )
-        .sensoryFeedback(.selection, trigger: viewModel.nextIndex)
-        .sensoryFeedback(.selection, trigger: viewModel.isPlaying)
     }
 }
 

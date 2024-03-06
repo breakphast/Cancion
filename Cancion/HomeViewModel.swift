@@ -102,7 +102,9 @@ import MusicKit
                     }
                 }
             } else {
-                player.pause()
+                withAnimation {
+                    player.pause()
+                }
             }
         }
     }
@@ -152,6 +154,7 @@ import MusicKit
             try await player.play()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                 self?.blockExternalChange = false
+                self?.changing = false
             }
         }
     }
