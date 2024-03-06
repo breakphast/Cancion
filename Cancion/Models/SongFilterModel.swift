@@ -89,12 +89,10 @@ enum ConditionalTitle: String {
     case doesNotContain = "does not contain"
 }
 
-enum Condition {
-    case equals
-    case contains
-    case doesNotContain
-    case greaterThan
-    case lessThan
+enum Condition: String {
+    case equals = "is"
+    case contains = "contains"
+    case doesNotContain = "does not contain"
 }
 
 enum Conditionn: String {

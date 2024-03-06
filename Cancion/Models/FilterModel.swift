@@ -16,7 +16,7 @@ class FilterModel {
     var value: String
     var condition: String
     
-    init(id: UUID = UUID(), type: String = "artist", value: String = "", condition: String = "equals") {
+    init(id: UUID = UUID(), type: String = "artist", value: String = "", condition: String = "is") {
         self.id = id
         self.type = type
         self.value = value
@@ -26,12 +26,21 @@ class FilterModel {
 
 func matches(song: Song, filter: FilterModel) -> Bool {
     switch filter.condition {
-    case "equals":
+    case Condition.equals.rawValue:
         switch filter.type {
         case FilterType.artist.rawValue:
             return song.artistName == filter.value
         case FilterType.title.rawValue:
             return song.title == filter.value
+        default:
+            return false
+        }
+    case Condition.contains.rawValue:
+        switch filter.type {
+        case FilterType.artist.rawValue:
+            return song.artistName.contains(filter.value)
+        case FilterType.title.rawValue:
+            return song.title.contains(filter.value)
         default:
             return false
         }

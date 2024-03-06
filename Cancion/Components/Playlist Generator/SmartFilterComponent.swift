@@ -14,7 +14,7 @@ struct SmartFilterComponent: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(type == .smartFilter ? .white : .oreo)
+                .fill((type == .smartFilter || type == .smartCondition) ? .white : .oreo)
                 .shadow(radius: 2)
             HStack {
                 Text(title)
@@ -27,7 +27,7 @@ struct SmartFilterComponent: View {
                 }
             }
             .padding(.horizontal, 8)
-            .foregroundStyle(type == .smartFilter ? .oreo : .white)
+            .foregroundStyle((type == .smartFilter || type == .smartCondition) ? .oreo : .white)
             .bold()
         }
         .frame(height: 44)

@@ -14,6 +14,15 @@ struct SongList: View {
     @State private var text: String = ""
     @State var scrollID: Int?
     
+    var songs: [Song] {
+        switch viewModel.playCountAscending {
+        case false:
+            return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+        case true:
+            return homeViewModel.songService.sortedSongs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0 }
+        }
+    }
+    
     var body: some View {
         VStack {
             navHeaderItems
@@ -97,9 +106,7 @@ struct SongList: View {
             Spacer()
             
             Button {
-                Task {
-                    await viewModel.togglePlayCountSort(songs: &homeViewModel.songService.sortedSongs)
-                }
+                viewModel.playCountAscending.toggle()
             } label: {
                 HStack {
                     Text("PLAYS")
@@ -115,8 +122,8 @@ struct SongList: View {
     }
     private var songList: some View {
         LazyVStack {
-            ForEach(Array(homeViewModel.songService.sortedSongs.enumerated()), id: \.offset) { index, song in
-                SongListRow(song: song, index: viewModel.playCountAscending ? ((homeViewModel.songService.sortedSongs.count - 1) - index) : index)
+            ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
+                SongListRow(song: song, index: homeViewModel.songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
                         homeViewModel.blockExternalChange = true
                         Task {

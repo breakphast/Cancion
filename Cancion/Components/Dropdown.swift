@@ -50,7 +50,7 @@ struct Dropdown: View {
             }
             .clipped()
             .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
-            .background((type == .smartFilter ? Color.white : .oreo).shadow(.drop(color: .oreo.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
+            .background(((type == .smartFilter || type == .smartCondition) ? Color.white : .oreo).shadow(.drop(color: .oreo.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
         }
         .frame(height: 44)
@@ -71,7 +71,7 @@ struct Dropdown: View {
                         Spacer()
                     }
                 }
-                .foregroundStyle(selection == option ? Color.primary : (type == .smartFilter ? Color.gray : .white.opacity(0.8)))
+                .foregroundStyle(selection == option ? Color.primary : ((type == .smartFilter || type == .smartCondition) ? Color.gray : .white.opacity(0.8)))
                 .fontWeight(selection == option ? .heavy : .regular)
                 .animation(.none, value: selection)
                 .frame(height: 40)
@@ -80,7 +80,7 @@ struct Dropdown: View {
                     withAnimation(.snappy) {
                         selection = option
                         showOptions = false
-                        type == .smartFilter ? handleSmartFilters(option: option) : handleLimitFilters(option: option)
+                        type == .smartFilter ? handleSmartFilters(option: option) : type == .smartCondition ? handleSmartConditions(option: option) : handleLimitFilters(option: option)
                     }
                 }
             }
@@ -95,16 +95,39 @@ struct Dropdown: View {
             if filterModel.id == filter.id {
                 switch option {
                 case FilterTitle.artist.rawValue:
-                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.artist.rawValue)
+                    playlistViewModel.activeFilters[index].type = FilterType.artist.rawValue
                 case FilterTitle.title.rawValue:
-                    playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.title.rawValue)
+                    playlistViewModel.activeFilters[index].type = FilterType.title.rawValue
                 case FilterTitle.playCount.rawValue:
                     playlistViewModel.activeFilters[index] = FilterModel(type: FilterType.artist.rawValue)
-                case ConditionalTitle.doesNotContain.rawValue:
-                    playlistViewModel.activeFilters[index].condition = "contains"
+                case Condition.equals.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.equals.rawValue
+                case Condition.contains.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.contains.rawValue
+                case Condition.doesNotContain.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.doesNotContain.rawValue
                 default:
                     print("No type found.")
                 }
+            }
+        }
+    }
+    
+    func handleSmartConditions(option: String) {
+        playlistViewModel.activeFilters.enumerated().forEach { index, filterModel in
+            if filterModel.id == filter.id {
+                switch option {
+                case Condition.equals.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.equals.rawValue
+                case Condition.contains.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.contains.rawValue
+                case Condition.doesNotContain.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.doesNotContain.rawValue
+                default:
+                    print("No type found.")
+                }
+            } else {
+                
             }
         }
     }
@@ -132,6 +155,7 @@ struct Dropdown: View {
 
 enum DropdownType {
     case smartFilter
+    case smartCondition
     case limitInt
     case limit
 }
