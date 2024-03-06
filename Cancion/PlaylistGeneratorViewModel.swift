@@ -21,6 +21,7 @@ import MusicKit
     var activePlaylist: Playlista? = nil
     var showView = false
     var matchRules: MatchRules = .any
+    var image: Image?
     
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules) async -> [String] {
         var filteredSongs = [Song]()
@@ -40,7 +41,10 @@ import MusicKit
         return filteredSongs.map { $0.id.rawValue }
     }
     
-    func generatePlaylist(songs: [Song], name: String) async -> Playlista? {
+    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil) async -> Playlista? {
+        if let cover, let uiImage = UIImage(data: cover) {
+            image = Image(uiImage: uiImage)
+        }
         let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules)
         do {
             let model = Playlista()
@@ -48,6 +52,7 @@ import MusicKit
             model.smartRules = smartRulesActive
             model.filters = activeFilters
             model.songs = songIDS
+            model.cover = cover
             
             return model
         }

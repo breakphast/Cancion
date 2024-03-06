@@ -25,7 +25,7 @@ struct PlaylistView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     songSearchTextField
-                    art
+                    playlistCover
                     headerItems
                     songList
                 }
@@ -117,9 +117,25 @@ struct PlaylistView: View {
         .opacity(0.7)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    private var art: some View {
+    private var playlistCover: some View {
         ZStack {
-            if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
+            if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
+                let image = Image(uiImage: uiImage)
+                
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 200)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.white)
+                            .shadow(radius: 3)
+                    )
+                    .padding()
+                    .id(33)
+            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
                 if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
                     HStack(spacing: 0) {
                         ArtworkImage(artwork1, width: 200)

@@ -27,15 +27,7 @@ struct PlaylistListRow: View {
         VStack {
             HStack {
                 HStack {
-                    if let song, let artwork = song.artwork {
-                        ArtworkImage(artwork, width: 44, height: 44)
-                            .clipShape(.rect(cornerRadius: 12, style: .continuous))
-                            .shadow(radius: 2)
-                    } else {
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .foregroundStyle(.gray.opacity(0.8))
-                            .frame(width: 44, height: 44)
-                    }
+                    playlistCoverIcon
                     
                     Text(playlist.title)
                         .fontWeight(.semibold)
@@ -69,6 +61,34 @@ struct PlaylistListRow: View {
                 .foregroundStyle(.secondary.opacity(0.2))
         }
         .frame(maxWidth: .infinity)
+    }
+    
+    private var playlistCoverIcon: some View {
+        ZStack {
+            if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
+                let image = Image(uiImage: uiImage)
+                
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 44, height: 44)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(.white)
+                            .shadow(radius: 2)
+                    )
+            } else if let song, let artwork = song.artwork {
+                ArtworkImage(artwork, width: 44, height: 44)
+                    .clipShape(.rect(cornerRadius: 12, style: .continuous))
+                    .shadow(radius: 2)
+            } else {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .foregroundStyle(.gray.opacity(0.8))
+                    .frame(width: 44, height: 44)
+            }
+        }
     }
     
     private func deletePlaylist() {

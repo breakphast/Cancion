@@ -19,6 +19,7 @@ class Playlista {
     var liveUpdating: Bool
     var sortOption: String
     var songs: [String]
+    var cover: Data? = nil
     
     init(id: UUID = UUID(), title: String = "", smartRules: Bool = true, limit: Int = 25, liveUpdating: Bool = false, sortOption: String = "most played", songs: [String] = []) {
         self.id = id

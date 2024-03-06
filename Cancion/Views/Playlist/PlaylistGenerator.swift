@@ -8,6 +8,7 @@
 import SwiftUI
 import MusicKit
 import SwiftData
+import PhotosUI
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
@@ -16,8 +17,16 @@ struct PlaylistGenerator: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
-    
     @State private var playlistName = ""
+    @State private var item: PhotosPickerItem?
+    @State private var imageData: Data?
+    
+    var image: Image? {
+        if let imageData, let uiiImage = UIImage(data: imageData) {
+            return Image(uiImage: uiiImage)
+        }
+        return nil
+    }
     
     var body: some View {
         ZStack {
@@ -27,7 +36,7 @@ struct PlaylistGenerator: View {
                     .padding(.horizontal, 24)
                 ScrollView {
                     VStack {
-                        playlistCover
+                        coverPicker
                             .padding(.top, 16)
                         playlistTitle
                             .padding(.top, 24)
@@ -50,6 +59,52 @@ struct PlaylistGenerator: View {
                 }
             }
             .padding(.top)
+        }
+    }
+    
+    private var coverPicker: some View {
+        VStack {
+            PhotosPicker(selection: $item) {
+                if let image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 200)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(.white)
+                                .shadow(radius: 3)
+                        )
+                        .padding(.horizontal)
+                } else {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(.oreo.opacity(0.1))
+                            .frame(height: 200)
+                        ZStack {
+                            Circle()
+                                .fill(.naranja.opacity(0.7))
+                                .shadow(radius: 5)
+                                .frame(width: 66)
+                            Image(systemName: "camera.fill")
+                                .font(.title2.bold())
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+        .padding(.horizontal, 24)
+        .onChange(of: item) { oldValue, newValue in
+            Task {
+                if let loaded = try? await item?.loadTransferable(type: Data.self) {
+                    imageData = loaded
+                } else {
+                    print("Failed")
+                }
+            }
         }
     }
     
@@ -156,7 +211,7 @@ struct PlaylistGenerator: View {
     
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: playlistName) {
+        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: playlistName, cover: imageData) {
             modelContext.insert(model)
             viewModel.activeFilters = []
             viewModel.activeFilters = [FilterModel()]
