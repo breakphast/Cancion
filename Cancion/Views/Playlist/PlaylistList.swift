@@ -68,7 +68,7 @@ struct PlaylistList: View {
                 homeViewModel.generatorActive = true
             }
         } label: {
-            HStack(spacing: 16) {
+            HStack {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(.naranja.opacity(0.8))

@@ -103,9 +103,7 @@ struct PlaylistView: View {
             Spacer()
             
             Button {
-                Task {
-                    await viewModel.togglePlayCountSort(songs: &songService.sortedSongs)
-                }
+                
             } label: {
                 HStack {
                     Text("PLAYS")

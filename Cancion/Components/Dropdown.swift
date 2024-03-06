@@ -80,7 +80,19 @@ struct Dropdown: View {
                     withAnimation(.snappy) {
                         selection = option
                         showOptions = false
-                        type == .smartFilter ? handleSmartFilters(option: option) : type == .smartCondition ? handleSmartConditions(option: option) : handleLimitFilters(option: option)
+                        
+                        switch type {
+                        case .smartFilter:
+                            handleSmartFilters(option: option)
+                        case .smartCondition:
+                            handleSmartConditions(option: option)
+                        case .matchRules:
+                            if let rule = MatchRules(rawValue: option) {
+                                playlistViewModel.matchRules = rule
+                            }
+                        case .limitInt, .limit:
+                            handleLimitFilters(option: option)
+                        }
                     }
                 }
             }
@@ -156,6 +168,7 @@ struct Dropdown: View {
 enum DropdownType {
     case smartFilter
     case smartCondition
+    case matchRules
     case limitInt
     case limit
 }

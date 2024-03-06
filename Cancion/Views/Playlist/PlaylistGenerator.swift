@@ -33,7 +33,7 @@ struct PlaylistGenerator: View {
                                 smartFilters
                                 LimitToStack(filter: songService.limitFilter)
                                 divider
-                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, smartRules: $viewModel.smartRulesActive)
+                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating, smartRules: $viewModel.smartRulesActive)
                             }
                             .padding(.horizontal, 24)
                             .padding(.top)
@@ -52,7 +52,17 @@ struct PlaylistGenerator: View {
     
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
-            FilterCheckbox(title: "Smart Rules", icon: "questionmark.circle.fill", cornerRadius: 12, strokeColor: .oreo, smartRules: $viewModel.smartRulesActive)
+            HStack {
+                FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match, smartRules: $viewModel.smartRulesActive)
+                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules)
+                    .frame(width: 66, height: 33)
+                Text("of the following rules")
+                    .foregroundStyle(.oreo)
+                    .fontWeight(.semibold)
+                    .font(.title3)
+                    .lineLimit(2)
+            }
+            .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(viewModel.activeFilters.indices, id: \.self) { index in

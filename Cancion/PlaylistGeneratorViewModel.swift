@@ -20,18 +20,28 @@ import MusicKit
     var activeFilters: [FilterModel] = [FilterModel()]
     var activePlaylist: Playlista? = nil
     var showView = false
+    var matchRules: MatchRules = .any
     
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]) async -> [String] {
-        var filteredSongs = songs
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules) async -> [String] {
+        var filteredSongs = [Song]()
         
-        for filter in filters {
-            filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
+        if matchRules == .all {
+            for filter in filters {
+                filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
+            }
+        } else if matchRules == .any {
+            filteredSongs = songs.filter { song in
+                filters.contains { filter in
+                    matches(song: song, filter: filter)
+                }
+            }
         }
+        
         return filteredSongs.map { $0.id.rawValue }
     }
     
     func generatePlaylist(songs: [Song]) async -> Playlista? {
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules)
         do {
             let model = Playlista()
             model.title = playlistName
@@ -84,4 +94,9 @@ import MusicKit
             }
         }
     }
+}
+
+enum MatchRules: String {
+    case all = "all"
+    case any = "any"
 }
