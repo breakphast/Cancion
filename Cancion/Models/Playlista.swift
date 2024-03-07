@@ -22,8 +22,9 @@ class Playlista {
     var sortOption: String
     var songs: [String]
     var cover: Data? = nil
+    var matchRules: String
     
-    init(id: UUID = UUID(), title: String = "", smartRules: Bool = true, limit: Int = 25, limitType: String = "items", limitSortType: String = "most played", liveUpdating: Bool = true, sortOption: String = "most played", songs: [String] = []) {
+    init(id: UUID = UUID(), title: String = "", smartRules: Bool = true, limit: Int = 25, limitType: String = "items", limitSortType: String = "most played", liveUpdating: Bool = true, sortOption: String = "most played", songs: [String] = [], matchRules: String = "any") {
         self.id = id
         self.title = title
         self.smartRules = smartRules
@@ -33,6 +34,7 @@ class Playlista {
         self.liveUpdating = liveUpdating
         self.sortOption = sortOption
         self.songs = songs
+        self.matchRules = matchRules
     }
 }
 

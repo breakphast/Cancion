@@ -8,14 +8,13 @@
 import SwiftUI
 
 struct FilterCheckbox: View {
+    @Environment(PlaylistGeneratorViewModel.self) var viewModel
+    
     let title: String
     let icon: String?
     let cornerRadius: CGFloat
     let strokeColor: Color
     let type: CheckboxType
-    
-    @State private var selected = false
-    @Binding var smartRules: Bool
     
     var body: some View {
         HStack {
@@ -34,26 +33,56 @@ struct FilterCheckbox: View {
         }
     }
     
+    var selectedd: Bool {
+        switch type {
+        case .match:
+            return viewModel.smartRulesActive
+        case .limit:
+            return viewModel.limitActive
+        case .liveUpdating:
+            return viewModel.liveUpdating
+        }
+    }
+    
     private var checkbox: some View {
         Button {
             withAnimation {
-                if type == .match {
-                    smartRules.toggle()
-                }
-                selected.toggle()
+                handleCheckboxToggle()
             }
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill((type == .match ? smartRules : selected) ? .naranja.opacity(0.9) : .white)
+                    .fill(fillColorForType())
                     .frame(width: 33, height: 33)
                     .shadow(radius: 2)
                 Image(systemName: "checkmark")
                     .font(.headline)
                     .fontWeight(.black)
                     .foregroundStyle(.white)
-                    .opacity((type == .match ? smartRules : selected) ? 1 : 0)
+                    .opacity(fillColorForType() == Color.naranja.opacity(0.9) ? 1 : 0)
             }
+        }
+    }
+    
+    private func handleCheckboxToggle() {
+        switch type {
+        case .match:
+            viewModel.smartRulesActive.toggle()
+        case .limit:
+            viewModel.limitActive.toggle()
+        case .liveUpdating:
+            viewModel.liveUpdating.toggle()
+        }
+    }
+    
+    private func fillColorForType() -> Color {
+        switch type {
+        case .match:
+            return viewModel.smartRulesActive ? Color.naranja.opacity(0.9) : Color.white
+        case .limit:
+            return viewModel.limitActive ? Color.naranja.opacity(0.9) : Color.white
+        case .liveUpdating:
+            return viewModel.liveUpdating ? Color.naranja.opacity(0.9) : Color.white
         }
     }
 }
@@ -62,10 +91,4 @@ enum CheckboxType: String {
     case match = "match"
     case limit = "limit"
     case liveUpdating = "liveUpdating"
-}
-
-#Preview {
-    ZStack {
-        FilterCheckbox(title: "Artist", icon: "plus", cornerRadius: 12, strokeColor: .oreo, type: .match, smartRules: .constant(true))
-    }
 }

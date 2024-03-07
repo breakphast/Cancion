@@ -13,14 +13,17 @@ import MusicKit
     static let options = ["Artist", "Title", "Play Count"]
     static let conditionals = ["is", "contains", "does not contain"]
     var keyboardHeight: CGFloat = 0
-    var playlistName = ""
-    var smartRulesActive = true
     var mainZIndex: CGFloat = 1000
-    var filterText = ""
     var activeFilters: [FilterModel] = [FilterModel()]
     var activePlaylist: Playlista? = nil
     var showView = false
+    
+    var playlistName = ""
+    var smartRulesActive = true
+    var liveUpdating = true
+    var limitActive = true
     var matchRules: MatchRules = .any
+    
     var image: Image?
     var genPlaylist = Playlista()
     
@@ -45,6 +48,7 @@ import MusicKit
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)
         }
+        let limit = genPlaylist.limit
         let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules)
         do {
             let model = Playlista()
@@ -53,6 +57,9 @@ import MusicKit
             model.filters = activeFilters
             model.songs = songIDS
             model.cover = cover
+            model.limit = limit
+            model.matchRules = matchRules.rawValue
+            model.liveUpdating = liveUpdating
             
             return model
         }

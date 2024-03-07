@@ -45,7 +45,7 @@ struct PlaylistGenerator: View {
                                 smartFilters
                                 LimitToStack()
                                 divider
-                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating, smartRules: .constant(true))
+                                FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                             }
                             .padding(.horizontal, 24)
                             .padding(.top)
@@ -108,7 +108,7 @@ struct PlaylistGenerator: View {
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
-                FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match, smartRules: .constant(true))
+                FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
                 Dropdown(options: ["all", "any"], selection: "any", type: .matchRules, playlist: viewModel.genPlaylist)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
@@ -215,6 +215,8 @@ struct PlaylistGenerator: View {
             modelContext.insert(model)
             viewModel.activeFilters = []
             viewModel.activeFilters = [FilterModel()]
+            
+            print(model.limit, model.smartRules)
             return true
         }
         return false

@@ -39,16 +39,24 @@ struct Home: View {
                 }
             }
             .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
-                guard oldValue != nil else { return }
-                viewModel.previousQueueEntryID = oldValue?.id
-                guard let previousID = viewModel.previousQueueEntryID, let oldValue else { return }
-                
-                if !viewModel.blockExternalChange || !viewModel.changing {
-                    viewModel.handleAutoQueue(forward: previousID != oldValue.id ? true : false)
+                guard let oldValue, let newValue else { return }
+                if let previousID = viewModel.previousQueueEntryID {
+                    if !viewModel.blockExternalChange || !viewModel.changing {
+                        viewModel.handleAutoQueue(forward: previousID != newValue.id ? true : false)
+                    } else {
+                        viewModel.blockExternalChange = false
+                        viewModel.changing = false
+                    }
                 } else {
-                    viewModel.blockExternalChange = false
-                    viewModel.changing = false
+                    if !viewModel.blockExternalChange || !viewModel.changing {
+                        viewModel.handleAutoQueue(forward: true)
+                    } else {
+                        viewModel.blockExternalChange = false
+                        viewModel.changing = false
+                    }
                 }
+                
+                viewModel.previousQueueEntryID = oldValue.id
             }
         }
         .environment(viewModel)
