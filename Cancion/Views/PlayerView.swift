@@ -69,7 +69,7 @@ struct PlayerView: View {
                         .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
-                    Image(systemName: viewModel.moveSet.isZero ? "rectangle.stack.fill" : "chevron.left")
+                    Image(systemName: viewModel.moveSet.isZero ? "music.note" : "chevron.left")
                         .foregroundStyle(.white)
                         .font(.headline)
                         .fontWeight(.heavy)
@@ -114,6 +114,7 @@ struct PlayerView: View {
                         .font(.title3)
                         .fontWeight(.medium)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                     
                     playsCapsule
                 }

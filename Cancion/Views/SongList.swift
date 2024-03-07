@@ -73,7 +73,7 @@ struct SongList: View {
                     .fill(.oreo)
                     .frame(width: 44)
                     .shadow(radius: 2)
-                Image(systemName: "folder.fill.badge.plus")
+                Image(systemName: "rectangle.stack.fill")
                     .bold()
                     .foregroundStyle(.white)
             }
@@ -123,8 +123,6 @@ struct SongList: View {
             ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: homeViewModel.songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
-                        homeViewModel.blockExternalChange = true
-                        homeViewModel.changing = true
                         Task {
                             await homeViewModel.handleSongSelected(song: song)
                         }

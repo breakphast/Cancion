@@ -42,7 +42,7 @@ import MusicKit
             }
             let currentPlaybackTime = self.player.playbackTime
             let totalDuration = cancion.duration ?? .zero
-            
+            print("Observing: ", cancion.title)
             if !totalDuration.isZero {
                 withAnimation(.linear) {
                     self.progress = CGFloat(currentPlaybackTime / totalDuration)
@@ -58,9 +58,6 @@ import MusicKit
         nextIndex += 1
         cancion = songService.randomSongs[nextIndex]
         startObservingCurrentTrack(cancion: songService.randomSongs[nextIndex])
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
-            self?.changing = false
-        }
     }
     
     @MainActor
@@ -124,22 +121,24 @@ import MusicKit
     
     @MainActor
     func handleForwardPress(songs: [Song]) async throws {
+        guard !blockExternalChange && !changing else { return }
+        blockExternalChange = true
+        changing = true
         do {
             progress = .zero
-            try await player.skipToNextEntry()
             nextIndex += 1
             cancion = songs[nextIndex]
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-                self?.blockExternalChange = false
-            }
+            startObservingCurrentTrack(cancion: songs[nextIndex])
+            try await player.skipToNextEntry()
         } catch {
-            
+            print("ERROR:", error.localizedDescription)
         }
     }
     
     @MainActor
     func handleSongSelected(song: Song) {
         blockExternalChange = true
+        changing = true
         var songs = songService.randomSongs.shuffled()
         songs.removeAll(where: {$0.id == song.id})
         songs[0] = song
@@ -152,10 +151,6 @@ import MusicKit
             try await player.prepareToPlay()
             isPlaybackQueueSet = true
             try await player.play()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
-                self?.blockExternalChange = false
-                self?.changing = false
-            }
         }
     }
 }

@@ -35,7 +35,6 @@ struct SmartFilterStack: View {
             if !filterSet {
                 Button {
                     withAnimation(.bouncy) {
-                        songService.filters.append(TitleFilter(value: "", condition: .contains))
                         playlistViewModel.activeFilters.append(FilterModel())
                     }
                 } label: {
@@ -50,12 +49,13 @@ struct SmartFilterStack: View {
                     }
                     .frame(width: 22, height: 44)
                 }
-                .animation(.none, value: songService.filters.count)
+                .animation(.none, value: playlistViewModel.activeFilters.count)
             }
             
             Button {
                 withAnimation(.bouncy) {
-                    songService.filters.removeAll(where: { $0.id == filter.id })
+                    guard playlistViewModel.activeFilters.count > 1 else { return }
+                    playlistViewModel.activeFilters.removeAll(where: { $0.id == filter.id })
                 }
             } label: {
                 ZStack {
