@@ -10,13 +10,20 @@ import MusicKit
 
 struct PlaylistView: View {
     @Environment(SongService.self) var songService
-    @Environment(SongListViewModel.self) var viewModel
+    @Environment(HomeViewModel.self) var homeViewModel
+    @State var viewModel = PlaylistViewModel()
     @Environment(\.dismiss) var dismiss
     @State private var text: String = ""
     @Binding var showView: Bool
     @State var scrollID: Int? = 0
+    var playCountAscending = false
     
     var playlist: Playlista
+    var songs: [Song]? {
+        var sortedSongs = homeViewModel.songService.sortedSongs
+        return sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
+    }
+    @State var sortedSongs: [Song]?
     
     var body: some View {
         VStack(spacing: 16) {
@@ -103,6 +110,7 @@ struct PlaylistView: View {
             Spacer()
             
             Button {
+                viewModel.playCountAscending.toggle()
                 
             } label: {
                 HStack {
@@ -163,17 +171,20 @@ struct PlaylistView: View {
     }
     private var songList: some View {
         LazyVStack {
-            ForEach(Array(playlist.songs.enumerated()), id: \.offset) { index, song in
-                if let songModel = songService.sortedSongs.first(where: {$0.id.rawValue == song}) {
-                    SongListRow(song: songModel, index: viewModel.playCountAscending ? ((songService.sortedSongs.count - 1) - index) : index)
+            if let songs {
+                var songsArray = !viewModel.playCountAscending ?
+                songs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0} :
+                songs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0}
+                
+                ForEach(Array(songsArray.enumerated()), id: \.offset) { index, song in
+                    SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
+                        .onTapGesture {
+                            Task {
+                                await homeViewModel.handleSongSelected(song: song)
+                            }
+                        }
                 }
             }
         }
     }
 }
-
-//#Preview {
-//    PlaylistView(moveSet: .constant(UIScreen.main.bounds.width * -2))
-//        .environment(SongService())
-//        .environment(SongListViewModel())
-//}
