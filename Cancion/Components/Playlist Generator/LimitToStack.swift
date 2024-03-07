@@ -9,10 +9,10 @@ import SwiftUI
 
 struct LimitToStack: View {
     @Environment(SongService.self) var songService
+    @Environment(PlaylistGeneratorViewModel.self) var viewModel
     @State var selected = false
     @State var limitTypeSelection = "items"
     @State var limitSortSelection = "sorted by"
-    let filter: LimitFilter
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -51,9 +51,9 @@ struct LimitToStack: View {
                 .fontWeight(.semibold)
                 .font(.title3)
             
-            Dropdown(options: ["50", "75", "100"], selection: filter.limit, type: .limitInt)
+            Dropdown(options: ["50", "75", "100"], selection: String(viewModel.genPlaylist.limit), type: .limitInt, playlist: viewModel.genPlaylist)
                 .frame(width: 44, height: 44)
-            Dropdown(options: ["items", "other"], selection: filter.limitTypeSelection, type: .limit)
+            Dropdown(options: ["items", "minutes", "hours"], selection: viewModel.genPlaylist.limitType, type: .limit, playlist: viewModel.genPlaylist)
         }
         .foregroundStyle(.oreo)
     }
@@ -68,7 +68,7 @@ struct LimitToStack: View {
                 Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
-                Dropdown(options: ["least played", "other"], selection: filter.limitSortSelection, type: .limit)
+                Dropdown(options: ["least played", "other"], selection: viewModel.genPlaylist.limitSortType, type: .limit, playlist: playlist)
             }
             .foregroundStyle(.oreo)
         }

@@ -19,8 +19,8 @@ struct SmartFilterStack: View {
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, type: .smartFilter)
-                Dropdown(filter: filter, type: .smartCondition)
+                Dropdown(filter: filter, type: .smartFilter, playlist: playlistViewModel.genPlaylist)
+                Dropdown(filter: filter, type: .smartCondition, playlist: playlistViewModel.genPlaylist)
                 SmartFilterTextField(text: $filterText, filterSet: $filterSet)
                     .onChange(of: filterText) { oldValue, newValue in
                         handleSmartFilterText()

@@ -22,6 +22,7 @@ struct Dropdown: View {
     @State private var zIndex: Double = 1000.0
     
     let type: DropdownType
+    let playlist: Playlista
         
     var body: some View {
         GeometryReader {
@@ -180,14 +181,14 @@ struct Dropdown: View {
     
     func handleLimitFilters(option: String) {
         switch option {
-        case "items":
-            songService.limitFilter.limitTypeSelection = "items"
-        case "most played":
-            songService.limitFilter.limitTypeSelection = "most played"
-        case "50":
-            songService.limitFilter.limit = "50"
-        case "75":
-            songService.limitFilter.limit = "75"
+        case LimitType.items.rawValue:
+            playlistViewModel.genPlaylist.limitType = "items"
+        case LimitSortType.mostPlayed.rawValue:
+            playlistViewModel.genPlaylist.limitSortType = "most played"
+        case Limit.fifty.rawValue:
+            playlistViewModel.genPlaylist.limit = 50
+        case Limit.seventyFive.rawValue:
+            playlistViewModel.genPlaylist.limit = 75
         default:
             print("No type found.")
         }

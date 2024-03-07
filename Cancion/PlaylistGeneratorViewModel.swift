@@ -22,6 +22,7 @@ import MusicKit
     var showView = false
     var matchRules: MatchRules = .any
     var image: Image?
+    var genPlaylist = Playlista()
     
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules) async -> [String] {
         var filteredSongs = [Song]()
@@ -37,8 +38,7 @@ import MusicKit
                 }
             }
         }
-        
-        return filteredSongs.map { $0.id.rawValue }
+        return filteredSongs.prefix(genPlaylist.limit).map { $0.id.rawValue }
     }
     
     func generatePlaylist(songs: [Song], name: String, cover: Data? = nil) async -> Playlista? {
