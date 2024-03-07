@@ -69,9 +69,9 @@ struct PlayerView: View {
                         .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
-                    Image(systemName: viewModel.moveSet.isZero ? "music.note" : "chevron.left")
+                    Image(systemName: viewModel.moveSet.isZero ? "music.note.list" : "waveform.circle.fill")
                         .foregroundStyle(.white)
-                        .font(.headline)
+                        .font(.title3)
                         .fontWeight(.heavy)
                 }
             }

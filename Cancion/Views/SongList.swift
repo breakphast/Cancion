@@ -73,7 +73,7 @@ struct SongList: View {
                     .fill(.oreo)
                     .frame(width: 44)
                     .shadow(radius: 2)
-                Image(systemName: "rectangle.stack.fill")
+                Image(systemName: "folder.fill.badge.gearshape")
                     .bold()
                     .foregroundStyle(.white)
             }

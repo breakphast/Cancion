@@ -94,7 +94,7 @@ struct PlaylistList: View {
                         .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
-                    Image(systemName: "chevron.left")
+                    Image(systemName: "music.note.list")
                         .foregroundStyle(.white)
                         .font(.headline)
                         .fontWeight(.heavy)
