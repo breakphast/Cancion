@@ -68,7 +68,7 @@ struct LimitToStack: View {
                 Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
-                Dropdown(options: ["least played", "other"], selection: viewModel.genPlaylist.limitSortType, type: .limit, playlist: playlist)
+                Dropdown(options: ["least played", "other"], selection: viewModel.genPlaylist.limitSortType, type: .limit, playlist: viewModel.genPlaylist)
             }
             .foregroundStyle(.oreo)
         }

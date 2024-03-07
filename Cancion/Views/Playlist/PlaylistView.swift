@@ -15,12 +15,12 @@ struct PlaylistView: View {
     @Environment(\.dismiss) var dismiss
     @State private var text: String = ""
     @Binding var showView: Bool
-    @State var scrollID: Int? = 0
+    @State private var scrollID: String?
     var playCountAscending = false
     
     var playlist: Playlista
     var songs: [Song]? {
-        var sortedSongs = homeViewModel.songService.sortedSongs
+        let sortedSongs = homeViewModel.songService.sortedSongs
         return sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
     }
     @State var sortedSongs: [Song]?
@@ -33,10 +33,10 @@ struct PlaylistView: View {
                 VStack(alignment: .leading) {
                     songSearchTextField
                     playlistCover
+                        .id("cover")
                     headerItems
                     songList
                 }
-                .scrollTargetLayout()
                 .padding(.top, 4)
             }
             .scrollIndicators(.never)
@@ -46,8 +46,8 @@ struct PlaylistView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
-        .task {
-            scrollID = 33
+        .onAppear {
+            scrollID = "cover"
         }
     }
     
@@ -142,7 +142,6 @@ struct PlaylistView: View {
                             .shadow(radius: 3)
                     )
                     .padding()
-                    .id(33)
             } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
                 if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
                     HStack(spacing: 0) {
@@ -158,7 +157,6 @@ struct PlaylistView: View {
                             .shadow(radius: 3)
                     )
                     .padding()
-                    .id(33)
                 } else {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .fill(.oreo.opacity(0.6))
