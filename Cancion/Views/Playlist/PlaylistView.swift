@@ -12,11 +12,13 @@ struct PlaylistView: View {
     @Environment(SongService.self) var songService
     @Environment(HomeViewModel.self) var homeViewModel
     @State var viewModel = PlaylistViewModel()
+    @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
     @Environment(\.dismiss) var dismiss
     @State private var text: String = ""
     @Binding var showView: Bool
     @State private var scrollID: String?
     var playCountAscending = false
+    @Environment(\.modelContext) var modelContext
     
     var playlist: Playlista
     var songs: [Song]? {
@@ -48,6 +50,20 @@ struct PlaylistView: View {
         .padding(.horizontal, 24)
         .onAppear {
             scrollID = "cover"
+        }
+        .task {
+            if playlist.liveUpdating {
+                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: .any)
+                if updatedSongs != playlist.songs {
+                    playlist.songs = updatedSongs
+                    do {
+                        try modelContext.save()
+                        print("Updated playlist songs.")
+                    } catch {
+                        print("Could not save new songs.")
+                    }
+                }
+            }
         }
     }
     
@@ -170,7 +186,7 @@ struct PlaylistView: View {
     private var songList: some View {
         LazyVStack {
             if let songs {
-                var songsArray = !viewModel.playCountAscending ?
+                let songsArray = !viewModel.playCountAscending ?
                 songs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0} :
                 songs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0}
                 

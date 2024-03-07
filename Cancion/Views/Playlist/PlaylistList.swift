@@ -36,7 +36,6 @@ struct PlaylistList: View {
                             
                             ForEach(playlistas, id: \.id) { playlist in
                                 PlaylistListRow(playlist: playlist)
-                                    .environment(viewModel)
                             }
                         }
                         .padding(.vertical, 8)
@@ -60,6 +59,7 @@ struct PlaylistList: View {
                 text = text
             }
         }
+        .environment(viewModel)
     }
     private var newPlaylistButton: some View {
         Button {

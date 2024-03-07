@@ -52,11 +52,8 @@ struct PlaylistGenerator: View {
                     }
                 }
                 .scrollIndicators(.never)
-                .safeAreaPadding(.bottom, 24 + viewModel.keyboardHeight)
+                .safeAreaPadding(.bottom, 24)
                 .scrollDismissesKeyboard(.interactively)
-                .onAppear {
-                    viewModel.trackKeyboardHeight()
-                }
             }
             .padding(.top)
         }
@@ -155,6 +152,9 @@ struct PlaylistGenerator: View {
     
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
+        viewModel.playlistName = ""
+        viewModel.activeFilters = []
+        viewModel.activeFilters = [FilterModel()]
         dismiss()
     }
     
