@@ -32,6 +32,7 @@ import MusicKit
     var songService = SongService()
     var changing = false
     var blockExternalChange = false
+    var previousQueueEntryID: String?
     
     func startObservingCurrentTrack(cancion: Song) {
         currentTimer?.invalidate()
@@ -52,12 +53,14 @@ import MusicKit
     }
     
     @MainActor
-    func handleAutoQueue() {
+    func handleAutoQueue(forward: Bool) {
         print("Queue auto progressing...")
         changing = true
-        nextIndex += 1
+        nextIndex += (forward ? 1 : -1)
         cancion = songService.randomSongs[nextIndex]
         startObservingCurrentTrack(cancion: songService.randomSongs[nextIndex])
+        blockExternalChange = false
+        changing = false
     }
     
     @MainActor
@@ -120,16 +123,16 @@ import MusicKit
     }
     
     @MainActor
-    func handleForwardPress(songs: [Song]) async throws {
+    func handleChangePress(songs: [Song], forward: Bool) async throws {
         guard !blockExternalChange && !changing else { return }
         blockExternalChange = true
         changing = true
         do {
             progress = .zero
-            nextIndex += 1
+            nextIndex += (forward ? 1 : -1)
             cancion = songs[nextIndex]
             startObservingCurrentTrack(cancion: songs[nextIndex])
-            try await player.skipToNextEntry()
+            try await (forward ? player.skipToNextEntry() : player.skipToPreviousEntry())
         } catch {
             print("ERROR:", error.localizedDescription)
         }

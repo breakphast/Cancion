@@ -40,8 +40,11 @@ struct Home: View {
             }
             .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
                 guard oldValue != nil else { return }
+                viewModel.previousQueueEntryID = oldValue?.id
+                guard let previousID = viewModel.previousQueueEntryID, let oldValue else { return }
+                
                 if !viewModel.blockExternalChange || !viewModel.changing {
-                    viewModel.handleAutoQueue()
+                    viewModel.handleAutoQueue(forward: previousID != oldValue.id ? true : false)
                 } else {
                     viewModel.blockExternalChange = false
                     viewModel.changing = false
@@ -62,6 +65,11 @@ struct Home: View {
                         .fill(viewModel.nextIndex <= 0 ? Color.oreo.opacity(0.6) : .clear)
                 }
                 .disabled(viewModel.nextIndex <= 0)
+                .onTapGesture {
+                    Task {
+                        try await viewModel.handleChangePress(songs: viewModel.songService.randomSongs, forward: false)
+                    }
+                }
             Spacer()
             TabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", playButton: true, progress: viewModel.progress, isPlaying: isPlaying)
                 .onTapGesture {
@@ -73,7 +81,7 @@ struct Home: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleForwardPress(songs: viewModel.songService.randomSongs)
+                        try await viewModel.handleChangePress(songs: viewModel.songService.randomSongs, forward: true)
                     }
                 }
             Spacer()
