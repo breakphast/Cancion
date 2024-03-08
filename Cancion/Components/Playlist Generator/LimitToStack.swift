@@ -14,6 +14,11 @@ struct LimitToStack: View {
     @State var limitTypeSelection = "items"
     @State var limitSortSelection = "sorted by"
     
+    var limitOptions: [String] {
+        var limits = Limit.limits(forType: viewModel.genPlaylist.limitType).map { $0.value }
+        return limits
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -51,15 +56,14 @@ struct LimitToStack: View {
                 .fontWeight(.semibold)
                 .font(.title3)
             
-            Dropdown(options: ["50", "75", "100"], selection: String(viewModel.genPlaylist.limit), type: .limitInt, playlist: viewModel.genPlaylist)
+            Dropdown(options: limitOptions, selection: String(viewModel.genPlaylist.limit), type: .limit, playlist: viewModel.genPlaylist)
                 .frame(width: 44, height: 44)
-            Dropdown(options: ["items", "minutes", "hours"], selection: viewModel.genPlaylist.limitType, type: .limit, playlist: viewModel.genPlaylist)
+            Dropdown(options: ["items", "minutes", "hours"], selection: viewModel.genPlaylist.limitType, type: .limitType, playlist: viewModel.genPlaylist)
         }
         .foregroundStyle(.oreo)
     }
     
     private var selectedByStack: some View {
-        
         HStack {
             Rectangle()
                 .fill(.clear)
@@ -68,7 +72,7 @@ struct LimitToStack: View {
                 Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
-                Dropdown(options: ["least played", "other"], selection: viewModel.genPlaylist.limitSortType, type: .limit, playlist: viewModel.genPlaylist)
+                Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, anchor: .top, selection: viewModel.genPlaylist.limitSortType, type: .limitSortType, playlist: viewModel.genPlaylist)
             }
             .foregroundStyle(.oreo)
         }

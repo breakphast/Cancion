@@ -38,21 +38,41 @@ class Playlista {
     }
 }
 
-enum Limit: String {
-    case twentyFive = "25"
-    case fifty = "50"
-    case seventyFive = "75"
-}
-
 enum LimitType: String {
     case items = "items"
     case minutes = "minutes"
     case hours = "hours"
 }
 
-enum LimitSortType: String {
+enum Limit {
+    case items(value: String)
+    case minutes(value: String)
+    case hours(value: String)
+    
+    static func limits(forType rawType: String) -> [Limit] {
+        guard let type = LimitType(rawValue: rawType) else { return [] }
+        switch type {
+        case .items:
+            return [.items(value: "25"), .items(value: "100"), .items(value: "250"), .items(value: "500")]
+        case .minutes:
+            return [.minutes(value: "15"), .minutes(value: "30"), .minutes(value: "45"), .minutes(value: "60")]
+        case .hours:
+            return [.hours(value: "1"), .hours(value: "3"), .hours(value: "5"), .hours(value: "12")]
+        }
+    }
+    
+    var value: String {
+        switch self {
+        case .items(let value), .minutes(let value), .hours(let value):
+            return value
+        }
+    }
+}
+
+enum LimitSortType: String, CaseIterable {
     case mostPlayed = "most played"
-    case leastPlayed = "least played"
+    case mostRecentlyAdded = "most recently added"
     case title = "title"
     case artist = "artist"
+    case random = "random"
 }

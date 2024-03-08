@@ -14,14 +14,13 @@ struct SmartFilterStack: View {
     let filter: FilterModel
     
     @State var filterText = ""
-    @State var filterSet: Bool = false
     
     var body: some View {
         ZStack {
             HStack {
                 Dropdown(filter: filter, type: .smartFilter, playlist: playlistViewModel.genPlaylist)
                 Dropdown(filter: filter, type: .smartCondition, playlist: playlistViewModel.genPlaylist)
-                SmartFilterTextField(text: $filterText, filterSet: $filterSet)
+                SmartFilterTextField(text: $filterText, type: .filter)
                     .onChange(of: filterText) { oldValue, newValue in
                         handleSmartFilterText()
                     }
@@ -32,25 +31,23 @@ struct SmartFilterStack: View {
     
     private var addFilterButton: some View {
         HStack(spacing: 4) {
-            if !filterSet {
-                Button {
-                    withAnimation(.bouncy) {
-                        playlistViewModel.activeFilters.append(FilterModel())
-                    }
-                } label: {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(.oreo)
-                            .shadow(radius: 1)
-                        Image(systemName: "plus")
-                            .font(.caption)
-                            .foregroundStyle(.white)
-                            .fontWeight(.black)
-                    }
-                    .frame(width: 22, height: 44)
+            Button {
+                withAnimation(.bouncy) {
+                    playlistViewModel.activeFilters.append(FilterModel())
                 }
-                .animation(.none, value: playlistViewModel.activeFilters.count)
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(.oreo)
+                        .shadow(radius: 1)
+                    Image(systemName: "plus")
+                        .font(.caption)
+                        .foregroundStyle(.white)
+                        .fontWeight(.black)
+                }
+                .frame(width: 22, height: 44)
             }
+            .animation(.none, value: playlistViewModel.activeFilters.count)
             
             Button {
                 withAnimation(.bouncy) {

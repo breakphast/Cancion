@@ -53,7 +53,7 @@ struct PlaylistView: View {
         }
         .task {
             if playlist.liveUpdating {
-                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: .any)
+                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: .any, limitType: playlist.limitType)
                 if updatedSongs != playlist.songs {
                     playlist.songs = updatedSongs
                     do {

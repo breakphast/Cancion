@@ -21,14 +21,18 @@ import MusicKit
     var playlistName = ""
     var smartRulesActive = true
     var liveUpdating = true
+    
     var limitActive = true
+    var limitOptions = [String]()
+    
     var matchRules: MatchRules = .any
     
     var image: Image?
     var genPlaylist = Playlista()
     
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules) async -> [String] {
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules, limitType: String) async -> [String] {
         var filteredSongs = [Song]()
+        var totalDuration = 0.0
         
         if matchRules == .all {
             for filter in filters {
@@ -41,7 +45,39 @@ import MusicKit
                 }
             }
         }
-        return filteredSongs.prefix(genPlaylist.limit).map { $0.id.rawValue }
+        
+        switch limitType {
+        case LimitType.items.rawValue:
+            filteredSongs = Array(filteredSongs.prefix(genPlaylist.limit))
+        case LimitType.hours.rawValue:
+            let maxMinutes = genPlaylist.limit * 60
+            for song in songs {
+                if let duration = song.duration {
+                    if (totalDuration + duration) <= Double(maxMinutes) {
+                        filteredSongs.append(song)
+                        totalDuration += duration
+                    } else {
+                        break
+                    }
+                }
+            }
+        case LimitType.minutes.rawValue:
+            let maxMinutes = genPlaylist.limit
+            for song in songs {
+                if let duration = song.duration {
+                    if (totalDuration + duration) <= Double(maxMinutes) {
+                        filteredSongs.append(song)
+                        totalDuration += duration
+                    } else {
+                        break
+                    }
+                }
+            }
+        default:
+            break
+        }
+        
+        return filteredSongs.map { $0.id.rawValue }
     }
     
     func generatePlaylist(songs: [Song], name: String, cover: Data? = nil) async -> Playlista? {
@@ -49,7 +85,7 @@ import MusicKit
             image = Image(uiImage: uiImage)
         }
         let limit = genPlaylist.limit
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules, limitType: genPlaylist.limitType)
         do {
             let model = Playlista()
             model.title = name

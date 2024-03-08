@@ -11,8 +11,13 @@ struct Dropdown: View {
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     @State var filter = FilterModel()
-    
     @State var options: [String] = []
+    
+    var limitOptions: [String] {
+        let limits = Limit.limits(forType: playlistViewModel.genPlaylist.limitType).map { $0.value }
+        return limits
+    }
+    
     var anchor: Anchor = .bottom
     var cornerRadius: CGFloat = 12
     
@@ -66,14 +71,14 @@ struct Dropdown: View {
     @ViewBuilder
     func optionsView() -> some View {
         VStack(spacing: 10) {
-            ForEach(options.filter({$0 != selection}), id: \.self) { option in
+            ForEach((type != .limit ? options : limitOptions).filter({$0 != selection}), id: \.self) { option in
                 HStack() {
                     Text(option)
                         .lineLimit(2)
                         .font(.caption)
                         .fontWeight(.semibold)
                     
-                    if type != .limitInt {
+                    if type != .limit {
                         Spacer()
                     }
                 }
@@ -96,14 +101,14 @@ struct Dropdown: View {
                             if let rule = MatchRules(rawValue: option) {
                                 playlistViewModel.matchRules = rule
                             }
-                        case .limitInt, .limit:
+                        default:
                             handleLimitFilters(option: option)
                         }
                     }
                 }
             }
         }
-        .padding(.horizontal, (type != .limitInt ? 8 : 4))
+        .padding(.horizontal, (type != .limit ? 8 : 4))
         .padding(.vertical, 5)
         .transition(.move(edge: anchor == .top ? .bottom : .top))
     }
@@ -168,14 +173,13 @@ struct Dropdown: View {
                 return
             }
         case .matchRules:
-            self.options = ["all", "any"]
             self.selection = "all"
-        case .limitInt:
-            self.options = ["25", "50", "75"]
-            self.selection = "25"
         case .limit:
-            self.options = ["items", "other"]
+            self.selection = "25"
+        case .limitType:
             self.selection = "items"
+        case .limitSortType:
+            self.selection = "most played"
         }
     }
     
@@ -183,14 +187,23 @@ struct Dropdown: View {
         switch option {
         case LimitType.items.rawValue:
             playlistViewModel.genPlaylist.limitType = "items"
-        case LimitSortType.mostPlayed.rawValue:
-            playlistViewModel.genPlaylist.limitSortType = "most played"
-        case Limit.fifty.rawValue:
-            playlistViewModel.genPlaylist.limit = 50
-        case Limit.seventyFive.rawValue:
-            playlistViewModel.genPlaylist.limit = 75
+            selection = "25"
+        case LimitType.hours.rawValue:
+            playlistViewModel.genPlaylist.limitType = "hours"
+            selection = "1"
+        case LimitType.minutes.rawValue:
+            playlistViewModel.genPlaylist.limitType = "minutes"
+            selection = "15"
+        case "25", "100", "250", "500":
+            if let limitValue = Int(option) {
+                playlistViewModel.genPlaylist.limit = limitValue
+            }
         default:
-            print("No type found.")
+            if let sortType = LimitSortType(rawValue: option) {
+                playlistViewModel.genPlaylist.limitSortType = sortType.rawValue
+            } else {
+                print("No type found.")
+            }
         }
     }
     
@@ -204,6 +217,7 @@ enum DropdownType {
     case smartFilter
     case smartCondition
     case matchRules
-    case limitInt
     case limit
+    case limitType
+    case limitSortType
 }

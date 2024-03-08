@@ -20,7 +20,7 @@ struct SmartFilterComponent: View {
                 Text(title)
                     .font(.caption2)
                     .fontWeight(.black)
-                if type != .limitInt {
+                if type != .limit {
                     Spacer()
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.caption2)
@@ -36,22 +36,27 @@ struct SmartFilterComponent: View {
 
 struct SmartFilterTextField: View {
     @Binding var text: String
-    @Binding var filterSet: Bool
+    let type: SmartFilterTextType
     
     var body: some View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(filterSet ? .oreo : .oreo.opacity(0.1))
+                .fill(type == .filter ? .oreo.opacity(0.1) : .oreo)
                 .shadow(radius: 2)
             TextField("", text: $text)
                 .font(.caption.bold())
-                .foregroundStyle(filterSet ? .white : .oreo)
+                .foregroundStyle(type == .filter ? .oreo : .white)
                 .padding(.leading, 8)
                 .padding(.trailing)
         }
         .bold()
         .frame(height: 44)
     }
+}
+
+enum SmartFilterTextType {
+    case filter
+    case limit
 }
 
 #Preview {
