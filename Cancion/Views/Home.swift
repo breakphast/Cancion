@@ -21,42 +21,50 @@ struct Home: View {
     
     var body: some View {
         GeometryReader { geo in
-            ZStack(alignment: .bottom) {
-                Color.white.ignoresSafeArea()
-                
-                if let art = viewModel.cancion?.artwork {
-                    PlayerView()
+            if viewModel.isPlaybackQueueSet {
+                ZStack(alignment: .bottom) {
+                    Color.white.ignoresSafeArea()
                     
-                    SongList()
-                    
-                    PlaylistList()
-                    
-                    tabs(UIScreen.main.bounds.size, artwork: art)
-                        .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
-                        .opacity(viewModel.generatorActive ? 0 : 1)
-                } else {
-                    ProgressView()
-                }
-            }
-            .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
-                guard let oldValue, let newValue else { return }
-                if let previousID = viewModel.previousQueueEntryID {
-                    if !viewModel.blockExternalChange || !viewModel.changing {
-                        viewModel.handleAutoQueue(forward: previousID != newValue.id ? true : false)
+                    if let art = viewModel.cancion?.artwork {
+                        PlayerView()
+                        
+                        SongList()
+                        
+                        PlaylistList()
+                        
+                        if !viewModel.generatorActive {
+                            tabs(UIScreen.main.bounds.size, artwork: art)
+                                .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
+                                .opacity(viewModel.isPlaybackQueueSet ? 1 : 0)
+                        }
                     } else {
-                        viewModel.blockExternalChange = false
-                        viewModel.changing = false
-                    }
-                } else {
-                    if !viewModel.blockExternalChange || !viewModel.changing {
-                        viewModel.handleAutoQueue(forward: true)
-                    } else {
-                        viewModel.blockExternalChange = false
-                        viewModel.changing = false
+                        ProgressView()
                     }
                 }
-                
-                viewModel.previousQueueEntryID = oldValue.id
+                .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
+                    guard let oldValue, let newValue else { return }
+                    
+                    if let previousID = viewModel.previousQueueEntryID {
+                        if !viewModel.blockExternalChange || !viewModel.changing {
+                            viewModel.handleAutoQueue(forward: previousID != newValue.id ? true : false)
+                        } else {
+                            viewModel.blockExternalChange = false
+                            viewModel.changing = false
+                        }
+                    } else {
+                        if !viewModel.blockExternalChange || !viewModel.changing {
+                            viewModel.handleAutoQueue(forward: true)
+                        } else {
+                            viewModel.blockExternalChange = false
+                            viewModel.changing = false
+                        }
+                    }
+                    
+                    viewModel.previousQueueEntryID = oldValue.id
+                }
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
         }
         .environment(viewModel)
@@ -104,8 +112,8 @@ struct Home: View {
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .shadow(radius: 2)
         )
-        .sensoryFeedback(.selection, trigger: viewModel.nextIndex)
         .sensoryFeedback(.selection, trigger: viewModel.isPlaying)
+        .sensoryFeedback(.selection, trigger: viewModel.player.queue.currentEntry?.id)
     }
 
 }

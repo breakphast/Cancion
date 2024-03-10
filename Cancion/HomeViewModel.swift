@@ -27,7 +27,7 @@ import MusicKit
     var currentTimer: Timer? = nil
     
     var generatorActive = false
-    var isPlaybackQueueSet = true
+    var isPlaybackQueueSet = false
     var altQueueActive = false
     var songService = SongService()
     var changing = false
@@ -117,7 +117,7 @@ import MusicKit
                     startObservingCurrentTrack(cancion: cancion)
                 }
             } catch {
-                print("Failed to prepare to play with error: \(error).")
+                print("Failed to play with error: \(error).")
             }
         }
     }
@@ -140,20 +140,22 @@ import MusicKit
     
     @MainActor
     func handleSongSelected(song: Song) {
+        guard !blockExternalChange && !changing else { return }
+        
         blockExternalChange = true
         changing = true
-        var songs = songService.randomSongs.shuffled()
-        songs.removeAll(where: {$0.id == song.id})
-        songs[0] = song
-        songService.randomSongs = songs
-        nextIndex = 0
-        player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: song)
+        var songs = songService.randomSongs
+        songService.randomSongs.removeAll(where: {$0.id == song.id})
+        songService.randomSongs[nextIndex] = song
         cancion = song
         startObservingCurrentTrack(cancion: song)
         Task {
-            try await player.prepareToPlay()
+            try await player.queue.insert(song, position: .afterCurrentEntry)
+            try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()
+            blockExternalChange = false
+            changing = false
         }
     }
 }
