@@ -72,7 +72,7 @@ struct LimitToStack: View {
                 Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
-                Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, anchor: .top, selection: viewModel.genPlaylist.limitSortType, type: .limitSortType, playlist: viewModel.genPlaylist)
+                Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, selection: viewModel.genPlaylist.limitSortType, type: .limitSortType, playlist: viewModel.genPlaylist)
             }
             .foregroundStyle(.oreo)
         }

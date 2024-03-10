@@ -45,6 +45,9 @@ struct Dropdown: View {
                         zIndex = index
                         withAnimation(.bouncy) {
                             showOptions.toggle()
+                            if type == .limitSortType {
+                                playlistViewModel.dropdownActive.toggle()
+                            }
                         }
                     }
                     .zIndex(10)

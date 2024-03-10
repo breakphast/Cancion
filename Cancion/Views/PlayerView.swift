@@ -105,9 +105,11 @@ struct PlayerView: View {
                         Text(cancion.title)
                             .lineLimit(1)
                             .font(.title.bold())
-                        Image(systemName: "e.square.fill").opacity(cancion.contentRating == .explicit ? 1 : 0)
-                            .font(.subheadline)
-                            .foregroundStyle(.naranja)
+                        if cancion.contentRating == .explicit {
+                            Image(systemName: "e.square.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(.naranja)
+                        }
                     }
                     
                     Text(cancion.artistName)

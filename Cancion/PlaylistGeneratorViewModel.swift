@@ -30,6 +30,8 @@ import MusicKit
     var image: Image?
     var genPlaylist = Playlista()
     
+    var dropdownActive = false
+    
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: MatchRules, limitType: String) async -> [String] {
         var filteredSongs = [Song]()
         var totalDuration = 0.0

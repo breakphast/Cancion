@@ -46,6 +46,12 @@ struct PlaylistGenerator: View {
                                 LimitToStack()
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
+                                
+                                if viewModel.dropdownActive {
+                                    Rectangle()
+                                        .fill(.clear.opacity(0.1))
+                                        .frame(height: 200)
+                                }
                             }
                             .padding(.horizontal, 24)
                             .padding(.top)
