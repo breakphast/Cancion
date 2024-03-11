@@ -21,6 +21,7 @@ struct PlaylistView: View {
     @Environment(\.modelContext) var modelContext
     
     var playlist: Playlista
+    @State private var showGenerator = false
     
     var songs: [Song] {
         var ogSongs = homeViewModel.songService.sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
@@ -55,6 +56,10 @@ struct PlaylistView: View {
         .frame(maxWidth: .infinity)
         .gesture(homeViewModel.swipeGesture)
         .padding(.horizontal, 24)
+        .fullScreenCover(isPresented: $showGenerator) {
+            EditPlaylistView(playlist: playlist)
+                .environment(playlistGeneratorViewModel)
+        }
         .onAppear {
             scrollID = "cover"
         }
@@ -104,14 +109,21 @@ struct PlaylistView: View {
             
             Spacer()
             
-            ZStack {
-                Circle()
-                    .fill(.oreo)
-                    .frame(width: 44)
-                    .shadow(radius: 2)
-                Image(systemName: "pencil")
-                    .fontWeight(.heavy)
-                    .foregroundStyle(.white)
+            Button {
+                withAnimation(.bouncy(duration: 0.4)) {
+                    showGenerator.toggle()
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(.oreo)
+                        .frame(width: 44)
+                        .shadow(radius: 2)
+                    Image(systemName: "pencil")
+                        .foregroundStyle(.white)
+                        .font(.headline)
+                        .fontWeight(.black)
+                }
             }
         }
         .padding(.top)

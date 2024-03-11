@@ -1,8 +1,8 @@
 //
-//  PlaylistGenerator.swift
+//  EditPlaylistView.swift
 //  Cancion
 //
-//  Created by Desmond Fitch on 2/20/24.
+//  Created by Desmond Fitch on 3/11/24.
 //
 
 import SwiftUI
@@ -10,7 +10,7 @@ import MusicKit
 import SwiftData
 import PhotosUI
 
-struct PlaylistGenerator: View {
+struct EditPlaylistView: View {
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
@@ -22,11 +22,13 @@ struct PlaylistGenerator: View {
     @State private var imageData: Data?
     
     var image: Image? {
-        if let imageData, let uiiImage = UIImage(data: imageData) {
-            return Image(uiImage: uiiImage)
+        if let cover = playlist.cover, let coverImage = UIImage(data: cover) {
+            return Image(uiImage: coverImage)
         }
         return nil
     }
+    
+    var playlist: Playlista
     
     var body: some View {
         ZStack {
@@ -43,7 +45,7 @@ struct PlaylistGenerator: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(playlist: viewModel.genPlaylist)
+                                LimitToStack(playlist: playlist)
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -115,7 +117,7 @@ struct PlaylistGenerator: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules, playlist: viewModel.genPlaylist)
+                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules, playlist: playlist)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -126,13 +128,13 @@ struct PlaylistGenerator: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.activeFilters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.activeFilters[index], playlist: viewModel.genPlaylist)
-                        .disabled(!viewModel.smartRulesActive)
+                ForEach(playlist.filters.indices, id: \.self) { index in
+                    SmartFilterStack(filter: playlist.filters[index], playlist: playlist, editing: true)
+                        .disabled(!playlist.smartRules)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
                 }
-                .blur(radius: !viewModel.smartRulesActive ? 2 : 0)
+                .blur(radius: !playlist.smartRules ? 2 : 0)
                 
                 RoundedRectangle(cornerRadius: 1)
                     .frame(height: 1)
@@ -144,31 +146,11 @@ struct PlaylistGenerator: View {
         .zIndex(10)
     }
     
-    private var playlistCover: some View {
-        Image(.ken)
-            .resizable()
-            .scaledToFill()
-            .frame(height: 200)
-            .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .frame(maxWidth: .infinity)
-            .shadow(radius: 5)
-            .padding(.horizontal, 24)
-    }
-    
-    func handleCancelPlaylist() {
-        homeViewModel.generatorActive = false
-        viewModel.playlistName = ""
-        viewModel.activeFilters = []
-        viewModel.activeFilters = [FilterModel()]
-        dismiss()
-    }
-    
     private var headerTitle: some View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    handleCancelPlaylist()
+                    dismiss()
                 }
             } label: {
                 ZStack {
@@ -185,7 +167,7 @@ struct PlaylistGenerator: View {
             
             Spacer()
             
-            Text("Playlist Generator")
+            Text("Edit Playlist")
                 .foregroundStyle(.oreo)
                 .font(.title2.bold())
             
@@ -194,11 +176,27 @@ struct PlaylistGenerator: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
-                        await addPlaylistToDatabase()
+                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
+                        var shouldSave = false
+                        if !songIDs.isEmpty {
+                            playlist.songs = songIDs
+                            shouldSave = true
+                        }
+                        if playlistName != playlist.title {
+                            playlist.title = playlistName
+                            shouldSave = true
+                        }
+                        if shouldSave {
+                            do {
+                                try modelContext.save()
+                                dismiss()
+                            } catch {
+                                print("Could not save edited playlist.")
+                            }
+                        }
                     }
                     
                     homeViewModel.generatorActive = false
-                    dismiss()
                 }
             } label: {
                 ZStack {
@@ -216,21 +214,14 @@ struct PlaylistGenerator: View {
     }
     
     @MainActor
-    private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: playlistName, cover: imageData) {
-            modelContext.insert(model)
-            viewModel.activeFilters = []
-            viewModel.activeFilters = [FilterModel()]
-            
-            print(model.limit, model.smartRules)
-            return true
-        }
-        return false
+    private func addPlaylistToDatabase(playlist: Playlista) async -> Bool {
+        modelContext.insert(playlist)
+        return true
     }
     
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField("Playlist Name", text: $playlistName)
+            TextField(playlist.title, text: $playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)
@@ -252,10 +243,3 @@ struct PlaylistGenerator: View {
             .foregroundStyle(.secondary.opacity(0.2))
     }
 }
-
-#Preview {
-    PlaylistGenerator()
-        .environment(SongService())
-        .environment(HomeViewModel())
-}
-

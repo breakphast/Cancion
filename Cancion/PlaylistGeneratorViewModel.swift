@@ -32,7 +32,7 @@ import MusicKit
     
     var dropdownActive = false
     
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: String, limitType: String) async -> [String] {
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: String, limitType: String, playlist: Playlista) async -> [String] {
         var filteredSongs = [Song]()
         var totalDuration = 0.0
         
@@ -52,10 +52,10 @@ import MusicKit
         var limitedSongs = [Song]()
         switch limitType {
         case LimitType.items.rawValue:
-            limitedSongs = Array(filteredSongs.prefix(genPlaylist.limit))
+            limitedSongs = Array(filteredSongs.prefix(playlist.limit))
             
         case LimitType.hours.rawValue:
-            let maxMinutes = genPlaylist.limit * 60
+            let maxMinutes = playlist.limit * 60
             for song in filteredSongs {
                 if let duration = song.duration {
                     if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
@@ -67,7 +67,7 @@ import MusicKit
                 }
             }
         case LimitType.minutes.rawValue:
-            let maxMinutes = genPlaylist.limit
+            let maxMinutes = playlist.limit
             for song in filteredSongs {
                 if let duration = song.duration {
                     if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
@@ -89,7 +89,7 @@ import MusicKit
             image = Image(uiImage: uiImage)
         }
         let limit = genPlaylist.limit
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules.rawValue, limitType: genPlaylist.limitType)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules.rawValue, limitType: genPlaylist.limitType, playlist: genPlaylist)
         do {
             let model = Playlista()
             model.title = name

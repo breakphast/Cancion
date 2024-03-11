@@ -12,20 +12,28 @@ struct SmartFilterStack: View {
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     let filter: FilterModel
+    let playlist: Playlista
+    var editing = false
     
     @State var filterText = ""
+    var filters: [FilterModel] {
+        return editing ? playlist.filters : playlistViewModel.activeFilters
+    }
     
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, type: .smartFilter, playlist: playlistViewModel.genPlaylist)
-                Dropdown(filter: filter, type: .smartCondition, playlist: playlistViewModel.genPlaylist)
+                Dropdown(filter: filter, type: .smartFilter, playlist: playlist)
+                Dropdown(filter: filter, type: .smartCondition, playlist: playlist)
                 SmartFilterTextField(text: $filterText, type: .filter)
                     .onChange(of: filterText) { oldValue, newValue in
-                        handleSmartFilterText()
+                        handleSmartFilterText(filters: filters)
                     }
                 addFilterButton
             }
+        }
+        .task {
+            filterText = filter.value
         }
     }
     
@@ -69,8 +77,8 @@ struct SmartFilterStack: View {
         }
     }
     
-    private func handleSmartFilterText() {
-        if let filter = playlistViewModel.activeFilters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
+    private func handleSmartFilterText(filters: [FilterModel]) {
+        if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
             filter.value = filterText
         }
     }
