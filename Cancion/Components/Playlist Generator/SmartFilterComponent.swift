@@ -9,7 +9,12 @@ import SwiftUI
 
 struct SmartFilterComponent: View {
     @Binding var title: String
+    var limit: Int
     let type: DropdownType
+    
+    var dropS: Bool {
+        return limit == 1 && type == .limitType
+    }
     
     var body: some View {
         ZStack {
@@ -17,7 +22,7 @@ struct SmartFilterComponent: View {
                 .fill((type == .smartFilter || type == .smartCondition) ? .white : .oreo)
                 .shadow(radius: 2)
             HStack {
-                Text(title)
+                Text(dropS ? String(title.dropLast()) : title)
                     .font(.caption2)
                     .fontWeight(.black)
                 if type != .limit {
@@ -59,6 +64,6 @@ enum SmartFilterTextType {
     case limit
 }
 
-#Preview {
-    SmartFilterComponent(title: .constant("GOVNAH!"), type: .limit)
-}
+//#Preview {
+//    SmartFilterComponent(title: .constant("GOVNAH!"), type: .limit)
+//}

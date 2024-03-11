@@ -144,7 +144,7 @@ import MusicKit
         
         blockExternalChange = true
         changing = true
-        var songs = songService.randomSongs
+        let songs = songService.randomSongs
         songService.randomSongs.removeAll(where: {$0.id == song.id})
         songService.randomSongs[nextIndex] = song
         cancion = song
@@ -154,8 +154,6 @@ import MusicKit
             try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()
-            blockExternalChange = false
-            changing = false
         }
     }
 }

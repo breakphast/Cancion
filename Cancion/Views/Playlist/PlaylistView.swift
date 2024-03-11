@@ -21,11 +21,17 @@ struct PlaylistView: View {
     @Environment(\.modelContext) var modelContext
     
     var playlist: Playlista
-    var songs: [Song]? {
-        let sortedSongs = homeViewModel.songService.sortedSongs
-        return sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
+    
+    var songs: [Song] {
+        var ogSongs = homeViewModel.songService.sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
+        
+        switch viewModel.playCountAscending {
+        case false:
+            return ogSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+        case true:
+            return ogSongs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0 }
+        }
     }
-    @State var sortedSongs: [Song]?
     
     var body: some View {
         VStack(spacing: 16) {
@@ -52,18 +58,18 @@ struct PlaylistView: View {
             scrollID = "cover"
         }
         .task {
-            if playlist.liveUpdating {
-                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: .any, limitType: playlist.limitType)
-                if updatedSongs != playlist.songs {
-                    playlist.songs = updatedSongs
-                    do {
-                        try modelContext.save()
-                        print("Updated playlist songs.")
-                    } catch {
-                        print("Could not save new songs.")
-                    }
-                }
-            }
+//            if playlist.liveUpdating {
+//                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType)
+//                if updatedSongs != playlist.songs {
+//                    playlist.songs = updatedSongs
+//                    do {
+//                        try modelContext.save()
+//                        print("Updated playlist songs.")
+//                    } catch {
+//                        print("Could not save new songs.")
+//                    }
+//                }
+//            }
         }
     }
     
@@ -185,19 +191,13 @@ struct PlaylistView: View {
     }
     private var songList: some View {
         LazyVStack {
-            if let songs {
-                let songsArray = !viewModel.playCountAscending ?
-                songs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0} :
-                songs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0}
-                
-                ForEach(Array(songsArray.enumerated()), id: \.offset) { index, song in
-                    SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
-                        .onTapGesture {
-                            Task {
-                                await homeViewModel.handleSongSelected(song: song)
-                            }
+            ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
+                SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
+                    .onTapGesture {
+                        Task {
+                            await homeViewModel.handleSongSelected(song: song)
                         }
-                }
+                    }
             }
         }
     }

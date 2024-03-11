@@ -34,11 +34,11 @@ struct LimitToStack: View {
     private var checkbox: some View {
         Button {
             withAnimation {
-                selected.toggle()
+                viewModel.limitActive.toggle()
             }
         } label: {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(selected ? .naranja.opacity(0.9) : .white)
+                .fill(viewModel.limitActive ? .naranja.opacity(0.9) : .white)
                 .shadow(radius: 2)
                 .frame(width: 33, height: 33)
                 .overlay {

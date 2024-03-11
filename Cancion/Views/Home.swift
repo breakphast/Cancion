@@ -42,7 +42,11 @@ struct Home: View {
                     }
                 }
                 .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
-                    guard let oldValue, let newValue else { return }
+                    guard let oldValue, let newValue else { 
+                        viewModel.blockExternalChange = false
+                        viewModel.changing = false
+                        return
+                    }
                     
                     if let previousID = viewModel.previousQueueEntryID {
                         if !viewModel.blockExternalChange || !viewModel.changing {
@@ -59,7 +63,6 @@ struct Home: View {
                             viewModel.changing = false
                         }
                     }
-                    
                     viewModel.previousQueueEntryID = oldValue.id
                 }
             } else {

@@ -38,7 +38,7 @@ class Playlista {
     }
 }
 
-enum LimitType: String {
+enum LimitType: String, CaseIterable {
     case items = "items"
     case minutes = "minutes"
     case hours = "hours"

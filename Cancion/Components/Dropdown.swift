@@ -38,7 +38,7 @@ struct Dropdown: View {
                     optionsView()
                 }
                 
-                SmartFilterComponent(title: $selection, type: type)
+                SmartFilterComponent(title: $selection, limit: playlistViewModel.genPlaylist.limit, type: type)
                     .frame(width: size.width - 1, height: size.height)
                     .onTapGesture {
                         index += 100
@@ -62,7 +62,13 @@ struct Dropdown: View {
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
             .onChange(of: filter.type) { oldValue, newValue in
                 handleFilterType(filter: filter)
+//                handleLimitFilters(option: playlistViewModel.genPlaylist.limitType)
             }
+            .onChange(of: playlistViewModel.genPlaylist.limit, { oldValue, newValue in
+                if type == .limit {
+                    selection = String(newValue)
+                }
+            })
             .task {
                 handleFilterType(filter: filter)
             }
@@ -175,37 +181,26 @@ struct Dropdown: View {
             default:
                 return
             }
-        case .matchRules:
-            self.selection = "all"
         case .limit:
-            self.selection = "25"
-        case .limitType:
-            self.selection = "items"
-        case .limitSortType:
-            self.selection = "most played"
+            self.selection = String(playlistViewModel.genPlaylist.limit)
+        default:
+            return
         }
     }
     
     func handleLimitFilters(option: String) {
-        switch option {
-        case LimitType.items.rawValue:
-            playlistViewModel.genPlaylist.limitType = "items"
-            selection = "25"
-        case LimitType.hours.rawValue:
-            playlistViewModel.genPlaylist.limitType = "hours"
-            selection = "1"
-        case LimitType.minutes.rawValue:
-            playlistViewModel.genPlaylist.limitType = "minutes"
-            selection = "15"
-        case "25", "100", "250", "500":
-            if let limitValue = Int(option) {
-                playlistViewModel.genPlaylist.limit = limitValue
-            }
-        default:
-            if let sortType = LimitSortType(rawValue: option) {
+        if let limitType = LimitType(rawValue: option) {
+            let defaultLimitValue = Limit.limits(forType: option).first?.value ?? "0"
+            playlistViewModel.genPlaylist.limitType = limitType.rawValue
+            playlistViewModel.genPlaylist.limit = Int(defaultLimitValue) ?? 0
+        } else {
+            let allLimits = LimitType.allCases.flatMap { Limit.limits(forType: $0.rawValue) }
+            if let matchingLimit = allLimits.first(where: { $0.value == option }) {
+                playlistViewModel.genPlaylist.limit = Int(matchingLimit.value) ?? 0
+            } else if let sortType = LimitSortType(rawValue: option) {
                 playlistViewModel.genPlaylist.limitSortType = sortType.rawValue
             } else {
-                print("No type found.")
+                print("No matching type or value found")
             }
         }
     }
