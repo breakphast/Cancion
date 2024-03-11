@@ -34,6 +34,8 @@ struct PlayerView: View {
                 .padding()
             }
         }
+        .offset(x: viewModel.moveSet)
+        .gesture(viewModel.swipeGesture)
     }
     
     @ViewBuilder
@@ -61,7 +63,7 @@ struct PlayerView: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    viewModel.moveSet = viewModel.moveSet.isZero ? -UIScreen.main.bounds.width : .zero
+                    viewModel.currentScreen = .songs
                 }
             } label: {
                 ZStack {
@@ -69,14 +71,12 @@ struct PlayerView: View {
                         .fill(.oreo)
                         .frame(width: 44)
                         .shadow(radius: 2)
-                    Image(systemName: viewModel.moveSet.isZero ? "music.note.list" : "waveform.circle.fill")
+                    Image(systemName: "music.note.list")
                         .foregroundStyle(.white)
                         .font(.title3)
                         .fontWeight(.heavy)
                 }
             }
-            .offset(x: viewModel.moveSet.isZero ? (viewModel.moveSet) : viewModel.moveSet + UIScreen.main.bounds.width / 4, y: 0)
-            .padding(.leading, viewModel.moveSet.isZero ? .zero : 2)
             .blur(radius: viewModel.filterActive ? 5 : 0)
         }
         .font(.title.bold())

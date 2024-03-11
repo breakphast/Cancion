@@ -53,6 +53,7 @@ struct PlaylistView: View {
             .blur(radius: viewModel.searchActive ? 5 : 0)
         }
         .frame(maxWidth: .infinity)
+        .gesture(homeViewModel.swipeGesture)
         .padding(.horizontal, 24)
         .onAppear {
             scrollID = "cover"

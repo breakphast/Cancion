@@ -20,6 +20,7 @@ struct PlaylistList: View {
     
     var body: some View {
         ZStack {
+            Color.clear.ignoresSafeArea()
             VStack {
                 navHeaderItems
                 ScrollView {
@@ -59,6 +60,7 @@ struct PlaylistList: View {
                 text = text
             }
         }
+        .gesture(homeViewModel.swipeGesture)
         .environment(viewModel)
     }
     private var newPlaylistButton: some View {
@@ -86,7 +88,7 @@ struct PlaylistList: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    homeViewModel.moveSet += UIScreen.main.bounds.width
+                    homeViewModel.currentScreen = .songs
                 }
             } label: {
                 ZStack {
@@ -112,7 +114,7 @@ struct PlaylistList: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    homeViewModel.moveSet += UIScreen.main.bounds.width
+                    
                 }
             } label: {
                 ZStack {

@@ -19,7 +19,6 @@ import MusicKit
     @MainActor var cancion: Song?
     
     var filterActive = false
-    var moveSet: CGFloat = .zero
     var progress: CGFloat = .zero
     var nextIndex = 0
     
@@ -33,6 +32,21 @@ import MusicKit
     var changing = false
     var blockExternalChange = false
     var previousQueueEntryID: String?
+    let swipeThreshold: CGFloat = 50.0
+    var currentScreen: Screen = .player
+    
+    var moveSet: CGFloat {
+        switch currentScreen {
+        case .player:
+            return .zero
+        case .songs:
+            return -UIScreen.main.bounds.width
+        case .playlists, .playlistView:
+            return (-UIScreen.main.bounds.width * 2)
+        case .playlistGen:
+            return (-UIScreen.main.bounds.width * 3)
+        }
+    }
     
     func startObservingCurrentTrack(cancion: Song) {
         currentTimer?.invalidate()
@@ -156,4 +170,55 @@ import MusicKit
             try await player.play()
         }
     }
+    
+    var swipeGesture: some Gesture {
+        DragGesture(minimumDistance: swipeThreshold)
+            .onEnded { value in
+                let horizontalDistance = value.translation.width
+                let verticalDistance = value.translation.height
+                let isHorizontalSwipe = abs(horizontalDistance) > abs(verticalDistance)
+                
+                if isHorizontalSwipe && abs(horizontalDistance) > self.swipeThreshold {
+                    if horizontalDistance < 0 {
+                        withAnimation(.bouncy(duration: 0.4)) {
+                            switch self.currentScreen {
+                            case .player:
+                                self.currentScreen = .songs
+                            case .songs:
+                                self.currentScreen = .playlists
+                            case .playlists:
+                                return
+                            case .playlistView:
+                                return
+                            case .playlistGen:
+                                return
+                            }
+                        }
+                    } else if horizontalDistance > 0 {
+                        withAnimation(.bouncy(duration: 0.4)) {
+                            switch self.currentScreen {
+                            case .player:
+                                return
+                            case .songs:
+                                self.currentScreen = .player
+                            case .playlists:
+                                self.currentScreen = .songs
+                            case .playlistView:
+                                return
+                            case .playlistGen:
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+    }
+}
+
+enum Screen {
+    case player
+    case songs
+    case playlists
+    case playlistView
+    case playlistGen
 }

@@ -36,6 +36,9 @@ struct Home: View {
                             tabs(UIScreen.main.bounds.size, artwork: art)
                                 .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
                                 .opacity(viewModel.isPlaybackQueueSet ? 1 : 0)
+                                .overlay {
+                                    backToPlayerButton
+                                }
                         }
                     } else {
                         ProgressView()
@@ -118,7 +121,32 @@ struct Home: View {
         .sensoryFeedback(.selection, trigger: viewModel.isPlaying)
         .sensoryFeedback(.selection, trigger: viewModel.player.queue.currentEntry?.id)
     }
-
+    private var backToPlayerButton: some View {
+        Button {
+            
+        } label: {
+            Button {
+                withAnimation(.bouncy(duration: 0.4)) {
+                    viewModel.currentScreen = .player
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(.oreo.opacity(0.8))
+                        .frame(width: 44)
+                        .shadow(radius: 2)
+                    Image(systemName: "waveform.circle.fill")
+                        .foregroundStyle(.white)
+                        .font(.title3)
+                        .fontWeight(.heavy)
+                }
+            }
+        }
+        .offset(y: -92)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 32)
+        .opacity(!viewModel.isPlaying ? 0 : viewModel.currentScreen == .playlists ? 1 : 0)
+    }
 }
 
 extension View {

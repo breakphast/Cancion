@@ -24,38 +24,52 @@ struct SongList: View {
     }
     
     var body: some View {
-        VStack {
-            navHeaderItems
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    songSearchTextField
-                    headerItems
-                        .id(33)
-                    songList
+        ZStack {
+            Color.white.opacity(0.000001).ignoresSafeArea()
+            VStack {
+                navHeaderItems
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        songSearchTextField
+                        headerItems
+                            .id(33)
+                        songList
+                    }
+                    .scrollTargetLayout()
                 }
-                .scrollTargetLayout()
+                .scrollIndicators(.never)
+                .scrollPosition(id: $scrollID)
+                .scrollTargetBehavior(.viewAligned)
+                .disabled(viewModel.searchActive)
+                .blur(radius: viewModel.searchActive ? 5 : 0)
+                .task {
+                    scrollID = 33
+                }
             }
-            .scrollIndicators(.never)
-            .scrollPosition(id: $scrollID)
-            .scrollTargetBehavior(.viewAligned)
-            .disabled(viewModel.searchActive)
-            .blur(radius: viewModel.searchActive ? 5 : 0)
-            .contentMargins(16, for: .scrollContent)
-            .task {
-                scrollID = 33
-            }
+            .padding(.horizontal, 24)
         }
+        .gesture(homeViewModel.swipeGesture)
         .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width)
-        .padding(.horizontal)
     }
     
     private var navHeaderItems: some View {
         HStack {
-            ZStack {
-                Circle()
-                    .fill(.clear)
-                    .frame(width: 44)
+            Button {
+                withAnimation(.bouncy(duration: 0.4)) {
+                    homeViewModel.currentScreen = .player
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(.oreo)
+                        .frame(width: 44)
+                        .shadow(radius: 2)
+                    Image(systemName: "waveform.circle.fill")
+                        .foregroundStyle(.white)
+                        .font(.title3)
+                        .fontWeight(.heavy)
+                }
             }
             
             Spacer()
@@ -79,7 +93,7 @@ struct SongList: View {
             }
             .onTapGesture {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    homeViewModel.moveSet -= UIScreen.main.bounds.width
+                    homeViewModel.currentScreen = .playlists
                 }
             }
         }
