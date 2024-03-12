@@ -9,7 +9,6 @@ import SwiftUI
 import MusicKit
 
 struct ContentView: View {
-    @Environment(HomeViewModel.self) var homeViewModel
     @Environment(AuthService.self) var authService
     
     var body: some View {
@@ -20,12 +19,9 @@ struct ContentView: View {
             if authService.status != .authorized {
                 AuthView(musicAuthorizationStatus: $authServicee.status)
             } else {
-                if let _ = homeViewModel.songService.randomSongs.first {
-                    Home()
-                }
+                Home()
             }
         }
-        .environment(homeViewModel)
         .environment(authService)
     }
 }

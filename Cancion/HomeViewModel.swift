@@ -78,21 +78,23 @@ import MusicKit
     }
     
     @MainActor
-    func initializeQueue(songs: [Song]) {
+    func initializeQueue() {
         Task {
             do {
-                if let song = songs.first {
+                if let song = songService.randomSongs.first {
                     cancion = song
-                }
-                player.queue = ApplicationMusicPlayer.Queue(for: songs, startingAt: songs[0])
-                try await player.prepareToPlay()
-                
-                isPlaybackQueueSet = true
-                if let cancion {
-                    startObservingCurrentTrack(cancion: cancion)
+                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: song)
+                    try await player.prepareToPlay()
+                    
+                    isPlaybackQueueSet = true
+                    if let cancion {
+                        startObservingCurrentTrack(cancion: cancion)
+                    }
+                } else {
+                    initializeQueue()
                 }
             } catch {
-                
+                initializeQueue()
             }
         }
     }

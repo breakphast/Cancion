@@ -11,11 +11,10 @@ import MusicKit
 struct AuthView: View {
     @Binding var musicAuthorizationStatus: MusicAuthorization.Status
     @Environment(\.openURL) var openURL
-    @State private var authService = AuthService.shared
     
     var body: some View {
         VStack {
-            if musicAuthorizationStatus == .notDetermined || musicAuthorizationStatus == .denied {
+            if musicAuthorizationStatus != .authorized {
                 Button {
                     authorizeAction()
                 } label: {

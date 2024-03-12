@@ -19,6 +19,7 @@ struct PlaylistView: View {
     @State private var scrollID: String?
     var playCountAscending = false
     @Environment(\.modelContext) var modelContext
+    @FocusState var isFocused: Bool
     
     var playlist: Playlista
     @State private var showGenerator = false
@@ -59,6 +60,9 @@ struct PlaylistView: View {
         .fullScreenCover(isPresented: $showGenerator) {
             EditPlaylistView(playlist: playlist)
                 .environment(playlistGeneratorViewModel)
+        }
+        .onChange(of: homeViewModel.currentScreen) { _, _ in
+            isFocused = false
         }
         .onAppear {
             scrollID = "cover"
@@ -137,6 +141,7 @@ struct PlaylistView: View {
                 viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs, using: songService.sortedSongs)
             }
             .padding(.horizontal)
+            .focused($isFocused)
     }
     private var headerItems: some View {
         HStack {

@@ -71,13 +71,25 @@ struct Home: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .task {
+                        getSongs()
+                        viewModel.initializeQueue()
+                    }
             }
         }
         .environment(viewModel)
-        .task {
-            viewModel.initializeQueue(songs: viewModel.songService.randomSongs)
+    }
+    
+    @MainActor
+    private func getSongs() {
+        Task {
+            try await viewModel.songService.smartFilterSongs(limit: 1500, by: .playCount)
+            if viewModel.songService.randomSongs.isEmpty {
+                getSongs()
+            }
         }
     }
+    
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
         HStack {
             Spacer()

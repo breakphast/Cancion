@@ -20,6 +20,7 @@ struct PlaylistGenerator: View {
     @State private var playlistName = ""
     @State private var item: PhotosPickerItem?
     @State private var imageData: Data?
+    @FocusState var isFocused: Bool
     
     var image: Image? {
         if let imageData, let uiiImage = UIImage(data: imageData) {
@@ -62,6 +63,9 @@ struct PlaylistGenerator: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .padding(.top)
+        }
+        .onChange(of: homeViewModel.currentScreen) { _, _ in
+            isFocused = false
         }
     }
     
@@ -131,6 +135,7 @@ struct PlaylistGenerator: View {
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
+                        .focused($isFocused)
                 }
                 .blur(radius: !viewModel.smartRulesActive ? 2 : 0)
                 
@@ -236,6 +241,7 @@ struct PlaylistGenerator: View {
                 .lineLimit(1)
                 .padding(.horizontal, 24)
                 .autocorrectionDisabled()
+                .focused($isFocused)
                 
             RoundedRectangle(cornerRadius: 2)
                 .frame(height: 1)

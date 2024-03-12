@@ -13,6 +13,7 @@ struct SongList: View {
     @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
     @State var scrollID: Int?
+    @FocusState var isFocused: Bool
     
     var songs: [Song] {
         switch viewModel.playCountAscending {
@@ -32,6 +33,7 @@ struct SongList: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         songSearchTextField
+                            .focused($isFocused)
                         headerItems
                             .id(33)
                         songList
@@ -51,6 +53,9 @@ struct SongList: View {
         }
         .gesture(homeViewModel.swipeGesture)
         .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width)
+        .onChange(of: homeViewModel.currentScreen) { _, _ in
+            isFocused = false
+        }
     }
     
     private var navHeaderItems: some View {
@@ -110,6 +115,7 @@ struct SongList: View {
                 text = text
                 viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, songItems: homeViewModel.songService.searchResultSongs, using: homeViewModel.songService.sortedSongs)
             }
+            .padding(.horizontal)
     }
     private var headerItems: some View {
         HStack {

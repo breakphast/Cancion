@@ -15,6 +15,7 @@ struct PlaylistList: View {
     @State private var text: String = ""
     @Environment(\.modelContext) var modelContext
     @Query var playlistas: [Playlista]
+    @FocusState var isFocused: Bool
     
     @State private var showGenerator = false
     
@@ -62,6 +63,9 @@ struct PlaylistList: View {
         }
         .gesture(homeViewModel.swipeGesture)
         .environment(viewModel)
+        .onChange(of: homeViewModel.currentScreen) { _, _ in
+            isFocused = false
+        }
     }
     private var newPlaylistButton: some View {
         Button {
@@ -137,6 +141,7 @@ struct PlaylistList: View {
             .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song in playlist", icon: "magnifyingglass"))
             .autocorrectionDisabled()
             .padding(.vertical, 8)
+            .focused($isFocused)
     }
 }
 

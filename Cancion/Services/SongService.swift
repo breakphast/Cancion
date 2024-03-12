@@ -14,13 +14,7 @@ import MusicKit
     var sortedSongs = [Song]()
     var limitFilter = LimitFilter(active: false, limit: "25", limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
     var filters: [any SongFilterModel] = [TitleFilter(value: "", condition: .contains)]
-    var fetchLimit: Int = 500
-    
-    init() {
-        Task {
-            try await smartFilterSongs(limit: fetchLimit, by: .playCount)
-        }
-    }
+    var fetchLimit: Int = 1500
     
     public func smartFilterSongs(limit: Int, by sortProperty: LibrarySongSortProperties, artist: String? = nil) async throws {
         var libraryRequest = MusicLibraryRequest<Song>()
