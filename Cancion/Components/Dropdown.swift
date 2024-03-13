@@ -14,7 +14,7 @@ struct Dropdown: View {
     @State var options: [String] = []
     
     var limitOptions: [String] {
-        let limits = Limit.limits(forType: playlist.limitType).map { $0.value }
+        let limits = Limit.limits(forType: playlist.limitType ?? LimitType.items.rawValue).map { $0.value }
         return limits
     }
     
@@ -38,7 +38,7 @@ struct Dropdown: View {
                     optionsView()
                 }
                 
-                SmartFilterComponent(title: $selection, limit: playlist.limit, type: type)
+                SmartFilterComponent(title: $selection, limit: playlist.limit ?? 0, type: type)
                     .frame(width: size.width - 1, height: size.height)
                     .onTapGesture {
                         index += 100
@@ -64,7 +64,7 @@ struct Dropdown: View {
                 handleFilterType(filter: filter)
 //                handleLimitFilters(option: playlistViewModel.genPlaylist.limitType)
             }
-            .onChange(of: playlist.limit, { oldValue, newValue in
+            .onChange(of: playlist.limit ?? 0, { oldValue, newValue in
                 if type == .limit {
                     selection = String(newValue)
                 }
@@ -132,6 +132,8 @@ struct Dropdown: View {
                     playlistViewModel.activeFilters[index].type = FilterType.title.rawValue
                 case FilterTitle.playCount.rawValue:
                     playlistViewModel.activeFilters[index].type = FilterType.plays.rawValue
+                case FilterTitle.dateAdded.rawValue:
+                    playlistViewModel.activeFilters[index].type = FilterType.dateAdded.rawValue
                 default:
                     print("No type found.")
                 }
@@ -182,7 +184,7 @@ struct Dropdown: View {
                 return
             }
         case .limit:
-            self.selection = String(playlist.limit)
+            self.selection = String(playlist.limit ?? 25)
         default:
             return
         }

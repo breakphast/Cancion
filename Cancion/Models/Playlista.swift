@@ -13,16 +13,16 @@ import SwiftData
 class Playlista {
     var id: UUID
     var title: String
-    var smartRules: Bool
-    var limit: Int
-    var limitType: String
-    var limitSortType: String
-    var filters = [FilterModel]()
+    var smartRules: Bool?
+    var limit: Int?
+    var limitType: String?
+    var limitSortType: String?
+    var filters: [FilterModel]? = []
     var liveUpdating: Bool
-    var sortOption: String
+    var sortOption: String?
     var songs: [String]
     var cover: Data? = nil
-    var matchRules: String
+    var matchRules: String?
     
     init(id: UUID = UUID(), title: String = "", smartRules: Bool = true, limit: Int = 25, limitType: String = "items", limitSortType: String = "most played", liveUpdating: Bool = true, sortOption: String = "most played", songs: [String] = [], matchRules: String = "any") {
         self.id = id

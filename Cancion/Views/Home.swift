@@ -32,14 +32,12 @@ struct Home: View {
                         
                         PlaylistList()
                         
-                        if !viewModel.generatorActive {
-                            tabs(UIScreen.main.bounds.size, artwork: art)
-                                .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
-                                .opacity(viewModel.isPlaybackQueueSet ? 1 : 0)
-                                .overlay {
-                                    backToPlayerButton
-                                }
-                        }
+                        tabs(UIScreen.main.bounds.size, artwork: art)
+                            .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
+                            .opacity(!viewModel.generatorActive ? 1 : 0)
+                            .overlay {
+                                backToPlayerButton
+                            }
                     } else {
                         ProgressView()
                     }

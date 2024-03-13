@@ -29,18 +29,18 @@ func matches(song: Song, filter: FilterModel) -> Bool {
     case Condition.equals.rawValue:
         switch filter.type {
         case FilterType.artist.rawValue:
-            return song.artistName == filter.value
+            return song.artistName.lowercased() == filter.value.lowercased()
         case FilterType.title.rawValue:
-            return song.title == filter.value
+            return song.title.lowercased() == filter.value.lowercased()
         default:
             return false
         }
     case Condition.contains.rawValue:
         switch filter.type {
         case FilterType.artist.rawValue:
-            return song.artistName.contains(filter.value)
+            return song.artistName.lowercased().contains(filter.value.lowercased())
         case FilterType.title.rawValue:
-            return song.title.contains(filter.value)
+            return song.title.lowercased().contains(filter.value.lowercased())
         default:
             return false
         }
@@ -72,4 +72,5 @@ enum FilterType: String, CaseIterable {
     case artist = "artist"
     case title = "title"
     case plays = "play count"
+    case dateAdded = "date added"
 }

@@ -24,15 +24,18 @@ struct PlaylistView: View {
     var playlist: Playlista
     @State private var showGenerator = false
     
-    var songs: [Song] {
+    @State var filteredSongs: [Song] = []
+    
+    var songs: [Song] { // sorted songs
         var ogSongs = homeViewModel.songService.sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
         
         switch viewModel.playCountAscending {
         case false:
-            return ogSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            ogSongs.sort { $0.playCount ?? 0 > $1.playCount ?? 0 }
         case true:
-            return ogSongs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0 }
+            ogSongs.sort { $1.playCount ?? 0 > $0.playCount ?? 0 }
         }
+        return viewModel.filterSongsByText(text: text, songs: ogSongs, using: ogSongs)
     }
     
     var body: some View {
@@ -137,9 +140,9 @@ struct PlaylistView: View {
         TextField("", text: $text)
             .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
             .autocorrectionDisabled()
-            .onChange(of: text) { _, _ in
-                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs, using: songService.sortedSongs)
-            }
+//            .onChange(of: text) { _, _ in
+//                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs, using: songService.sortedSongs)
+//            }
             .padding(.horizontal)
             .focused($isFocused)
     }
@@ -182,7 +185,7 @@ struct PlaylistView: View {
                             .shadow(radius: 3)
                     )
                     .padding()
-            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
+            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = homeViewModel.songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = homeViewModel.songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
                 if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
                     HStack(spacing: 0) {
                         ArtworkImage(artwork1, width: 200)

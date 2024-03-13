@@ -25,63 +25,69 @@ import MusicKit
     var limitActive = true
     var limitOptions = [String]()
     
-    var matchRules: MatchRules = .any
+    var matchRules: MatchRules? = .any
     
     var image: Image?
     var genPlaylist = Playlista()
     
     var dropdownActive = false
     
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel], matchRules: String, limitType: String, playlist: Playlista) async -> [String] {
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?, playlist: Playlista) async -> [String] {
         var filteredSongs = [Song]()
         var totalDuration = 0.0
         
-        if matchRules == MatchRules.all.rawValue {
-            filteredSongs = songs
-            for filter in filters {
-                filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
-            }
-        } else if matchRules == MatchRules.any.rawValue {
-            filteredSongs = songs.filter { song in
-                filters.contains { filter in
-                    matches(song: song, filter: filter)
+        if self.matchRules != nil {
+            if matchRules == MatchRules.all.rawValue, let filters {
+                filteredSongs = songs
+                for filter in filters {
+                    filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
+                }
+            } else if matchRules == MatchRules.any.rawValue, let filters {
+                filteredSongs = songs.filter { song in
+                    filters.contains { filter in
+                        matches(song: song, filter: filter)
+                    }
                 }
             }
         }
         
-        var limitedSongs = [Song]()
-        switch limitType {
-        case LimitType.items.rawValue:
-            limitedSongs = Array(filteredSongs.prefix(playlist.limit))
-            
-        case LimitType.hours.rawValue:
-            let maxMinutes = playlist.limit * 60
-            for song in filteredSongs {
-                if let duration = song.duration {
-                    if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
-                        limitedSongs.append(song)
-                        totalDuration += (duration / 60)
-                    } else {
-                        break
+        if limitActive, let limit = playlist.limit {
+            var limitedSongs = [Song]()
+            switch limitType {
+            case LimitType.items.rawValue:
+                limitedSongs = Array(filteredSongs.prefix(limit))
+                
+            case LimitType.hours.rawValue:
+                let maxMinutes = limit * 60
+                for song in filteredSongs {
+                    if let duration = song.duration {
+                        if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
+                            limitedSongs.append(song)
+                            totalDuration += (duration / 60)
+                        } else {
+                            break
+                        }
                     }
                 }
-            }
-        case LimitType.minutes.rawValue:
-            let maxMinutes = playlist.limit
-            for song in filteredSongs {
-                if let duration = song.duration {
-                    if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
-                        limitedSongs.append(song)
-                        totalDuration += (duration / 60)
-                    } else {
-                        break
+            case LimitType.minutes.rawValue:
+                let maxMinutes = limit
+                for song in filteredSongs {
+                    if let duration = song.duration {
+                        if (totalDuration + (duration / 60)) <= Double(maxMinutes) {
+                            limitedSongs.append(song)
+                            totalDuration += (duration / 60)
+                        } else {
+                            break
+                        }
                     }
                 }
+            default:
+                break
             }
-        default:
-            break
+            return limitedSongs.map { $0.id.rawValue }
         }
-        return limitedSongs.map { $0.id.rawValue }
+        
+        return filteredSongs.map { $0.id.rawValue }
     }
 
     func generatePlaylist(songs: [Song], name: String, cover: Data? = nil) async -> Playlista? {
@@ -89,7 +95,7 @@ import MusicKit
             image = Image(uiImage: uiImage)
         }
         let limit = genPlaylist.limit
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules.rawValue, limitType: genPlaylist.limitType, playlist: genPlaylist)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules?.rawValue, limitType: genPlaylist.limitType, playlist: genPlaylist)
         do {
             let model = Playlista()
             model.title = name
@@ -98,7 +104,7 @@ import MusicKit
             model.songs = songIDS
             model.cover = cover
             model.limit = limit
-            model.matchRules = matchRules.rawValue
+            model.matchRules = matchRules?.rawValue ?? ""
             model.liveUpdating = liveUpdating
             model.limitType = genPlaylist.limitType
             

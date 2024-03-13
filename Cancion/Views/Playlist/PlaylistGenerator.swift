@@ -222,12 +222,11 @@ struct PlaylistGenerator: View {
     
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: playlistName, cover: imageData) {
+        if let model = await viewModel.generatePlaylist(songs: homeViewModel.songService.sortedSongs, name: playlistName, cover: imageData) {
             modelContext.insert(model)
             viewModel.activeFilters = []
             viewModel.activeFilters = [FilterModel()]
             
-            print(model.limit, model.smartRules)
             return true
         }
         return false

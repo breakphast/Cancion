@@ -14,11 +14,15 @@ import MusicKit
     var searchActive = false
     var selectedFilter: String? = nil
         
-    func filterSongsByText(text: String, songs: inout [Song], songItems: MusicItemCollection<Song>, using staticSongs: [Song]) {
+    func filterSongsByText(text: String, songs: [Song], using staticSongs: [Song]) -> [Song] {
+        var filteredSongs = songs
+        
         if !text.isEmpty {
-            songs = Array(songItems).filter { $0.title.contains(text) || $0.artistName.contains(text) && $0.artwork != nil }
+            filteredSongs = songs.filter { $0.title.contains(text) || $0.artistName.contains(text) && $0.artwork != nil }
         } else {
-            songs = Array(songItems).filter { $0.artwork != nil }
+            filteredSongs = songs.filter { $0.artwork != nil }
         }
+        
+        return filteredSongs
     }
 }

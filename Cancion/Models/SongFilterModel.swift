@@ -81,6 +81,7 @@ enum FilterTitle: String {
     case artist = "Artist"
     case title = "Title"
     case playCount = "Play Count"
+    case dateAdded = "Date Added"
 }
 
 enum ConditionalTitle: String {

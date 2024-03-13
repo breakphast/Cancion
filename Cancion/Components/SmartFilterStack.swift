@@ -16,8 +16,12 @@ struct SmartFilterStack: View {
     var editing = false
     
     @State var filterText = ""
-    var filters: [FilterModel] {
+    var filters: [FilterModel]? {
         return editing ? playlist.filters : playlistViewModel.activeFilters
+    }
+    
+    var isDateStack: Bool {
+        return filter.type == FilterType.dateAdded.rawValue
     }
     
     var body: some View {
@@ -25,10 +29,15 @@ struct SmartFilterStack: View {
             HStack {
                 Dropdown(filter: filter, type: .smartFilter, playlist: playlist)
                 Dropdown(filter: filter, type: .smartCondition, playlist: playlist)
-                SmartFilterTextField(text: $filterText, type: .filter)
-                    .onChange(of: filterText) { oldValue, newValue in
-                        handleSmartFilterText(filters: filters)
-                    }
+                if isDateStack {
+                    DatePickr()
+                        .padding(.trailing, 4)
+                } else {
+                    SmartFilterTextField(text: $filterText, type: .filter)
+                        .onChange(of: filterText) { oldValue, newValue in
+                            if let filters { handleSmartFilterText(filters: filters) }
+                        }
+                }
                 addFilterButton
             }
         }

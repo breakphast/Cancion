@@ -128,13 +128,15 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(playlist.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: playlist.filters[index], playlist: playlist, editing: true)
-                        .disabled(!playlist.smartRules)
-                        .zIndex(Double(100 - index))
-                        .environment(viewModel)
+                if let filters = playlist.filters, let smartRules = playlist.smartRules {
+                    ForEach(filters.indices, id: \.self) { index in
+                        SmartFilterStack(filter: filters[index], playlist: playlist, editing: true)
+                            .disabled(!smartRules)
+                            .zIndex(Double(100 - index))
+                            .environment(viewModel)
+                    }
+                    .blur(radius: !smartRules ? 2 : 0)
                 }
-                .blur(radius: !playlist.smartRules ? 2 : 0)
                 
                 RoundedRectangle(cornerRadius: 1)
                     .frame(height: 1)
@@ -176,7 +178,7 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
-                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
+                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
                         var shouldSave = false
                         if !songIDs.isEmpty {
                             playlist.songs = songIDs

@@ -13,11 +13,12 @@ struct PlaylistListRow: View {
     let playlist: Playlista
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @State private var showMenu = false
     
     var song: Song? {
-        if let songID = playlist.songs.first, let song = songService.sortedSongs.first(where: {$0.id.rawValue == songID}) {
+        if let songID = playlist.songs.first, let song = homeViewModel.songService.sortedSongs.first(where: {$0.id.rawValue == songID}) {
             return song
         }
         return nil
