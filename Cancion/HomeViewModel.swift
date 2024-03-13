@@ -34,6 +34,7 @@ import MusicKit
     var previousQueueEntryID: String?
     let swipeThreshold: CGFloat = 50.0
     var currentScreen: Screen = .player
+    var queueActive = false
     
     var moveSet: CGFloat {
         switch currentScreen {
@@ -67,14 +68,26 @@ import MusicKit
     }
     
     @MainActor
-    func handleAutoQueue(forward: Bool) {
-        print("Queue auto progressing...")
-        changing = true
-        nextIndex += (forward ? 1 : -1)
-        cancion = songService.randomSongs[nextIndex]
-        startObservingCurrentTrack(cancion: songService.randomSongs[nextIndex])
-        blockExternalChange = false
-        changing = false
+    func findMatchingSong(entry: MusicPlayer.Queue.Entry) {
+        switch entry.item {
+        case .song(let song):
+            if let songSong = songService.sortedSongs.first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
+                cancion = songSong
+                startObservingCurrentTrack(cancion: songSong)
+            }
+        default:
+            return
+        }
+    }
+    
+    @MainActor
+    func getSongs() {
+        Task {
+            try await songService.smartFilterSongs(limit: 1500, by: .playCount)
+            if songService.randomSongs.isEmpty {
+                getSongs()
+            }
+        }
     }
     
     @MainActor
@@ -140,14 +153,8 @@ import MusicKit
     
     @MainActor
     func handleChangePress(songs: [Song], forward: Bool) async throws {
-        guard !blockExternalChange && !changing else { return }
-        blockExternalChange = true
-        changing = true
         do {
             progress = .zero
-            nextIndex += (forward ? 1 : -1)
-            cancion = songs[nextIndex]
-            startObservingCurrentTrack(cancion: songs[nextIndex])
             try await (forward ? player.skipToNextEntry() : player.skipToPreviousEntry())
         } catch {
             print("ERROR:", error.localizedDescription)
@@ -156,15 +163,7 @@ import MusicKit
     
     @MainActor
     func handleSongSelected(song: Song) {
-        guard !blockExternalChange && !changing else { return }
-        
-        blockExternalChange = true
         changing = true
-        let songs = songService.randomSongs
-        songService.randomSongs.removeAll(where: {$0.id == song.id})
-        songService.randomSongs[nextIndex] = song
-        cancion = song
-        startObservingCurrentTrack(cancion: song)
         Task {
             try await player.queue.insert(song, position: .afterCurrentEntry)
             try await player.skipToNextEntry()

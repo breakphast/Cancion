@@ -10,13 +10,12 @@ import MusicKit
 
 struct Home: View {
     @Environment(HomeViewModel.self) var viewModel
-    var cancion: Song? {
-        return viewModel.cancion
-    }
-    
     @ObservedObject private var playerState = ApplicationMusicPlayer.shared.state
     private var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
+    }
+    private var cancion: Song? {
+        return viewModel.cancion
     }
     
     var body: some View {
@@ -42,50 +41,30 @@ struct Home: View {
                         ProgressView()
                     }
                 }
-                .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newValue in
-                    guard let oldValue, let newValue else { 
-                        viewModel.blockExternalChange = false
+                .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newSong in
+                    Task {
+                        guard let oldValue, let newSong else {
+                            if viewModel.changing, let newSong {
+                                viewModel.findMatchingSong(entry: newSong)
+                            }
+                            return
+                        }
+                        
                         viewModel.changing = false
-                        return
+                        viewModel.queueActive = true
+                        viewModel.findMatchingSong(entry: newSong)
                     }
-                    
-                    if let previousID = viewModel.previousQueueEntryID {
-                        if !viewModel.blockExternalChange || !viewModel.changing {
-                            viewModel.handleAutoQueue(forward: previousID != newValue.id ? true : false)
-                        } else {
-                            viewModel.blockExternalChange = false
-                            viewModel.changing = false
-                        }
-                    } else {
-                        if !viewModel.blockExternalChange || !viewModel.changing {
-                            viewModel.handleAutoQueue(forward: true)
-                        } else {
-                            viewModel.blockExternalChange = false
-                            viewModel.changing = false
-                        }
-                    }
-                    viewModel.previousQueueEntryID = oldValue.id
                 }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     .task {
-                        getSongs()
+                        viewModel.getSongs()
                         viewModel.initializeQueue()
                     }
             }
         }
         .environment(viewModel)
-    }
-    
-    @MainActor
-    private func getSongs() {
-        Task {
-            try await viewModel.songService.smartFilterSongs(limit: 1500, by: .playCount)
-            if viewModel.songService.randomSongs.isEmpty {
-                getSongs()
-            }
-        }
     }
     
     private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
@@ -94,7 +73,7 @@ struct Home: View {
             TabIcon(icon: "backward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .overlay {
                     Circle()
-                        .fill(viewModel.nextIndex <= 0 ? Color.oreo.opacity(0.6) : .clear)
+                        .fill(!viewModel.queueActive ? Color.oreo.opacity(0.6) : .clear)
                 }
                 .disabled(viewModel.nextIndex <= 0)
                 .onTapGesture {

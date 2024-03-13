@@ -18,7 +18,7 @@ struct PlaylistListRow: View {
     @State private var showMenu = false
     
     var song: Song? {
-        if let songID = playlist.songs.first, let song = homeViewModel.songService.sortedSongs.first(where: {$0.id.rawValue == songID}) {
+        if let songID = playlist.songs.first, let song = Array(homeViewModel.songService.searchResultSongs).first(where: {$0.id.rawValue == songID}) {
             return song
         }
         return nil

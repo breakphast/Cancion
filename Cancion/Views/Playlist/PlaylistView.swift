@@ -27,7 +27,7 @@ struct PlaylistView: View {
     @State var filteredSongs: [Song] = []
     
     var songs: [Song] { // sorted songs
-        var ogSongs = homeViewModel.songService.sortedSongs.filter { playlist.songs.contains($0.id.rawValue) }
+        var ogSongs = Array(homeViewModel.songService.searchResultSongs).filter { playlist.songs.contains($0.id.rawValue) }
         
         switch viewModel.playCountAscending {
         case false:
@@ -185,7 +185,7 @@ struct PlaylistView: View {
                             .shadow(radius: 3)
                     )
                     .padding()
-            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = homeViewModel.songService.sortedSongs.first(where: { $0.id.rawValue == songID }), let song2 = homeViewModel.songService.sortedSongs.first(where: { $0.id.rawValue == songID2 }) {
+            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = Array(homeViewModel.songService.searchResultSongs).first(where: { $0.id.rawValue == songID }), let song2 = Array(homeViewModel.songService.searchResultSongs).first(where: { $0.id.rawValue == songID2 }) {
                 if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
                     HStack(spacing: 0) {
                         ArtworkImage(artwork1, width: 200)
