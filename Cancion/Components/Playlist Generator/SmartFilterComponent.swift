@@ -25,7 +25,7 @@ struct SmartFilterComponent: View {
                 Text(dropS ? String(title.dropLast()) : title)
                     .font(.caption2)
                     .fontWeight(.black)
-                    .lineLimit(type == .songListSort ? 1 : 0)
+                    .lineLimit(2)
                 if type != .limit && type != .songListSort {
                     Spacer()
                     Image(systemName: "chevron.up.chevron.down")

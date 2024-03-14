@@ -32,35 +32,32 @@ import MusicKit
     
     var dropdownActive = false
     
-    var dateFilterType: DateFilterType? = .dateAdded
-    var dateAdded: Date = Date()
-    var lastPlayedDate: Date?
+    var filteredDate: Date = Date()
     
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?, playlist: Playlista) async -> [String] {
-        var filteredSongs = [Song]()
+        var filteredSongs = songs
         var totalDuration = 0.0
         
         if self.matchRules != nil {
             if matchRules == MatchRules.all.rawValue, let filters {
                 filteredSongs = songs
                 for filter in filters {
-                    filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter) }
+                    filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: filteredDate) }
                 }
             } else if matchRules == MatchRules.any.rawValue, let filters {
                 filteredSongs = songs.filter { song in
                     filters.contains { filter in
-                        matches(song: song, filter: filter)
+                        matches(song: song, filter: filter, date: filteredDate)
                     }
                 }
             }
         }
-        
+                
         if limitActive, let limit = playlist.limit {
             var limitedSongs = [Song]()
             switch limitType {
             case LimitType.items.rawValue:
                 limitedSongs = Array(filteredSongs.prefix(limit))
-                
             case LimitType.hours.rawValue:
                 let maxMinutes = limit * 60
                 for song in filteredSongs {
@@ -88,6 +85,7 @@ import MusicKit
             default:
                 break
             }
+            
             return limitedSongs.map { $0.id.rawValue }
         }
         

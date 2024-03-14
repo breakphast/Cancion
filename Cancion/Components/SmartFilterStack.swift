@@ -20,7 +20,7 @@ struct SmartFilterStack: View {
     }
     
     var isDateStack: Bool {
-        return filter.type == FilterType.dateAdded.rawValue
+        return [FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue].contains(filter.type)
     }
     
     var body: some View {

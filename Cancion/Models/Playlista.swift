@@ -24,16 +24,18 @@ class Playlista {
     var cover: Data? = nil
     var matchRules: String?
     
-    init(id: UUID = UUID(), title: String = "", smartRules: Bool = true, limit: Int = 25, limitType: String = "items", limitSortType: String = "most played", liveUpdating: Bool = true, sortOption: String = "most played", songs: [String] = [], matchRules: String = "any") {
+    init(id: UUID = UUID(), title: String = "", smartRules: Bool? = true, limit: Int? = 25, limitType: String? = "items", limitSortType: String? = "most played", filters: [FilterModel]? = [], liveUpdating: Bool = true, sortOption: String? = "most played", songs: [String] = [], cover: Data? = nil, matchRules: String? = "any") {
         self.id = id
         self.title = title
         self.smartRules = smartRules
         self.limit = limit
         self.limitType = limitType
         self.limitSortType = limitSortType
+        self.filters = filters
         self.liveUpdating = liveUpdating
         self.sortOption = sortOption
         self.songs = songs
+        self.cover = cover
         self.matchRules = matchRules
     }
 }

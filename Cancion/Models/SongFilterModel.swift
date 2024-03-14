@@ -82,6 +82,7 @@ enum FilterTitle: String {
     case title = "Title"
     case playCount = "Play Count"
     case dateAdded = "Date Added"
+    case lastPlayedDate = "Last Played"
 }
 
 enum ConditionalTitle: String {
@@ -96,8 +97,8 @@ enum Condition: String {
     case doesNotContain = "does not contain"
     case greaterThan = "greater than"
     case lessThan = "less than"
-    case before = "before"
-    case after = "after"
+    case before = "is before"
+    case after = "is after"
 }
 
 extension SongFilterModel {

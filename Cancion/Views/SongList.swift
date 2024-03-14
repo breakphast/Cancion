@@ -10,6 +10,7 @@ import MusicKit
 
 enum SongSortOption: String {
     case dateAdded = "Date Added"
+    case lastPlayed = "Last Played"
     case plays = "Plays"
 }
 
@@ -31,6 +32,8 @@ struct SongList: View {
                 return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
             case .plays:
                 return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
             }
         case true:
             switch sortOption {
@@ -38,6 +41,8 @@ struct SongList: View {
                 return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
             case .plays:
                 return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
             }
         }
     }
@@ -142,7 +147,7 @@ struct SongList: View {
             
             Spacer()
             
-            SortDropdown(options: ["Date Added", "Plays"])
+            SortDropdown(options: ["Plays", "Date Added", "Last Played"])
                 .frame(maxWidth: 100)
                 .frame(height: 33)
             Image(systemName: "chevron.down")

@@ -46,6 +46,15 @@ struct SongListRow: View {
             case .plays:
                 Text("\(song.playCount ?? 0)")
                     .fontWeight(.bold)
+            case .lastPlayed:
+                if let lastPlayedDate = song.lastPlayedDate {
+                    HStack(spacing: 2) {
+                        Text(homeViewModel.dateFormatter.string(from: lastPlayedDate))
+                    }
+                    .foregroundStyle(.oreo)
+                    .font(.caption2)
+                    .fontWeight(.black)
+                }
             }
         }
     }

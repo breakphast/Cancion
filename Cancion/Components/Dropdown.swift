@@ -61,7 +61,6 @@ struct Dropdown: View {
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
             .onChange(of: filter.type) { oldValue, newValue in
                 handleFilterType(filter: filter)
-//                handleLimitFilters(option: playlistViewModel.genPlaylist.limitType)
             }
             .onChange(of: playlist.limit ?? 0, { oldValue, newValue in
                 if type == .limit {
@@ -133,6 +132,8 @@ struct Dropdown: View {
                     playlistViewModel.activeFilters[index].type = FilterType.plays.rawValue
                 case FilterTitle.dateAdded.rawValue:
                     playlistViewModel.activeFilters[index].type = FilterType.dateAdded.rawValue
+                case FilterTitle.lastPlayedDate.rawValue.capitalized:
+                    playlistViewModel.activeFilters[index].type = FilterType.lastPlayedDate.rawValue
                 default:
                     print("No type found.")
                 }
@@ -154,6 +155,10 @@ struct Dropdown: View {
                     playlistViewModel.activeFilters[index].condition = Condition.greaterThan.rawValue
                 case Condition.lessThan.rawValue:
                     playlistViewModel.activeFilters[index].condition = Condition.lessThan.rawValue
+                case Condition.before.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.before.rawValue
+                case Condition.after.rawValue:
+                    playlistViewModel.activeFilters[index].condition = Condition.after.rawValue
                 default:
                     print("No type found.")
                 }
@@ -179,6 +184,10 @@ struct Dropdown: View {
                 self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
                 self.selection = Condition.greaterThan.rawValue
                 handleSmartConditions(option: Condition.greaterThan.rawValue)
+            case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:
+                self.options = [Condition.equals, Condition.before, Condition.after].map {$0.rawValue}
+                self.selection = Condition.after.rawValue
+                handleSmartConditions(option: Condition.after.rawValue)
             default:
                 return
             }

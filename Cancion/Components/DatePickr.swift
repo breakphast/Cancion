@@ -19,13 +19,13 @@ struct DatePickr: View {
     var body: some View {
         VStack {
             ZStack {
-                DatePicker("Date", selection: $playlistGenViewModel.dateAdded, in: ...Date.now, displayedComponents: .date)
+                DatePicker("Date", selection: $playlistGenViewModel.filteredDate, in: ...Date.now, displayedComponents: .date)
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.white)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.oreo.opacity(0.1))
-                    Text(dateFormatter.string(from: playlistGenViewModel.dateAdded))
+                    Text(dateFormatter.string(from: playlistGenViewModel.filteredDate))
                         .foregroundStyle(.oreo)
                         .font(.caption.bold())
                 }
