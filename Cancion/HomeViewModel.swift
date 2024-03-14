@@ -17,24 +17,24 @@ import MusicKit
         return (playerState.playbackStatus == .playing)
     }
     @MainActor var cancion: Song?
-    
     var filterActive = false
     var progress: CGFloat = .zero
-    var nextIndex = 0
-    
-    var customQueueSong: Song? = nil
     var currentTimer: Timer? = nil
     
     var generatorActive = false
     var isPlaybackQueueSet = false
-    var altQueueActive = false
     var songService = SongService()
-    var changing = false
-    var blockExternalChange = false
-    var previousQueueEntryID: String?
+    var selectionChange = false
     let swipeThreshold: CGFloat = 50.0
     var currentScreen: Screen = .player
     var queueActive = false
+    
+    var songSort: SongSortOption = .plays
+    
+    let dateFormatter = DateFormatter()
+    init() {
+        dateFormatter.dateFormat = "M/d/yy"
+    }
     
     var moveSet: CGFloat {
         switch currentScreen {
@@ -71,7 +71,7 @@ import MusicKit
     func findMatchingSong(entry: MusicPlayer.Queue.Entry) {
         switch entry.item {
         case .song(let song):
-            if let songSong = songService.sortedSongs.first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
+            if let songSong = Array(songService.searchResultSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
                 cancion = songSong
                 startObservingCurrentTrack(cancion: songSong)
             }
@@ -163,7 +163,7 @@ import MusicKit
     
     @MainActor
     func handleSongSelected(song: Song) {
-        changing = true
+        selectionChange = true
         Task {
             try await player.queue.insert(song, position: .afterCurrentEntry)
             try await player.skipToNextEntry()

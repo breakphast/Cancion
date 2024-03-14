@@ -96,6 +96,8 @@ enum Condition: String {
     case doesNotContain = "does not contain"
     case greaterThan = "greater than"
     case lessThan = "less than"
+    case before = "before"
+    case after = "after"
 }
 
 extension SongFilterModel {

@@ -8,19 +8,37 @@
 import SwiftUI
 import MusicKit
 
+enum SongSortOption: String {
+    case dateAdded = "Date Added"
+    case plays = "Plays"
+}
+
 struct SongList: View {
     @Environment(SongListViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @State private var text: String = ""
     @State var scrollID: Int?
     @FocusState var isFocused: Bool
+    private var sortOption: SongSortOption {
+        return homeViewModel.songSort
+    }
     
     var songs: [Song] {
         switch viewModel.playCountAscending {
         case false:
-            return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            }
         case true:
-            return homeViewModel.songService.sortedSongs.sorted { $1.playCount ?? 0 > $0.playCount ?? 0 }
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
+            }
         }
     }
     
@@ -35,6 +53,7 @@ struct SongList: View {
                         songSearchTextField
                             .focused($isFocused)
                         headerItems
+                            .zIndex(2000)
                             .id(33)
                         songList
                     }
@@ -123,19 +142,18 @@ struct SongList: View {
             
             Spacer()
             
-            Button {
-                viewModel.playCountAscending.toggle()
-            } label: {
-                HStack {
-                    Text("PLAYS")
-                    Image(systemName: "chevron.down")
-                        .bold()
-                        .rotationEffect(.degrees(viewModel.playCountAscending ? 180 : 0))
+            SortDropdown(options: ["Date Added", "Plays"])
+                .frame(maxWidth: 100)
+                .frame(height: 33)
+            Image(systemName: "chevron.down")
+                .font(.title3.bold())
+                .rotationEffect(.degrees(viewModel.playCountAscending ? 180 : 0))
+                .contentShape(Circle())
+                .onTapGesture {
+                    viewModel.playCountAscending.toggle()
                 }
-            }
         }
         .font(.subheadline.bold())
-        .opacity(0.7)
         .padding(.vertical, 8)
     }
     private var songList: some View {

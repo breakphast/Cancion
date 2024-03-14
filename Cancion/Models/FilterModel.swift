@@ -24,7 +24,7 @@ class FilterModel {
     }
 }
 
-func matches(song: Song, filter: FilterModel) -> Bool {
+func matches(song: Song, filter: FilterModel, date: Date = Date()) -> Bool {
     switch filter.condition {
     case Condition.equals.rawValue:
         switch filter.type {
@@ -73,4 +73,9 @@ enum FilterType: String, CaseIterable {
     case title = "title"
     case plays = "play count"
     case dateAdded = "date added"
+}
+
+enum DateFilterType: String {
+    case dateAdded = "date added"
+    case lastPlayedDate = "last played date"
 }

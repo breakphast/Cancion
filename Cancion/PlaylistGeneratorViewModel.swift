@@ -32,6 +32,10 @@ import MusicKit
     
     var dropdownActive = false
     
+    var dateFilterType: DateFilterType? = .dateAdded
+    var dateAdded: Date = Date()
+    var lastPlayedDate: Date?
+    
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?, playlist: Playlista) async -> [String] {
         var filteredSongs = [Song]()
         var totalDuration = 0.0

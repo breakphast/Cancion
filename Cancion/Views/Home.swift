@@ -44,13 +44,13 @@ struct Home: View {
                 .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newSong in
                     Task {
                         guard let oldValue, let newSong else {
-                            if viewModel.changing, let newSong {
+                            if viewModel.selectionChange, let newSong {
                                 viewModel.findMatchingSong(entry: newSong)
                             }
                             return
                         }
                         
-                        viewModel.changing = false
+                        viewModel.selectionChange = false
                         viewModel.queueActive = true
                         viewModel.findMatchingSong(entry: newSong)
                     }
@@ -75,7 +75,7 @@ struct Home: View {
                     Circle()
                         .fill(!viewModel.queueActive ? Color.oreo.opacity(0.6) : .clear)
                 }
-                .disabled(viewModel.nextIndex <= 0)
+                .disabled(!viewModel.queueActive)
                 .onTapGesture {
                     Task {
                         try await viewModel.handleChangePress(songs: viewModel.songService.randomSongs, forward: false)

@@ -8,23 +8,24 @@
 import SwiftUI
 
 struct DatePickr: View {
-    @State private var birthDate = Date.now
-    let dateFormatter = DateFormatter()
+    @Bindable var playlistGenViewModel: PlaylistGeneratorViewModel
     
-    init() {
+    let dateFormatter = DateFormatter()
+    init(playlistGenViewModel: PlaylistGeneratorViewModel) {
+        self.playlistGenViewModel = playlistGenViewModel
         dateFormatter.dateFormat = "MMM dd, yyyy"
     }
     
     var body: some View {
         VStack {
             ZStack {
-                DatePicker("Date", selection: $birthDate, in: ...Date.now, displayedComponents: .date)
+                DatePicker("Date", selection: $playlistGenViewModel.dateAdded, in: ...Date.now, displayedComponents: .date)
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.white)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.oreo.opacity(0.1))
-                    Text(dateFormatter.string(from: birthDate))
+                    Text(dateFormatter.string(from: playlistGenViewModel.dateAdded))
                         .foregroundStyle(.oreo)
                         .font(.caption.bold())
                 }
@@ -33,8 +34,4 @@ struct DatePickr: View {
             .frame(height: 44)
         }
     }
-}
-
-#Preview {
-    DatePickr()
 }

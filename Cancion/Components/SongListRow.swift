@@ -9,9 +9,12 @@ import SwiftUI
 import MusicKit
 
 struct SongListRow: View {
+    @Environment(HomeViewModel.self) var homeViewModel
     let song: Song
     let index: Int
-    
+    var songSort: SongSortOption {
+        return homeViewModel.songSort
+    }
     var body: some View {
         VStack {
             HStack {
@@ -20,15 +23,33 @@ struct SongListRow: View {
                 songInfo
                 
                 Spacer()
-                
-                Text("\(song.playCount ?? 0)")
-                    .fontWeight(.bold)
+                sortInfo
             }
             .frame(height: 55)
             
             CustomDivider()
         }
     }
+    
+    private var sortInfo: some View {
+        ZStack {
+            switch songSort {
+            case .dateAdded:
+                if let dateAdded = song.libraryAddedDate {
+                    HStack(spacing: 2) {
+                        Text(homeViewModel.dateFormatter.string(from: dateAdded))
+                    }
+                    .foregroundStyle(.oreo)
+                    .font(.caption2)
+                    .fontWeight(.black)
+                }
+            case .plays:
+                Text("\(song.playCount ?? 0)")
+                    .fontWeight(.bold)
+            }
+        }
+    }
+    
     private var songBadge: some View {
         ZStack {
             Image(systemName: "seal.fill")

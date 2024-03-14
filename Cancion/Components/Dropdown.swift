@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct Dropdown: View {
-    @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     @State var filter = FilterModel()
     @State var options: [String] = []
@@ -220,4 +219,5 @@ enum DropdownType {
     case limit
     case limitType
     case limitSortType
+    case songListSort
 }

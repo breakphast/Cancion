@@ -33,6 +33,7 @@
 		3E7B2E392B7FAA1500476A76 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7B2E382B7FAA1500476A76 /* Home.swift */; };
 		3E92F2E52B8D2D89007C4E1E /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E92F2E42B8D2D89007C4E1E /* HomeViewModel.swift */; };
 		3EA08C872B88175B0079BA18 /* SongListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA08C862B88175B0079BA18 /* SongListViewModel.swift */; };
+		3EA333D32BA34036006C6646 /* SortDropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA333D22BA34036006C6646 /* SortDropdown.swift */; };
 		3EA42AAB2B83CF6B00F0A4C0 /* SongList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA42AAA2B83CF6B00F0A4C0 /* SongList.swift */; };
 		3EA42AAD2B83FB9500F0A4C0 /* Dropdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA42AAC2B83FB9500F0A4C0 /* Dropdown.swift */; };
 		3EB45AED2B8541A5006F4EDB /* PlaylistGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB45AEC2B8541A5006F4EDB /* PlaylistGenerator.swift */; };
@@ -70,6 +71,7 @@
 		3E7D465E2B8C0615000849F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3E92F2E42B8D2D89007C4E1E /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		3EA08C862B88175B0079BA18 /* SongListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongListViewModel.swift; sourceTree = "<group>"; };
+		3EA333D22BA34036006C6646 /* SortDropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortDropdown.swift; sourceTree = "<group>"; };
 		3EA42AAA2B83CF6B00F0A4C0 /* SongList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongList.swift; sourceTree = "<group>"; };
 		3EA42AAC2B83FB9500F0A4C0 /* Dropdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dropdown.swift; sourceTree = "<group>"; };
 		3EB45AEC2B8541A5006F4EDB /* PlaylistGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistGenerator.swift; sourceTree = "<group>"; };
@@ -156,11 +158,13 @@
 			isa = PBXGroup;
 			children = (
 				3EA42AAC2B83FB9500F0A4C0 /* Dropdown.swift */,
+				3EA333D22BA34036006C6646 /* SortDropdown.swift */,
 				3E3AE4392B86B48500FBDE10 /* SmartFilterStack.swift */,
 				3E5B3BE62BA1FB83005DF2A5 /* DatePickr.swift */,
 				3E3AE4302B86489F00FBDE10 /* Playlist Generator */,
 				3E3802DF2B8E461200839017 /* CustomDivider.swift */,
 				3E3802E12B8E46ED00839017 /* SongListRow.swift */,
+				3E3802E52B8E4B4800839017 /* PlaylistListRow.swift */,
 				3E3802E82B8E4D8300839017 /* TabIcon.swift */,
 			);
 			path = Components;
@@ -183,7 +187,6 @@
 				3EB45AEE2B86241D006F4EDB /* FilterCheckbox.swift */,
 				3EB45AF02B862980006F4EDB /* SmartFilterComponent.swift */,
 				3E3AE42E2B86372000FBDE10 /* LimitToStack.swift */,
-				3E3802E52B8E4B4800839017 /* PlaylistListRow.swift */,
 			);
 			path = "Playlist Generator";
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				3E244C272B7E557E00193CA0 /* AuthService.swift in Sources */,
 				3EB45AF12B862980006F4EDB /* SmartFilterComponent.swift in Sources */,
 				3E3AE42F2B86372000FBDE10 /* LimitToStack.swift in Sources */,
+				3EA333D32BA34036006C6646 /* SortDropdown.swift in Sources */,
 				3E5B3BE72BA1FB83005DF2A5 /* DatePickr.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

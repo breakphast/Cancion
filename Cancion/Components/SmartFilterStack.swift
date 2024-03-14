@@ -9,7 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct SmartFilterStack: View {
-    @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     let filter: FilterModel
     let playlist: Playlista
@@ -30,7 +29,7 @@ struct SmartFilterStack: View {
                 Dropdown(filter: filter, type: .smartFilter, playlist: playlist)
                 Dropdown(filter: filter, type: .smartCondition, playlist: playlist)
                 if isDateStack {
-                    DatePickr()
+                    DatePickr(playlistGenViewModel: playlistViewModel)
                         .padding(.trailing, 4)
                 } else {
                     SmartFilterTextField(text: $filterText, type: .filter)
