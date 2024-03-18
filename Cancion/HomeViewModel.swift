@@ -96,8 +96,12 @@ import MusicKit
             do {
                 if let song = songService.randomSongs.first {
                     cancion = song
-                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs, startingAt: song)
-                    try await player.prepareToPlay()
+                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs[..<500], startingAt: song)
+                    do {
+                        try await player.prepareToPlay()
+                    } catch {
+                        print(error.localizedDescription)
+                    }
                     
                     isPlaybackQueueSet = true
                     if let cancion {

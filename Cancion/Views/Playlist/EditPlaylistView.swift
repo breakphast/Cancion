@@ -180,11 +180,11 @@ struct EditPlaylistView: View {
                     Task {
                         let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
                         var shouldSave = false
-                        if !songIDs.isEmpty {
+                        if !songIDs.isEmpty && songIDs != playlist.songs {
                             playlist.songs = songIDs
                             shouldSave = true
                         }
-                        if playlistName != playlist.title {
+                        if playlistName != playlist.title || !playlistName.isEmpty {
                             playlist.title = playlistName
                             shouldSave = true
                         }

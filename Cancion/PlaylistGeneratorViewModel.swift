@@ -38,7 +38,7 @@ import MusicKit
         var filteredSongs = songs
         var totalDuration = 0.0
         
-        if self.matchRules != nil {
+        if matchRules != nil {
             if matchRules == MatchRules.all.rawValue, let filters {
                 filteredSongs = songs
                 for filter in filters {

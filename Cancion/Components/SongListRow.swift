@@ -64,11 +64,18 @@ struct SongListRow: View {
             Image(systemName: "seal.fill")
                 .font(.title)
                 .foregroundStyle(index == 0 ? .naranja : .clear)
-            Text("\(index + 1)")
-                .fontWeight(.semibold)
-                .foregroundStyle(index == 0 ? .white : .primary)
+            if let plays = song.playCount, plays > 0 {
+                Text("\(index + 1)")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(index == 0 ? .white : .primary)
+            } else {
+                Text("-")
+                    .fontWeight(.semibold)
+                    .foregroundStyle(index == 0 ? .white : .primary)
+            }
         }
-        .padding(.trailing, 8)
+        .lineLimit(1)
+        .frame(maxWidth: 44, alignment: .leading)
     }
     private var art: some View {
         ZStack {

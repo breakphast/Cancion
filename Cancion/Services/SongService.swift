@@ -26,7 +26,6 @@ import MusicKit
             libraryRequest.sort(by: \.artistName, ascending: true)
         }
         
-        libraryRequest.limit = limit
         if let artist {
             libraryRequest.filter(matching: \.artistName, equalTo: artist)
         }
