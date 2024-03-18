@@ -21,6 +21,10 @@ struct EditPlaylistView: View {
     @State private var item: PhotosPickerItem?
     @State private var imageData: Data?
     
+    var saveNewFilters: Bool {
+        return viewModel.saveNewFilters
+    }
+    
     var image: Image? {
         if let cover = playlist.cover, let coverImage = UIImage(data: cover) {
             return Image(uiImage: coverImage)
@@ -178,27 +182,19 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
+                        viewModel.saveNewFilters = true
                         let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
-                        var shouldSave = false
                         if !songIDs.isEmpty && songIDs != playlist.songs {
                             playlist.songs = songIDs
-                            shouldSave = true
                         }
-                        if playlistName != playlist.title || !playlistName.isEmpty {
+                        if playlistName != playlist.title && !playlistName.isEmpty {
                             playlist.title = playlistName
-                            shouldSave = true
                         }
-                        if shouldSave {
-                            do {
-                                try modelContext.save()
-                                dismiss()
-                            } catch {
-                                print("Could not save edited playlist.")
-                            }
-                        }
+                        dismiss()
                     }
                     
                     homeViewModel.generatorActive = false
+                    viewModel.saveNewFilters = false
                 }
             } label: {
                 ZStack {

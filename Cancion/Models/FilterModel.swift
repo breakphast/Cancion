@@ -52,6 +52,15 @@ func matches(song: Song, filter: FilterModel, date: Date?) -> Bool {
         default:
             return false
         }
+    case Condition.doesNotContain.rawValue:
+        switch filter.type {
+        case FilterType.artist.rawValue:
+            return !song.artistName.lowercased().contains(filter.value.lowercased())
+        case FilterType.title.rawValue:
+            return !song.title.lowercased().contains(filter.value.lowercased())
+        default:
+            return false
+        }
     case Condition.greaterThan.rawValue:
         switch filter.type {
         case FilterType.plays.rawValue:

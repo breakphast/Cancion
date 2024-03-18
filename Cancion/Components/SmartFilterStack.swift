@@ -13,6 +13,9 @@ struct SmartFilterStack: View {
     let filter: FilterModel
     let playlist: Playlista
     var editing = false
+    var saveNewFilters: Bool {
+        return playlistViewModel.saveNewFilters
+    }
     
     @State var filterText = ""
     var filters: [FilterModel]? {
@@ -42,6 +45,11 @@ struct SmartFilterStack: View {
         }
         .task {
             filterText = filter.value
+        }
+        .onChange(of: saveNewFilters) { oldValue, newValue in
+            if newValue {
+                filter.value = filterText
+            }
         }
     }
     
@@ -86,7 +94,7 @@ struct SmartFilterStack: View {
     }
     
     private func handleSmartFilterText(filters: [FilterModel]) {
-        if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
+        if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}), !editing {
             filter.value = filterText
         }
     }

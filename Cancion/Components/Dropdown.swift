@@ -175,21 +175,23 @@ struct Dropdown: View {
             self.selection = filter.type.capitalized
             handleSmartFilters(option: filter.type)
         case .smartCondition:
-            switch filter.type {
-            case FilterType.artist.rawValue, FilterType.title.rawValue:
-                self.options = [Condition.equals, Condition.contains, Condition.doesNotContain].map {$0.rawValue}
-                self.selection = Condition.equals.rawValue
-                handleSmartConditions(option: Condition.equals.rawValue)
-            case FilterType.plays.rawValue:
-                self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
-                self.selection = Condition.greaterThan.rawValue
-                handleSmartConditions(option: Condition.greaterThan.rawValue)
-            case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:
-                self.options = [Condition.equals, Condition.before, Condition.after].map {$0.rawValue}
-                self.selection = Condition.after.rawValue
-                handleSmartConditions(option: Condition.after.rawValue)
-            default:
-                return
+            if let condition = Condition(rawValue: filter.condition) {
+                switch filter.type {
+                case FilterType.artist.rawValue, FilterType.title.rawValue:
+                    self.options = [Condition.equals, Condition.contains, Condition.doesNotContain].map {$0.rawValue}
+                    self.selection = condition.rawValue
+                    handleSmartConditions(option: condition.rawValue)
+                case FilterType.plays.rawValue:
+                    self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
+                    self.selection = Condition.greaterThan.rawValue
+                    handleSmartConditions(option: condition.rawValue)
+                case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:
+                    self.options = [Condition.equals, Condition.before, Condition.after].map {$0.rawValue}
+                    self.selection = condition.rawValue
+                    handleSmartConditions(option: condition.rawValue)
+                default:
+                    return
+                }
             }
         case .limit:
             self.selection = String(playlist.limit ?? 25)

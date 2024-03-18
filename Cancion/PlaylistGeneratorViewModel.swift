@@ -33,6 +33,7 @@ import MusicKit
     var dropdownActive = false
     
     var filteredDate: Date = Date()
+    var saveNewFilters = false
     
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?, playlist: Playlista) async -> [String] {
         var filteredSongs = songs

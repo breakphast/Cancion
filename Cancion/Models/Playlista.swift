@@ -55,7 +55,7 @@ enum Limit {
         guard let type = LimitType(rawValue: rawType) else { return [] }
         switch type {
         case .items:
-            return [.items(value: "25"), .items(value: "100"), .items(value: "250"), .items(value: "500")]
+            return [.items(value: "25"), .items(value: "50"), .items(value: "100"), .items(value: "250"), .items(value: "500")]
         case .minutes:
             return [.minutes(value: "15"), .minutes(value: "30"), .minutes(value: "45"), .minutes(value: "60")]
         case .hours:
