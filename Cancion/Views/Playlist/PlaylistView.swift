@@ -11,20 +11,21 @@ import MusicKit
 struct PlaylistView: View {
     @Environment(SongService.self) var songService
     @Environment(HomeViewModel.self) var homeViewModel
-    @State var viewModel = PlaylistViewModel()
     @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
-    @Environment(\.dismiss) var dismiss
-    @State private var text: String = ""
-    @Binding var showView: Bool
-    @State private var scrollID: String?
-    var playCountAscending = false
     @Environment(\.modelContext) var modelContext
+    @Environment(\.dismiss) var dismiss
+    
+    @State var viewModel = PlaylistViewModel()
+    @State private var text: String = ""
+    @State var filteredSongs: [Song] = []
+    var playCountAscending = false
+    
     @FocusState var isFocused: Bool
+    @Binding var showView: Bool
+    @State private var showGenerator = false
+    @State private var scrollID: String?
     
     var playlist: Playlista
-    @State private var showGenerator = false
-    
-    @State var filteredSongs: [Song] = []
     
     var songs: [Song] { // sorted songs
         var ogSongs = Array(homeViewModel.songService.searchResultSongs).filter { playlist.songs.contains($0.id.rawValue) }
@@ -211,7 +212,7 @@ struct PlaylistView: View {
         }
     }
     private var songList: some View {
-        LazyVStack {
+        VStack {
             ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
                     .onTapGesture {

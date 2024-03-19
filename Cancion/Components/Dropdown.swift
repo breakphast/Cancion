@@ -95,6 +95,7 @@ struct Dropdown: View {
                 .contentShape(.rect)
                 .onTapGesture {
                     withAnimation(.snappy) {
+                        playlistViewModel.dropdownActive = false
                         selection = option
                         showOptions = false
                         
@@ -193,7 +194,20 @@ struct Dropdown: View {
                 }
             }
         case .limit:
-            self.selection = String(playlistViewModel.limit ?? 25)
+            if let limit = playlistViewModel.limit {
+                self.selection = String(limit)
+                handleLimitFilters(option: String(limit))
+            }
+        case .limitType:
+            if let limitType = playlistViewModel.limitType {
+                self.selection = limitType
+                handleLimitFilters(option: limitType)
+            }
+        case .limitSortType:
+            if let limitSortType = playlistViewModel.limitSortType {
+                self.selection = limitSortType
+                handleLimitFilters(option: limitSortType)
+            }
         default:
             return
         }

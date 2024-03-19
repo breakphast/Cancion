@@ -73,6 +73,7 @@ enum Limit {
 
 enum LimitSortType: String, CaseIterable {
     case mostPlayed = "most played"
+    case lastPlayed = "last played"
     case mostRecentlyAdded = "most recently added"
     case title = "title"
     case artist = "artist"

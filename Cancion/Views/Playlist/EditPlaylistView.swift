@@ -192,6 +192,15 @@ struct EditPlaylistView: View {
                         if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
                             playlist.name = viewModel.playlistName
                         }
+                        if viewModel.limit != playlist.limit {
+                            playlist.limit = viewModel.limit
+                        }
+                        if viewModel.limitType != playlist.limitType {
+                            playlist.limitType = viewModel.limitType
+                        }
+                        if viewModel.limitSortType != playlist.limitSortType {
+                            playlist.limitSortType = viewModel.limitSortType
+                        }
                         await viewModel.resetViewModelValues()
                     }
                     dismiss()

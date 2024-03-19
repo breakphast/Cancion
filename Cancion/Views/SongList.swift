@@ -14,6 +14,14 @@ enum SongSortOption: String {
     case plays = "Plays"
 }
 
+enum PlaylistSongSortOption: String {
+    case dateAdded = "Date Added"
+    case lastPlayed = "Last Played"
+    case plays = "Plays"
+    case title = "Title"
+    case artist = "Artist"
+}
+
 struct SongList: View {
     @Environment(SongListViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel

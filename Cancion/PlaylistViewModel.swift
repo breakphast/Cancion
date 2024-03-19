@@ -13,6 +13,7 @@ import MusicKit
     var playCountAscending = false
     var searchActive = false
     var selectedFilter: String? = nil
+    var songSort: PlaylistSongSortOption = .plays
         
     func filterSongsByText(text: String, songs: [Song], using staticSongs: [Song]) -> [Song] {
         var filteredSongs = songs

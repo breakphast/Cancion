@@ -15,6 +15,9 @@ struct SongListRow: View {
     var songSort: SongSortOption {
         return homeViewModel.songSort
     }
+    var playlistSongSort: PlaylistSongSortOption {
+        return homeViewModel.playlistSongSort
+    }
     var body: some View {
         VStack {
             HStack {
