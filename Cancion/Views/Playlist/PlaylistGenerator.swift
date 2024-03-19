@@ -44,7 +44,7 @@ struct PlaylistGenerator: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(playlist: viewModel.genPlaylist)
+                                LimitToStack()
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -66,6 +66,9 @@ struct PlaylistGenerator: View {
         }
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false
+        }
+        .task {
+            viewModel.filters.append(FilterModel())
         }
     }
     
@@ -119,7 +122,7 @@ struct PlaylistGenerator: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules, playlist: viewModel.genPlaylist)
+                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -130,8 +133,8 @@ struct PlaylistGenerator: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.activeFilters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.activeFilters[index], playlist: viewModel.genPlaylist)
+                ForEach(viewModel.filters.indices, id: \.self) { index in
+                    SmartFilterStack(filter: viewModel.filters[index])
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -164,8 +167,7 @@ struct PlaylistGenerator: View {
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
         viewModel.playlistName = ""
-        viewModel.activeFilters = []
-        viewModel.activeFilters = [FilterModel()]
+        viewModel.filters = []
         dismiss()
     }
     
@@ -224,8 +226,7 @@ struct PlaylistGenerator: View {
     private func addPlaylistToDatabase() async -> Bool {
         if let model = await viewModel.generatePlaylist(songs: homeViewModel.songService.sortedSongs, name: playlistName, cover: imageData) {
             modelContext.insert(model)
-            viewModel.activeFilters = []
-            viewModel.activeFilters = [FilterModel()]
+            viewModel.filters = []
             
             return true
         }

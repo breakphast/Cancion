@@ -11,15 +11,10 @@ import SwiftData
 struct SmartFilterStack: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     let filter: FilterModel
-    let playlist: Playlista
-    var editing = false
-    var saveNewFilters: Bool {
-        return playlistViewModel.saveNewFilters
-    }
     
     @State var filterText = ""
     var filters: [FilterModel]? {
-        return editing ? playlist.filters : playlistViewModel.activeFilters
+        return playlistViewModel.filters
     }
     
     var isDateStack: Bool {
@@ -29,8 +24,8 @@ struct SmartFilterStack: View {
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, type: .smartFilter, playlist: playlist)
-                Dropdown(filter: filter, type: .smartCondition, playlist: playlist)
+                Dropdown(filter: filter, type: .smartFilter)
+                Dropdown(filter: filter, type: .smartCondition)
                 if isDateStack {
                     DatePickr(playlistGenViewModel: playlistViewModel)
                         .padding(.trailing, 4)
@@ -46,18 +41,13 @@ struct SmartFilterStack: View {
         .task {
             filterText = filter.value
         }
-        .onChange(of: saveNewFilters) { oldValue, newValue in
-            if newValue {
-                filter.value = filterText
-            }
-        }
     }
     
     private var addFilterButton: some View {
         HStack(spacing: 4) {
             Button {
                 withAnimation(.bouncy) {
-                    playlistViewModel.activeFilters.append(FilterModel())
+                    playlistViewModel.filters.append(FilterModel())
                 }
             } label: {
                 ZStack {
@@ -71,12 +61,12 @@ struct SmartFilterStack: View {
                 }
                 .frame(width: 22, height: 44)
             }
-            .animation(.none, value: playlistViewModel.activeFilters.count)
+            .animation(.none, value: playlistViewModel.filters.count)
             
             Button {
                 withAnimation(.bouncy) {
-                    guard playlistViewModel.activeFilters.count > 1 else { return }
-                    playlistViewModel.activeFilters.removeAll(where: { $0.id == filter.id })
+                    guard playlistViewModel.filters.count > 1 else { return }
+                    playlistViewModel.filters.removeAll(where: { $0.id == filter.id })
                 }
             } label: {
                 ZStack {
@@ -94,7 +84,7 @@ struct SmartFilterStack: View {
     }
     
     private func handleSmartFilterText(filters: [FilterModel]) {
-        if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}), !editing {
+        if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
             filter.value = filterText
         }
     }

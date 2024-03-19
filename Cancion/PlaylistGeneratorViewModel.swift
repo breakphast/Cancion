@@ -10,36 +10,33 @@ import SwiftUI
 import MusicKit
 
 @Observable class PlaylistGeneratorViewModel {
-    static let options = ["Artist", "Title", "Play Count"]
-    static let conditionals = ["is", "contains", "does not contain"]
+    // MARK: - UI State Properties
     var keyboardHeight: CGFloat = 0
     var mainZIndex: CGFloat = 1000
-    var activeFilters: [FilterModel] = [FilterModel()]
     var activePlaylist: Playlista? = nil
     var showView = false
-    
-    var playlistName = ""
-    var smartRulesActive = true
-    var liveUpdating = true
-    
-    var limitActive = true
-    var limitOptions = [String]()
-    
-    var matchRules: MatchRules? = .any
-    
-    var image: Image?
-    var genPlaylist = Playlista()
-    
     var dropdownActive = false
     
-    var filteredDate: Date = Date()
-    var saveNewFilters = false
+    // MARK: - Generator Properties & Values
+    var image: Image?
     
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?, playlist: Playlista) async -> [String] {
+    var playlistName = ""
+    var matchRules: String? = MatchRules.any.rawValue
+    var smartRulesActive: Bool = true
+    var filters: [FilterModel] = []
+    var filteredDate: Date = Date()
+    var limitActive: Bool = true
+    var limit: Int? = 25
+    var limitType: String? = LimitType.items.rawValue
+    var limitSortType: String? = LimitSortType.mostPlayed.rawValue
+    var liveUpdating: Bool = true
+    
+    // MARK: - Generator Functions
+    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?) async -> [String] {
         var filteredSongs = songs
         var totalDuration = 0.0
         
-        if matchRules != nil {
+        if let matchRules {
             if matchRules == MatchRules.all.rawValue, let filters {
                 filteredSongs = songs
                 for filter in filters {
@@ -54,7 +51,7 @@ import MusicKit
             }
         }
                 
-        if limitActive, let limit = playlist.limit {
+        if limitActive, let limit {
             var limitedSongs = [Song]()
             switch limitType {
             case LimitType.items.rawValue:
@@ -97,19 +94,18 @@ import MusicKit
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)
         }
-        let limit = genPlaylist.limit
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: activeFilters, matchRules: matchRules?.rawValue, limitType: genPlaylist.limitType, playlist: genPlaylist)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: filters, matchRules: matchRules, limitType: limitType)
         do {
             let model = Playlista()
-            model.title = name
+            model.name = name
             model.smartRules = smartRulesActive
-            model.filters = activeFilters
+            model.filters = filters
             model.songs = songIDS
             model.cover = cover
             model.limit = limit
-            model.matchRules = matchRules?.rawValue ?? ""
+            model.matchRules = matchRules
             model.liveUpdating = liveUpdating
-            model.limitType = genPlaylist.limitType
+            model.limitType = limitType
             
             return model
         }
@@ -155,6 +151,30 @@ import MusicKit
                 self.keyboardHeight = 0
             }
         }
+    }
+    
+    @MainActor
+    func assignViewModelValues(playlist: Playlista) {
+        playlistName = playlist.name
+        matchRules = playlist.matchRules
+        smartRulesActive = playlist.smartRules ?? false
+        filters = playlist.filters ?? []
+        liveUpdating = playlist.liveUpdating
+        limit = playlist.limit
+        limitType = playlist.limitType
+        limitSortType = playlist.limitSortType
+    }
+    
+    @MainActor
+    func resetViewModelValues() {
+        playlistName = ""
+        matchRules = MatchRules.any.rawValue
+        smartRulesActive = true
+        filters = []
+        liveUpdating = true
+        limit = nil
+        limitType = nil
+        limitSortType = nil
     }
 }
 

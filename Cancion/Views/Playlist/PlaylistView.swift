@@ -108,7 +108,7 @@ struct PlaylistView: View {
             
             Spacer()
             
-            Text(playlist.title)
+            Text(playlist.name)
                 .foregroundStyle(.oreo)
                 .font(.title2.bold())
                 .fontDesign(.rounded)

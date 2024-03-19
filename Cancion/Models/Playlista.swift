@@ -12,7 +12,7 @@ import SwiftData
 @Model
 class Playlista {
     var id: UUID
-    var title: String
+    var name: String
     var smartRules: Bool?
     var limit: Int?
     var limitType: String?
@@ -26,7 +26,7 @@ class Playlista {
     
     init(id: UUID = UUID(), title: String = "", smartRules: Bool? = true, limit: Int? = 25, limitType: String? = "items", limitSortType: String? = "most played", filters: [FilterModel]? = [], liveUpdating: Bool = true, sortOption: String? = "most played", songs: [String] = [], cover: Data? = nil, matchRules: String? = "any") {
         self.id = id
-        self.title = title
+        self.name = title
         self.smartRules = smartRules
         self.limit = limit
         self.limitType = limitType

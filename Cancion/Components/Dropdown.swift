@@ -9,24 +9,23 @@ import SwiftUI
 
 struct Dropdown: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    // MARK: - Main State Properties
     @State var filter = FilterModel()
     @State var options: [String] = []
+    @State var selection = ""
+    @State var type: DropdownType
     
-    var limitOptions: [String] {
-        let limits = Limit.limits(forType: playlist.limitType ?? LimitType.items.rawValue).map { $0.value }
-        return limits
-    }
-    
+    // MARK: - UI Properties
+    @SceneStorage("dropDownZIndex") private var index = 1000.0
+    @State private var zIndex: Double = 1000.0
+    @State private var showOptions = false
     var anchor: Anchor = .bottom
     var cornerRadius: CGFloat = 12
     
-    @State var selection = ""
-    @State private var showOptions = false
-    @SceneStorage("dropDownZIndex") private var index = 1000.0
-    @State private var zIndex: Double = 1000.0
-    
-    let type: DropdownType
-    let playlist: Playlista
+    var limitOptions: [String] {
+        let limits = Limit.limits(forType: playlistViewModel.limitType ?? LimitType.items.rawValue).map { $0.value }
+        return limits
+    }
         
     var body: some View {
         GeometryReader {
@@ -37,7 +36,7 @@ struct Dropdown: View {
                     optionsView()
                 }
                 
-                SmartFilterComponent(title: $selection, limit: playlist.limit ?? 0, type: type)
+                SmartFilterComponent(title: $selection, limit: playlistViewModel.limit ?? 0, type: type)
                     .frame(width: size.width - 1, height: size.height)
                     .onTapGesture {
                         index += 100
@@ -62,7 +61,7 @@ struct Dropdown: View {
             .onChange(of: filter.type) { oldValue, newValue in
                 handleFilterType(filter: filter)
             }
-            .onChange(of: playlist.limit ?? 0, { oldValue, newValue in
+            .onChange(of: playlistViewModel.limit ?? 0, { oldValue, newValue in
                 if type == .limit {
                     selection = String(newValue)
                 }
@@ -106,7 +105,7 @@ struct Dropdown: View {
                             handleSmartConditions(option: option)
                         case .matchRules:
                             if let rule = MatchRules(rawValue: option) {
-                                playlistViewModel.matchRules = rule
+                                playlistViewModel.matchRules = rule.rawValue
                             }
                         default:
                             handleLimitFilters(option: option)
@@ -121,19 +120,19 @@ struct Dropdown: View {
     }
     
     func handleSmartFilters(option: String) {
-        playlistViewModel.activeFilters.enumerated().forEach { index, filterModel in
+        playlistViewModel.filters.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 switch option {
                 case FilterTitle.artist.rawValue:
-                    playlistViewModel.activeFilters[index].type = FilterType.artist.rawValue
+                    playlistViewModel.filters[index].type = FilterType.artist.rawValue
                 case FilterTitle.title.rawValue:
-                    playlistViewModel.activeFilters[index].type = FilterType.title.rawValue
+                    playlistViewModel.filters[index].type = FilterType.title.rawValue
                 case FilterTitle.playCount.rawValue:
-                    playlistViewModel.activeFilters[index].type = FilterType.plays.rawValue
+                    playlistViewModel.filters[index].type = FilterType.plays.rawValue
                 case FilterTitle.dateAdded.rawValue:
-                    playlistViewModel.activeFilters[index].type = FilterType.dateAdded.rawValue
+                    playlistViewModel.filters[index].type = FilterType.dateAdded.rawValue
                 case FilterTitle.lastPlayedDate.rawValue.capitalized:
-                    playlistViewModel.activeFilters[index].type = FilterType.lastPlayedDate.rawValue
+                    playlistViewModel.filters[index].type = FilterType.lastPlayedDate.rawValue
                 default:
                     print("No type found.")
                 }
@@ -142,23 +141,23 @@ struct Dropdown: View {
     }
     
     func handleSmartConditions(option: String) {
-        playlistViewModel.activeFilters.enumerated().forEach { index, filterModel in
+        playlistViewModel.filters.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 switch option {
                 case Condition.equals.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.equals.rawValue
+                    playlistViewModel.filters[index].condition = Condition.equals.rawValue
                 case Condition.contains.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.contains.rawValue
+                    playlistViewModel.filters[index].condition = Condition.contains.rawValue
                 case Condition.doesNotContain.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.doesNotContain.rawValue
+                    playlistViewModel.filters[index].condition = Condition.doesNotContain.rawValue
                 case Condition.greaterThan.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.greaterThan.rawValue
+                    playlistViewModel.filters[index].condition = Condition.greaterThan.rawValue
                 case Condition.lessThan.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.lessThan.rawValue
+                    playlistViewModel.filters[index].condition = Condition.lessThan.rawValue
                 case Condition.before.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.before.rawValue
+                    playlistViewModel.filters[index].condition = Condition.before.rawValue
                 case Condition.after.rawValue:
-                    playlistViewModel.activeFilters[index].condition = Condition.after.rawValue
+                    playlistViewModel.filters[index].condition = Condition.after.rawValue
                 default:
                     print("No type found.")
                 }
@@ -194,7 +193,7 @@ struct Dropdown: View {
                 }
             }
         case .limit:
-            self.selection = String(playlist.limit ?? 25)
+            self.selection = String(playlistViewModel.limit ?? 25)
         default:
             return
         }
@@ -203,14 +202,14 @@ struct Dropdown: View {
     func handleLimitFilters(option: String) {
         if let limitType = LimitType(rawValue: option) {
             let defaultLimitValue = Limit.limits(forType: option).first?.value ?? "0"
-            playlist.limitType = limitType.rawValue
-            playlist.limit = Int(defaultLimitValue) ?? 0
+            playlistViewModel.limitType = limitType.rawValue
+            playlistViewModel.limit = Int(defaultLimitValue) ?? 0
         } else {
             let allLimits = LimitType.allCases.flatMap { Limit.limits(forType: $0.rawValue) }
             if let matchingLimit = allLimits.first(where: { $0.value == option }) {
-                playlist.limit = Int(matchingLimit.value) ?? 0
+                playlistViewModel.limit = Int(matchingLimit.value) ?? 0
             } else if let sortType = LimitSortType(rawValue: option) {
-                playlist.limitSortType = sortType.rawValue
+                playlistViewModel.limitSortType = sortType.rawValue
             } else {
                 print("No matching type or value found")
             }

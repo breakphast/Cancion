@@ -21,10 +21,6 @@ struct EditPlaylistView: View {
     @State private var item: PhotosPickerItem?
     @State private var imageData: Data?
     
-    var saveNewFilters: Bool {
-        return viewModel.saveNewFilters
-    }
-    
     var image: Image? {
         if let cover = playlist.cover, let coverImage = UIImage(data: cover) {
             return Image(uiImage: coverImage)
@@ -49,7 +45,7 @@ struct EditPlaylistView: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(playlist: playlist)
+                                LimitToStack()
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -68,6 +64,9 @@ struct EditPlaylistView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .padding(.top)
+        }
+        .task {
+            viewModel.assignViewModelValues(playlist: playlist)
         }
     }
     
@@ -115,13 +114,16 @@ struct EditPlaylistView: View {
                 }
             }
         }
+        .onChange(of: playlistName) { _, newName in
+            viewModel.playlistName = newName
+        }
     }
     
     private var smartFilters: some View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules, playlist: playlist)
+                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -132,15 +134,13 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                if let filters = playlist.filters, let smartRules = playlist.smartRules {
-                    ForEach(filters.indices, id: \.self) { index in
-                        SmartFilterStack(filter: filters[index], playlist: playlist, editing: true)
-                            .disabled(!smartRules)
-                            .zIndex(Double(100 - index))
-                            .environment(viewModel)
-                    }
-                    .blur(radius: !smartRules ? 2 : 0)
+                ForEach(viewModel.filters.indices, id: \.self) { index in
+                    SmartFilterStack(filter: viewModel.filters[index])
+                        .disabled(!(viewModel.smartRulesActive))
+                        .zIndex(Double(100 - index))
+                        .environment(viewModel)
                 }
+                .blur(radius: !(viewModel.smartRulesActive) ? 2 : 0)
                 
                 RoundedRectangle(cornerRadius: 1)
                     .frame(height: 1)
@@ -156,6 +156,9 @@ struct EditPlaylistView: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
+                    Task {
+                        await viewModel.resetViewModelValues()
+                    }
                     dismiss()
                 }
             } label: {
@@ -182,19 +185,17 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
-                        viewModel.saveNewFilters = true
-                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType, playlist: playlist)
+                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
                         if !songIDs.isEmpty && songIDs != playlist.songs {
                             playlist.songs = songIDs
                         }
-                        if playlistName != playlist.title && !playlistName.isEmpty {
-                            playlist.title = playlistName
+                        if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
+                            playlist.name = viewModel.playlistName
                         }
-                        dismiss()
+                        await viewModel.resetViewModelValues()
                     }
-                    
+                    dismiss()
                     homeViewModel.generatorActive = false
-                    viewModel.saveNewFilters = false
                 }
             } label: {
                 ZStack {
@@ -219,7 +220,7 @@ struct EditPlaylistView: View {
     
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField(playlist.title, text: $playlistName)
+            TextField(playlist.name, text: $playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)

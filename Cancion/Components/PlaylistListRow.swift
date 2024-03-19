@@ -10,7 +10,7 @@ import MusicKit
 import SwiftData
 
 struct PlaylistListRow: View {
-    let playlist: Playlista
+    @State var playlist: Playlista
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     @Environment(HomeViewModel.self) var homeViewModel
@@ -24,13 +24,17 @@ struct PlaylistListRow: View {
         return nil
     }
     
+    var name: String {
+        return playlist.name
+    }
+    
     var body: some View {
         VStack {
             HStack {
                 HStack {
                     playlistCoverIcon
                     
-                    Text(playlist.title)
+                    Text(name)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 4)
                         .lineLimit(1)
