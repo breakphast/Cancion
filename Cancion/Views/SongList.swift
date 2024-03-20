@@ -15,11 +15,11 @@ enum SongSortOption: String {
 }
 
 enum PlaylistSongSortOption: String {
-    case dateAdded = "Date Added"
-    case lastPlayed = "Last Played"
-    case plays = "Plays"
-    case title = "Title"
-    case artist = "Artist"
+    case dateAdded = "date added"
+    case lastPlayed = "last played"
+    case plays = "plays"
+    case title = "title"
+    case artist = "artist"
 }
 
 struct SongList: View {

@@ -15,7 +15,7 @@ struct SongListRow: View {
     var songSort: SongSortOption {
         return homeViewModel.songSort
     }
-    var playlistSongSort: PlaylistSongSortOption {
+    var playlistSongSort: PlaylistSongSortOption? {
         return homeViewModel.playlistSongSort
     }
     var body: some View {
@@ -35,33 +35,55 @@ struct SongListRow: View {
     }
     
     private var sortInfo: some View {
-        ZStack {
-            switch songSort {
-            case .dateAdded:
-                if let dateAdded = song.libraryAddedDate {
-                    HStack(spacing: 2) {
-                        Text(homeViewModel.dateFormatter.string(from: dateAdded))
-                    }
-                    .foregroundStyle(.oreo)
-                    .font(.caption2)
-                    .fontWeight(.black)
-                }
-            case .plays:
-                Text("\(song.playCount ?? 0)")
-                    .fontWeight(.bold)
-            case .lastPlayed:
-                if let lastPlayedDate = song.lastPlayedDate {
-                    HStack(spacing: 2) {
-                        Text(homeViewModel.dateFormatter.string(from: lastPlayedDate))
-                    }
-                    .foregroundStyle(.oreo)
-                    .font(.caption2)
-                    .fontWeight(.black)
+        let (info, format) = sortInfoDetails()
+        
+        return Group {
+            if let info = info {
+                switch format {
+                case .date:
+                    InfoText(info)
+                case .count:
+                    Text(info).fontWeight(.bold)
                 }
             }
         }
     }
     
+    private func InfoText(_ text: String) -> some View {
+        HStack(spacing: 2) {
+            Text(text)
+        }
+        .foregroundStyle(.oreo)
+        .font(.caption2)
+        .fontWeight(.black)
+    }
+    
+    private func sortInfoDetails() -> (info: String?, format: TextFormat) {
+        if let playlistSort = playlistSongSort {
+            switch playlistSort {
+            case .dateAdded, .lastPlayed:
+                let date = (playlistSort == .dateAdded) ? song.libraryAddedDate : song.lastPlayedDate
+                return (homeViewModel.dateFormatter.string(from: date ?? Date()), .date)
+            case .plays:
+                return ("\(song.playCount ?? 0)", .count)
+            default:
+                return ("\(song.playCount ?? 0)", .count)
+            }
+        } else {
+            switch songSort {
+            case .dateAdded, .lastPlayed:
+                let date = (songSort == .dateAdded) ? song.libraryAddedDate : song.lastPlayedDate
+                return (homeViewModel.dateFormatter.string(from: date ?? Date()), .date)
+            case .plays:
+                return ("\(song.playCount ?? 0)", .count)
+            }
+        }
+    }
+
+    enum TextFormat {
+        case date, count
+    }
+
     private var songBadge: some View {
         ZStack {
             Image(systemName: "seal.fill")

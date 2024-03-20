@@ -184,44 +184,7 @@ struct EditPlaylistView: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    Task {
-                        let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
-                        if !songIDs.isEmpty && songIDs != playlist.songs {
-                            playlist.songs = songIDs
-                            homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
-                                songIDs.contains($0.id.rawValue)
-                            }
-                        }
-                        if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
-                            playlist.name = viewModel.playlistName
-                        }
-                        if viewModel.limit != playlist.limit {
-                            playlist.limit = viewModel.limit
-                        }
-                        if viewModel.limitType != playlist.limitType {
-                            playlist.limitType = viewModel.limitType
-                        }
-                        if viewModel.limitSortType != playlist.limitSortType {
-                            playlist.limitSortType = viewModel.limitSortType
-                            if let limitSortType = playlist.limitSortType {
-                                switch LimitSortType(rawValue: limitSortType) {
-                                case .artist:
-                                    homeViewModel.playlistSongSort = .artist
-                                case .mostPlayed:
-                                    homeViewModel.playlistSongSort = .plays
-                                case .lastPlayed:
-                                    homeViewModel.playlistSongSort = .lastPlayed
-                                case .mostRecentlyAdded:
-                                    homeViewModel.playlistSongSort = .dateAdded
-                                case .title:
-                                    homeViewModel.playlistSongSort = .title
-                                default:
-                                    homeViewModel.playlistSongSort = .plays
-                                }
-                            }
-                        }
-                        await viewModel.resetViewModelValues()
-                    }
+                    handleEditPlaylist()
                     dismiss()
                     homeViewModel.generatorActive = false
                 }
@@ -238,6 +201,49 @@ struct EditPlaylistView: View {
                 }
             }
         }
+    }
+    
+    private func handleEditPlaylist() {
+        Task { @MainActor in
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
+            if !songIDs.isEmpty && songIDs != playlist.songs {
+                playlist.songs = songIDs
+                homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
+                    songIDs.contains($0.id.rawValue)
+                }
+            }
+            if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
+                playlist.name = viewModel.playlistName
+            }
+            if viewModel.limit != playlist.limit {
+                playlist.limit = viewModel.limit
+            }
+            if viewModel.limitType != playlist.limitType {
+                playlist.limitType = viewModel.limitType
+            }
+            if viewModel.limitSortType != playlist.limitSortType {
+                playlist.limitSortType = viewModel.limitSortType
+                if let limitSortType = playlist.limitSortType {
+                    switch LimitSortType(rawValue: limitSortType) {
+                    case .artist:
+                        homeViewModel.playlistSongSort = .artist
+                    case .mostPlayed:
+                        homeViewModel.playlistSongSort = .plays
+                    case .lastPlayed:
+                        homeViewModel.playlistSongSort = .lastPlayed
+                    case .mostRecentlyAdded:
+                        homeViewModel.playlistSongSort = .dateAdded
+                    case .title:
+                        homeViewModel.playlistSongSort = .title
+                    default:
+                        homeViewModel.playlistSongSort = .plays
+                    }
+                }
+            }
+            viewModel.resetViewModelValues()
+        }
+        dismiss()
+        homeViewModel.generatorActive = false
     }
     
     @MainActor

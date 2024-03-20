@@ -27,9 +27,11 @@ struct PlaylistView: View {
     
     var playlist: Playlista
     
-    private var sortOption: PlaylistSongSortOption {
+    private var sortOption: PlaylistSongSortOption? {
         return homeViewModel.playlistSongSort
     }
+    
+    @State var sortTitle: String = ""
     
     var songs: [Song] {
         switch viewModel.playCountAscending {
@@ -45,6 +47,8 @@ struct PlaylistView: View {
                 return homeViewModel.songService.playlistSongs.sorted { $0.title < $1.title}
             case .artist:
                 return homeViewModel.songService.playlistSongs.sorted { $0.artistName < $1.artistName}
+            case .none:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
             }
         case true:
             switch sortOption {
@@ -58,6 +62,8 @@ struct PlaylistView: View {
                 return homeViewModel.songService.playlistSongs.sorted { $0.title > $1.title}
             case .artist:
                 return homeViewModel.songService.playlistSongs.sorted { $0.artistName > $1.artistName}
+            case .none:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             }
         }
     }
@@ -94,21 +100,43 @@ struct PlaylistView: View {
         .onAppear {
             scrollID = "cover"
         }
+        .onChange(of: sortOption, { oldValue, newValue in
+            switch sortOption {
+            case .artist:
+                sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
+            case .plays:
+                sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
+            case .lastPlayed:
+                sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
+            case .dateAdded:
+                sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
+            case .title:
+                sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
+            default:
+                sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
+            }
+        })
         .task {
             if let limitSortType = playlist.limitSortType {
                 switch LimitSortType(rawValue: limitSortType) {
                 case .artist:
                     homeViewModel.playlistSongSort = .artist
+                    sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
                 case .mostPlayed:
                     homeViewModel.playlistSongSort = .plays
+                    sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                 case .lastPlayed:
                     homeViewModel.playlistSongSort = .lastPlayed
+                    sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
                 case .mostRecentlyAdded:
                     homeViewModel.playlistSongSort = .dateAdded
+                    sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
                 case .title:
                     homeViewModel.playlistSongSort = .title
+                    sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
                 default:
                     homeViewModel.playlistSongSort = .plays
+                    sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                 }
             }
         }
@@ -181,8 +209,8 @@ struct PlaylistView: View {
                 viewModel.playCountAscending.toggle()
                 
             } label: {
-                HStack {
-                    Text("PLAYS")
+                HStack(spacing: 2) {
+                    Text(sortTitle)
                     Image(systemName: "chevron.down")
                         .bold()
                         .rotationEffect(.degrees(viewModel.playCountAscending ? 180 : 0))
