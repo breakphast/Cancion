@@ -33,41 +33,6 @@ struct PlaylistView: View {
     
     @State var sortTitle: String = ""
     
-    var songs: [Song] {
-        switch viewModel.playCountAscending {
-        case false:
-            switch sortOption {
-            case .dateAdded:
-                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
-            case .plays:
-                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
-            case .lastPlayed:
-                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
-            case .title:
-                return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() < $1.title.lowercased()}
-            case .artist:
-                return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() < $1.artistName.lowercased()}
-            case .none:
-                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
-            }
-        case true:
-            switch sortOption {
-            case .dateAdded:
-                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
-            case .plays:
-                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
-            case .lastPlayed:
-                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
-            case .title:
-                return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() > $1.title.lowercased()}
-            case .artist:
-                return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() > $1.artistName.lowercased()}
-            case .none:
-                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
-            }
-        }
-    }
-    
     var body: some View {
         VStack(spacing: 16) {
             navHeaderItems
@@ -269,9 +234,43 @@ struct PlaylistView: View {
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song)
+                            await homeViewModel.handleSongSelected(song: song, songs: homeViewModel.songService.playlistSongs)
                         }
                     }
+            }
+        }
+    }
+    var songs: [Song] {
+        switch viewModel.playCountAscending {
+        case false:
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
+            case .title:
+                return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() < $1.title.lowercased()}
+            case .artist:
+                return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() < $1.artistName.lowercased()}
+            case .none:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            }
+        case true:
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
+            case .title:
+                return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() > $1.title.lowercased()}
+            case .artist:
+                return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() > $1.artistName.lowercased()}
+            case .none:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             }
         }
     }

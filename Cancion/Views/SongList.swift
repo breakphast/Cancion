@@ -175,7 +175,7 @@ struct SongList: View {
                 SongListRow(song: song, index: homeViewModel.songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song)
+                            await homeViewModel.handleSongSelected(song: song, songs: homeViewModel.songService.sortedSongs)
                         }
                     }
             }
