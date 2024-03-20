@@ -25,90 +25,41 @@ class FilterModel {
 }
 
 func matches(song: Song, filter: FilterModel, date: Date?) -> Bool {
+    let filterValue = filter.value.lowercased().trimmingCharacters(in: .whitespaces)
+    
     switch filter.condition {
     case Condition.equals.rawValue:
         switch filter.type {
         case FilterType.artist.rawValue:
-            return song.artistName.lowercased() == filter.value.lowercased()
+            return song.artistName.lowercased() == filterValue
         case FilterType.title.rawValue:
-            return song.title.lowercased() == filter.value.lowercased()
-        case FilterType.dateAdded.rawValue:
-            if let dateAdded = song.libraryAddedDate, let date {
-                return areDatesEqual(date1: dateAdded, date2: date)
-            }
-        case FilterType.lastPlayedDate.rawValue:
-            if let dateAdded = song.lastPlayedDate, let date {
-                return areDatesEqual(date1: dateAdded, date2: date)
+            return song.title.lowercased() == filterValue
+        case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:
+            if let songDate = (filter.type == FilterType.dateAdded.rawValue ? song.libraryAddedDate : song.lastPlayedDate), let filterDate = date {
+                return areDatesEqual(date1: songDate, date2: filterDate)
             }
         default:
-            return false
+            break
         }
-    case Condition.contains.rawValue:
-        switch filter.type {
-        case FilterType.artist.rawValue:
-            return song.artistName.lowercased().contains(filter.value.lowercased())
-        case FilterType.title.rawValue:
-            return song.title.lowercased().contains(filter.value.lowercased())
-        default:
-            return false
+        
+    case Condition.contains.rawValue, Condition.doesNotContain.rawValue:
+        let contains = (filter.type == FilterType.artist.rawValue && song.artistName.lowercased().contains(filterValue)) || (filter.type == FilterType.title.rawValue && song.title.lowercased().contains(filterValue))
+        return filter.condition == Condition.contains.rawValue ? contains : !contains
+        
+    case Condition.greaterThan.rawValue, Condition.lessThan.rawValue:
+        if filter.type == FilterType.plays.rawValue, let plays = song.playCount, let value = Int(filterValue) {
+            return filter.condition == Condition.greaterThan.rawValue ? plays > value : plays < value
         }
-    case Condition.doesNotContain.rawValue:
-        switch filter.type {
-        case FilterType.artist.rawValue:
-            return !song.artistName.lowercased().contains(filter.value.lowercased())
-        case FilterType.title.rawValue:
-            return !song.title.lowercased().contains(filter.value.lowercased())
-        default:
-            return false
+        
+    case Condition.before.rawValue, Condition.after.rawValue:
+        if let songDate = (filter.type == FilterType.dateAdded.rawValue ? song.libraryAddedDate : filter.type == FilterType.lastPlayedDate.rawValue ? song.lastPlayedDate : nil), let filterDate = date {
+            return filter.condition == Condition.before.rawValue ? songDate < filterDate : songDate > filterDate
         }
-    case Condition.greaterThan.rawValue:
-        switch filter.type {
-        case FilterType.plays.rawValue:
-            if let plays = song.playCount, let value = Int(filter.value) {
-                return plays > value
-            }
-        default:
-            return false
-        }
-    case Condition.lessThan.rawValue:
-        switch filter.type {
-        case FilterType.plays.rawValue:
-            if let plays = song.playCount, let value = Int(filter.value) {
-                return plays < value
-            }
-        default:
-            return false
-        }
-    case Condition.before.rawValue:
-        switch filter.type {
-        case FilterType.dateAdded.rawValue:
-            if let dateAdded = song.libraryAddedDate, let date {
-                return dateAdded < date
-            }
-        case FilterType.lastPlayedDate.rawValue:
-            if let dateAdded = song.lastPlayedDate, let date {
-                return dateAdded < date
-            }
-        default:
-            return false
-        }
-        return false
-    case Condition.after.rawValue:
-        switch filter.type {
-        case FilterType.dateAdded.rawValue:
-            if let dateAdded = song.libraryAddedDate, let date {
-                return dateAdded > date
-            }
-        case FilterType.lastPlayedDate.rawValue:
-            if let dateAdded = song.lastPlayedDate, let date {
-                return dateAdded > date
-            }
-        default:
-            return false
-        }
+        
     default:
-        return false
+        break
     }
+    
     return false
 }
 

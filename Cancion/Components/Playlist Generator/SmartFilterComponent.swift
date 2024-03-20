@@ -13,7 +13,7 @@ struct SmartFilterComponent: View {
     let type: DropdownType
     
     var dropS: Bool {
-        return limit == 1 && type == .limitType
+        return limit == 1 && type == .limitType && title == "hours"
     }
     
     var body: some View {
@@ -54,6 +54,7 @@ struct SmartFilterTextField: View {
                 .foregroundStyle(type == .filter ? .oreo : .white)
                 .padding(.leading, 8)
                 .padding(.trailing)
+                .autocorrectionDisabled()
         }
         .bold()
         .frame(height: 44)

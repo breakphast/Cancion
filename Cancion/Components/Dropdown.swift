@@ -66,6 +66,12 @@ struct Dropdown: View {
                     selection = String(newValue)
                 }
             })
+            .onChange(of: limitOptions, { oldValue, newValue in
+                if let value = self.limitOptions.first, type == .limit {
+                    playlistViewModel.limit = Int(value)
+                    self.selection = value
+                }
+            })
             .task {
                 handleFilterType(filter: filter)
             }

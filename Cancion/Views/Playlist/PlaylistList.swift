@@ -24,10 +24,10 @@ struct PlaylistList: View {
             Color.clear.ignoresSafeArea()
             VStack {
                 navHeaderItems
+                    .padding(.horizontal, 24)
                 ScrollView {
                     VStack(alignment: .leading) {
                         songSearchTextField
-                            .padding(.horizontal)
                         
                         LazyVStack {
                             HStack(spacing: 16) {
@@ -42,11 +42,11 @@ struct PlaylistList: View {
                         }
                         .padding(.vertical, 8)
                     }
+                    .padding(.horizontal, 24)
                 }
                 Spacer()
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 24)
             .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 2))
             .fullScreenCover(isPresented: $viewModel.showView) {
                 if let activePlaylist = viewModel.activePlaylist {
