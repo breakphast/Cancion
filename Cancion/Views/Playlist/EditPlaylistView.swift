@@ -65,7 +65,6 @@ struct EditPlaylistView: View {
             .padding(.top)
         }
         .task {
-            viewModel.assignViewModelValues(playlist: playlist)
             if let coverData = playlist.cover {
                 viewModel.coverData = coverData
             }
@@ -132,7 +131,7 @@ struct EditPlaylistView: View {
         }
         .padding(.horizontal, 24)
         .onChange(of: item) { oldValue, newValue in
-            Task {
+            Task { @MainActor in
                 if let loaded = try? await item?.loadTransferable(type: Data.self) {
                     viewModel.coverData = loaded
                 } else {
@@ -184,9 +183,6 @@ struct EditPlaylistView: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    Task {
-                        await viewModel.resetViewModelValues()
-                    }
                     dismiss()
                 }
             } label: {
@@ -257,6 +253,9 @@ struct EditPlaylistView: View {
             }
             if viewModel.matchRules != playlist.matchRules {
                 playlist.matchRules = viewModel.matchRules
+            }
+            if viewModel.liveUpdating != playlist.liveUpdating {
+                playlist.liveUpdating = viewModel.liveUpdating
             }
             if viewModel.limitSortType != playlist.limitSortType {
                 playlist.limitSortType = viewModel.limitSortType

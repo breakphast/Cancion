@@ -82,6 +82,10 @@ struct PlaylistView: View {
             }
         })
         .task {
+            playlistGeneratorViewModel.assignViewModelValues(playlist: playlist)
+            if let coverData = playlist.cover {
+                playlistGeneratorViewModel.coverData = coverData
+            }
             if let limitSortType = playlist.limitSortType {
                 switch LimitSortType(rawValue: limitSortType) {
                 case .artist:
@@ -104,6 +108,13 @@ struct PlaylistView: View {
                     sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                 }
             }
+            
+            if playlist.liveUpdating {
+                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlistGeneratorViewModel.filters, matchRules: playlistGeneratorViewModel.matchRules, limitType: playlistGeneratorViewModel.limitType)
+                if updatedSongs != playlist.songs {
+                    playlist.songs = updatedSongs
+                }
+            }
         }
     }
     
@@ -111,6 +122,13 @@ struct PlaylistView: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
+                    dismiss()
+                    showView = false
+                }
+                withAnimation(.bouncy(duration: 0.4)) {
+                    Task {
+                        await playlistGeneratorViewModel.resetViewModelValues()
+                    }
                     dismiss()
                     showView = false
                 }
