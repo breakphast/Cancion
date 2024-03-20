@@ -21,6 +21,7 @@ import MusicKit
     var image: Image?
     
     var playlistName = ""
+    var coverData: Data?
     var matchRules: String? = MatchRules.any.rawValue
     var smartRulesActive: Bool = true
     var filters: [FilterModel] = []
@@ -168,6 +169,7 @@ import MusicKit
     @MainActor
     func resetViewModelValues() {
         playlistName = ""
+        coverData = nil
         matchRules = MatchRules.any.rawValue
         smartRulesActive = true
         filters = []

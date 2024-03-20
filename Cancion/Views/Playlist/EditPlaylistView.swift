@@ -19,11 +19,10 @@ struct EditPlaylistView: View {
     @Query var playlistas: [Playlista]
     @State private var playlistName = ""
     @State private var item: PhotosPickerItem?
-    @State private var imageData: Data?
     
     var image: Image? {
-        if let cover = playlist.cover, let coverImage = UIImage(data: cover) {
-            return Image(uiImage: coverImage)
+        if let coverData = viewModel.coverData, let uiiImage = UIImage(data: coverData) {
+            return Image(uiImage: uiiImage)
         }
         return nil
     }
@@ -67,6 +66,9 @@ struct EditPlaylistView: View {
         }
         .task {
             viewModel.assignViewModelValues(playlist: playlist)
+            if let coverData = playlist.cover {
+                viewModel.coverData = coverData
+            }
         }
     }
     
@@ -85,6 +87,30 @@ struct EditPlaylistView: View {
                                 .fill(.white)
                                 .shadow(radius: 3)
                         )
+                        .overlay {
+                            HStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(.naranja.opacity(0.9))
+                                        .shadow(radius: 5)
+                                        .frame(width: 66)
+                                    Image(systemName: "photo.fill")
+                                        .font(.title2.bold())
+                                }
+                                ZStack {
+                                    Circle()
+                                        .fill(.naranja.opacity(0.9))
+                                        .shadow(radius: 5)
+                                        .frame(width: 66)
+                                    Image(systemName: "trash.fill")
+                                        .font(.title2.bold())
+                                }
+                                .onTapGesture {
+                                    viewModel.coverData = nil
+                                    item = nil
+                                }
+                            }
+                        }
                         .padding(.horizontal)
                 } else {
                     ZStack {
@@ -108,7 +134,7 @@ struct EditPlaylistView: View {
         .onChange(of: item) { oldValue, newValue in
             Task {
                 if let loaded = try? await item?.loadTransferable(type: Data.self) {
-                    imageData = loaded
+                    viewModel.coverData = loaded
                 } else {
                     print("Failed")
                 }
@@ -214,6 +240,9 @@ struct EditPlaylistView: View {
             }
             if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
                 playlist.name = viewModel.playlistName
+            }
+            if let cover = viewModel.coverData {
+                playlist.cover = cover
             }
             if viewModel.limit != playlist.limit {
                 playlist.limit = viewModel.limit
