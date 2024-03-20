@@ -19,10 +19,10 @@ struct AuthView: View {
                     authorizeAction()
                 } label: {
                     Text("Authorize")
-                        .bold()
+                        .font(.title.bold())
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.orange.opacity(0.8))
+                .tint(.naranja)
             }
         }
     }
