@@ -160,11 +160,13 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.filters[index])
-                        .disabled(!(viewModel.smartRulesActive))
-                        .zIndex(Double(100 - index))
-                        .environment(viewModel)
+                ForEach(viewModel.filters, id: \.self) { filter in
+                    if let index = viewModel.filters.firstIndex(where: {$0.id == filter.id}) {
+                        SmartFilterStack(filter: filter)
+                            .disabled(!(viewModel.smartRulesActive))
+                            .zIndex(Double(100 - index))
+                            .environment(viewModel)
+                    }
                 }
                 .blur(radius: !(viewModel.smartRulesActive) ? 2 : 0)
                 
