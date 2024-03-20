@@ -172,9 +172,9 @@ import MusicKit
         smartRulesActive = true
         filters = []
         liveUpdating = true
-        limit = nil
-        limitType = nil
-        limitSortType = nil
+        limit = 25
+        limitType = LimitType.items.rawValue
+        limitSortType = LimitSortType.mostPlayed.rawValue
     }
 }
 

@@ -27,16 +27,39 @@ struct PlaylistView: View {
     
     var playlist: Playlista
     
-    var songs: [Song] { // sorted songs
-        var ogSongs = Array(homeViewModel.songService.searchResultSongs).filter { playlist.songs.contains($0.id.rawValue) }
-        
+    private var sortOption: PlaylistSongSortOption {
+        return homeViewModel.playlistSongSort
+    }
+    
+    var songs: [Song] {
         switch viewModel.playCountAscending {
         case false:
-            ogSongs.sort { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
+            case .title:
+                return homeViewModel.songService.playlistSongs.sorted { $0.title < $1.title}
+            case .artist:
+                return homeViewModel.songService.playlistSongs.sorted { $0.artistName < $1.artistName}
+            }
         case true:
-            ogSongs.sort { $1.playCount ?? 0 > $0.playCount ?? 0 }
+            switch sortOption {
+            case .dateAdded:
+                return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
+            case .plays:
+                return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
+            case .lastPlayed:
+                return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
+            case .title:
+                return homeViewModel.songService.playlistSongs.sorted { $0.title > $1.title}
+            case .artist:
+                return homeViewModel.songService.playlistSongs.sorted { $0.artistName > $1.artistName}
+            }
         }
-        return viewModel.filterSongsByText(text: text, songs: ogSongs, using: ogSongs)
     }
     
     var body: some View {
@@ -72,18 +95,22 @@ struct PlaylistView: View {
             scrollID = "cover"
         }
         .task {
-//            if playlist.liveUpdating {
-//                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType)
-//                if updatedSongs != playlist.songs {
-//                    playlist.songs = updatedSongs
-//                    do {
-//                        try modelContext.save()
-//                        print("Updated playlist songs.")
-//                    } catch {
-//                        print("Could not save new songs.")
-//                    }
-//                }
-//            }
+            if let limitSortType = playlist.limitSortType {
+                switch LimitSortType(rawValue: limitSortType) {
+                case .artist:
+                    homeViewModel.playlistSongSort = .artist
+                case .mostPlayed:
+                    homeViewModel.playlistSongSort = .plays
+                case .lastPlayed:
+                    homeViewModel.playlistSongSort = .lastPlayed
+                case .mostRecentlyAdded:
+                    homeViewModel.playlistSongSort = .dateAdded
+                case .title:
+                    homeViewModel.playlistSongSort = .title
+                default:
+                    homeViewModel.playlistSongSort = .plays
+                }
+            }
         }
     }
     
@@ -141,9 +168,6 @@ struct PlaylistView: View {
         TextField("", text: $text)
             .textFieldStyle(CustomTextFieldStyle(text: $text, placeholder: "Search for song", icon: "magnifyingglass"))
             .autocorrectionDisabled()
-//            .onChange(of: text) { _, _ in
-//                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, songItems: songService.searchResultSongs, using: songService.sortedSongs)
-//            }
             .padding(.horizontal)
             .focused($isFocused)
     }

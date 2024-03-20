@@ -41,7 +41,12 @@ struct PlaylistListRow: View {
 
                 }
                 .onTapGesture {
-                    playlistViewModel.setActivePlaylist(playlist: playlist)
+                    Task {
+                        let setSongs = await setPlaylistSongs()
+                        if setSongs {
+                            playlistViewModel.setActivePlaylist(playlist: playlist)
+                        }
+                    }
                 }
                 
                 Spacer()
@@ -66,6 +71,16 @@ struct PlaylistListRow: View {
                 .foregroundStyle(.secondary.opacity(0.2))
         }
         .frame(maxWidth: .infinity)
+    }
+    
+    private func setPlaylistSongs() async -> Bool {
+        homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
+            playlist.songs.contains($0.id.rawValue)
+        }
+        if let sortOption = PlaylistSongSortOption(rawValue: playlist.limitSortType ?? "") {
+            homeViewModel.playlistSongSort = sortOption
+        }
+        return !homeViewModel.songService.playlistSongs.isEmpty
     }
     
     private var playlistCoverIcon: some View {

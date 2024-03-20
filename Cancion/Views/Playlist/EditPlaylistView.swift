@@ -188,6 +188,9 @@ struct EditPlaylistView: View {
                         let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
                         if !songIDs.isEmpty && songIDs != playlist.songs {
                             playlist.songs = songIDs
+                            homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
+                                songIDs.contains($0.id.rawValue)
+                            }
                         }
                         if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
                             playlist.name = viewModel.playlistName
