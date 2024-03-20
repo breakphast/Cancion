@@ -215,9 +215,7 @@ struct Dropdown: View {
     
     func handleLimitFilters(option: String) {
         if let limitType = LimitType(rawValue: option) {
-            let defaultLimitValue = Limit.limits(forType: option).first?.value ?? "0"
             playlistViewModel.limitType = limitType.rawValue
-            playlistViewModel.limit = Int(defaultLimitValue) ?? 0
         } else {
             let allLimits = LimitType.allCases.flatMap { Limit.limits(forType: $0.rawValue) }
             if let matchingLimit = allLimits.first(where: { $0.value == option }) {

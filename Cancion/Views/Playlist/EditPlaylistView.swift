@@ -203,6 +203,22 @@ struct EditPlaylistView: View {
                         }
                         if viewModel.limitSortType != playlist.limitSortType {
                             playlist.limitSortType = viewModel.limitSortType
+                            if let limitSortType = playlist.limitSortType {
+                                switch LimitSortType(rawValue: limitSortType) {
+                                case .artist:
+                                    homeViewModel.playlistSongSort = .artist
+                                case .mostPlayed:
+                                    homeViewModel.playlistSongSort = .plays
+                                case .lastPlayed:
+                                    homeViewModel.playlistSongSort = .lastPlayed
+                                case .mostRecentlyAdded:
+                                    homeViewModel.playlistSongSort = .dateAdded
+                                case .title:
+                                    homeViewModel.playlistSongSort = .title
+                                default:
+                                    homeViewModel.playlistSongSort = .plays
+                                }
+                            }
                         }
                         await viewModel.resetViewModelValues()
                     }
