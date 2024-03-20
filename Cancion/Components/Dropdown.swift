@@ -189,7 +189,7 @@ struct Dropdown: View {
                     handleSmartConditions(option: condition.rawValue)
                 case FilterType.plays.rawValue:
                     self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
-                    self.selection = Condition.greaterThan.rawValue
+                    self.selection = condition.rawValue
                     handleSmartConditions(option: condition.rawValue)
                 case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:
                     self.options = [Condition.equals, Condition.before, Condition.after].map {$0.rawValue}

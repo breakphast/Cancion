@@ -22,7 +22,7 @@ import MusicKit
     
     var playlistName = ""
     var coverData: Data?
-    var matchRules: String? = MatchRules.any.rawValue
+    var matchRules: String? = MatchRules.all.rawValue
     var smartRulesActive: Bool = true
     var filters: [FilterModel] = []
     var filteredDate: Date = Date()
@@ -170,7 +170,7 @@ import MusicKit
     func resetViewModelValues() {
         playlistName = ""
         coverData = nil
-        matchRules = MatchRules.any.rawValue
+        matchRules = MatchRules.all.rawValue
         smartRulesActive = true
         filters = []
         liveUpdating = true

@@ -149,7 +149,7 @@ struct EditPlaylistView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: "any", type: .matchRules)
+                Dropdown(options: ["all", "any"], selection: viewModel.matchRules ?? "all", type: .matchRules)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -249,6 +249,12 @@ struct EditPlaylistView: View {
             }
             if viewModel.limitType != playlist.limitType {
                 playlist.limitType = viewModel.limitType
+            }
+            if viewModel.filters != playlist.filters {
+                playlist.filters = viewModel.filters
+            }
+            if viewModel.matchRules != playlist.matchRules {
+                playlist.matchRules = viewModel.matchRules
             }
             if viewModel.limitSortType != playlist.limitSortType {
                 playlist.limitSortType = viewModel.limitSortType
