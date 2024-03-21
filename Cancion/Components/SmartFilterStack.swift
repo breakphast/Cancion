@@ -27,7 +27,7 @@ struct SmartFilterStack: View {
                 Dropdown(filter: filter, type: .smartFilter)
                 Dropdown(filter: filter, type: .smartCondition)
                 if isDateStack {
-                    DatePickr(playlistGenViewModel: playlistViewModel)
+                    DatePickr(filter: filter)
                         .padding(.trailing, 4)
                 } else {
                     SmartFilterTextField(text: $filterText, type: .filter)

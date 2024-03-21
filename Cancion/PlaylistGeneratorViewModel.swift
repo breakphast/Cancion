@@ -25,7 +25,7 @@ import MusicKit
     var matchRules: String? = MatchRules.all.rawValue
     var smartRulesActive: Bool = true
     var filters: [FilterModel] = []
-    var filteredDate: Date = Date()
+    var filteredDates = [String : String]()
     var limitActive: Bool = true
     var limit: Int? = 25
     var limitType: String? = LimitType.items.rawValue
@@ -41,12 +41,17 @@ import MusicKit
             if matchRules == MatchRules.all.rawValue, let filters {
                 filteredSongs = songs
                 for filter in filters {
-                    filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: filteredDate) }
+                    if let filterrDate = filteredDates[filter.id.uuidString] {
+                        let datedate = Helpers().dateFormatter.date(from: filterrDate)
+                        filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: datedate) }
+                    } else {
+                        filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: nil) }
+                    }
                 }
             } else if matchRules == MatchRules.any.rawValue, let filters {
                 filteredSongs = songs.filter { song in
                     filters.contains { filter in
-                        matches(song: song, filter: filter, date: filteredDate)
+                        matches(song: song, filter: filter, date: filter.date == nil ? nil : Helpers().dateFormatter.date(from: filter.date!))
                     }
                 }
             }
@@ -117,7 +122,6 @@ import MusicKit
             let model = Playlista()
             model.name = name
             model.smartRules = smartRulesActive
-            model.filters = filters
             model.songs = songIDS
             model.cover = cover
             model.limit = limit
@@ -126,6 +130,12 @@ import MusicKit
             model.limitType = limitType
             model.limitSortType = limitSortType
             
+            for filter in filters {
+                if let filterrDate = filteredDates[filter.id.uuidString] {
+                    filter.date = filterrDate
+                }
+            }
+            model.filters = filters
             return model
         }
     }
@@ -182,6 +192,11 @@ import MusicKit
         limit = playlist.limit
         limitType = playlist.limitType
         limitSortType = playlist.limitSortType
+        for filter in filters {
+            if let filterDateString = filter.date {
+                filteredDates[filter.id.uuidString] = filterDateString
+            }
+        }
     }
     
     @MainActor
@@ -195,6 +210,7 @@ import MusicKit
         limit = 25
         limitType = LimitType.items.rawValue
         limitSortType = LimitSortType.mostPlayed.rawValue
+        filteredDates = [:]
     }
 }
 

@@ -15,12 +15,14 @@ class FilterModel {
     var type: String
     var value: String
     var condition: String
+    var date: String?
     
-    init(id: UUID = UUID(), type: String = "artist", value: String = "", condition: String = "is") {
+    init(id: UUID = UUID(), type: String = "artist", value: String = "", condition: String = "is", date: String? = nil) {
         self.id = id
         self.type = type
         self.value = value
         self.condition = condition
+        self.date = date
     }
 }
 

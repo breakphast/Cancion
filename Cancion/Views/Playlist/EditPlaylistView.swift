@@ -65,6 +65,7 @@ struct EditPlaylistView: View {
             .padding(.top)
         }
         .task {
+            viewModel.assignViewModelValues(playlist: playlist)
             if let coverData = playlist.cover {
                 viewModel.coverData = coverData
             }
@@ -183,6 +184,9 @@ struct EditPlaylistView: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
+                    Task {
+                        await viewModel.resetViewModelValues()
+                    }
                     dismiss()
                 }
             } label: {
@@ -248,9 +252,16 @@ struct EditPlaylistView: View {
             if viewModel.limitType != playlist.limitType {
                 playlist.limitType = viewModel.limitType
             }
+            for filter in viewModel.filters {
+                if let filterrDate = viewModel.filteredDates[filter.id.uuidString] {
+                    filter.date = filterrDate
+                }
+            }
             if viewModel.filters != playlist.filters {
+                playlist.filters = []
                 playlist.filters = viewModel.filters
             }
+            
             if viewModel.matchRules != playlist.matchRules {
                 playlist.matchRules = viewModel.matchRules
             }

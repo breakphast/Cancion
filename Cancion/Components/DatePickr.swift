@@ -8,28 +8,40 @@
 import SwiftUI
 
 struct DatePickr: View {
-    @Bindable var playlistGenViewModel: PlaylistGeneratorViewModel
-    
+    let filter: FilterModel
+    @State private var filteredDate = Date()
+    @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
     let dateFormatter = DateFormatter()
-    init(playlistGenViewModel: PlaylistGeneratorViewModel) {
-        self.playlistGenViewModel = playlistGenViewModel
+    init(filter: FilterModel) {
+        self.filter = filter
         dateFormatter.dateFormat = "MMM dd, yyyy"
+    }
+    
+    var filterDateText: String {
+        if let filterDateString = playlistGeneratorViewModel.filteredDates[filter.id.uuidString] {
+            return filterDateString
+        }
+        return Helpers().dateFormatter.string(from: Date())
     }
     
     var body: some View {
         VStack {
             ZStack {
-                DatePicker("Date", selection: $playlistGenViewModel.filteredDate, in: ...Date.now, displayedComponents: .date)
+                DatePicker("Date", selection: $filteredDate, in: ...Date.now, displayedComponents: .date)
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.white)
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(.oreo.opacity(0.1))
-                    Text(dateFormatter.string(from: playlistGenViewModel.filteredDate))
+                    Text(filterDateText)
                         .foregroundStyle(.oreo)
                         .font(.caption.bold())
                 }
                 .allowsHitTesting(false)
+                .onChange(of: filteredDate) { oldValue, newValue in
+                    let dateeee = Helpers().dateFormatter.string(from: newValue)
+                    playlistGeneratorViewModel.filteredDates[filter.id.uuidString] = dateeee
+                }
             }
             .frame(height: 44)
         }
