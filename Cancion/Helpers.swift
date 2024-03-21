@@ -38,3 +38,10 @@ struct CustomTextFieldStyle: TextFieldStyle {
         )
     }
 }
+
+struct Helpers {
+    var dateFormatter = DateFormatter()
+    init() {
+        dateFormatter.dateFormat = "M/d/yy"
+    }
+}

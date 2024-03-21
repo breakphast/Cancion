@@ -110,8 +110,8 @@ struct PlaylistView: View {
             }
             
             if playlist.liveUpdating {
-                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlistGeneratorViewModel.filters, matchRules: playlistGeneratorViewModel.matchRules, limitType: playlistGeneratorViewModel.limitType)
-                if updatedSongs != playlist.songs {
+                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType)
+                if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
                     playlist.songs = updatedSongs
                 }
             }

@@ -257,6 +257,9 @@ struct EditPlaylistView: View {
             if viewModel.liveUpdating != playlist.liveUpdating {
                 playlist.liveUpdating = viewModel.liveUpdating
             }
+            if viewModel.smartRulesActive != playlist.smartRules {
+                playlist.smartRules = viewModel.smartRulesActive
+            }
             if viewModel.limitSortType != playlist.limitSortType {
                 playlist.limitSortType = viewModel.limitSortType
                 if let limitSortType = playlist.limitSortType {
