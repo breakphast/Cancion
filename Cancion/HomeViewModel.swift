@@ -111,12 +111,9 @@ import MusicKit
                 } else {
                     initializeQueue()
                 }
-            } catch {
-                initializeQueue()
             }
         }
     }
-    
     @MainActor
     func handlePlayButtonSelected() {
         Task {

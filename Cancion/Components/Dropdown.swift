@@ -43,7 +43,7 @@ struct Dropdown: View {
                         zIndex = index
                         withAnimation(.bouncy) {
                             showOptions.toggle()
-                            if type == .limitSortType {
+                            if type == .limitSortType || type == .limit {
                                 playlistViewModel.dropdownActive.toggle()
                             }
                         }

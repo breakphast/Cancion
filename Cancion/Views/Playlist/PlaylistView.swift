@@ -124,6 +124,7 @@ struct PlaylistView: View {
                 withAnimation(.bouncy(duration: 0.4)) {
                     dismiss()
                     showView = false
+                    homeViewModel.playlistSongSort = nil
                 }
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
@@ -184,15 +185,13 @@ struct PlaylistView: View {
     }
     private var headerItems: some View {
         HStack {
-            Text("RANK")
-            
             Spacer()
             
             Button {
                 viewModel.playCountAscending.toggle()
                 
             } label: {
-                HStack(spacing: 2) {
+                HStack(spacing: 4) {
                     Text(sortTitle)
                     Image(systemName: "chevron.down")
                         .bold()

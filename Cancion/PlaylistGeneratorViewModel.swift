@@ -37,7 +37,7 @@ import MusicKit
         var filteredSongs = songs
         var totalDuration = 0.0
         
-        if let matchRules {
+        if let matchRules, smartRulesActive {
             if matchRules == MatchRules.all.rawValue, let filters {
                 filteredSongs = songs
                 for filter in filters {
@@ -49,6 +49,23 @@ import MusicKit
                         matches(song: song, filter: filter, date: filteredDate)
                     }
                 }
+            }
+        }
+        
+        if let limitSortType, let sort = LimitSortType(rawValue: limitSortType) {
+            switch sort {
+            case .mostPlayed:
+                filteredSongs.sort { $0.playCount ?? 0 > $1.playCount ?? 0 }
+            case .lastPlayed:
+                filteredSongs = filteredSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
+            case .mostRecentlyAdded:
+                filteredSongs = filteredSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
+            case .title:
+                filteredSongs.sort { $0.title.lowercased() < $1.title.lowercased() }
+            case .artist:
+                filteredSongs.sort { $0.artistName.lowercased() < $1.artistName.lowercased() }
+            case .random:
+                filteredSongs.shuffle()
             }
         }
                 
@@ -107,6 +124,7 @@ import MusicKit
             model.matchRules = matchRules
             model.liveUpdating = liveUpdating
             model.limitType = limitType
+            model.limitSortType = limitSortType
             
             return model
         }

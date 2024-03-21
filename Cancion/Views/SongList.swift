@@ -75,6 +75,7 @@ struct SongList: View {
                 .scrollIndicators(.never)
                 .scrollPosition(id: $scrollID)
                 .scrollTargetBehavior(.viewAligned)
+                .scrollDismissesKeyboard(.interactively)
                 .disabled(viewModel.searchActive)
                 .blur(radius: viewModel.searchActive ? 5 : 0)
                 .task {
@@ -151,8 +152,6 @@ struct SongList: View {
     }
     private var headerItems: some View {
         HStack {
-            Text("RANK")
-            
             Spacer()
             
             SortDropdown(options: ["Plays", "Date Added", "Last Played"])

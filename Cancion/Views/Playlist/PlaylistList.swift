@@ -10,14 +10,21 @@ import MusicKit
 import SwiftData
 
 struct PlaylistList: View {
-    @State var viewModel = PlaylistGeneratorViewModel()
     @Environment(HomeViewModel.self) var homeViewModel
-    @State private var text: String = ""
     @Environment(\.modelContext) var modelContext
-    @Query var playlistas: [Playlista]
-    @FocusState var isFocused: Bool
-    
+    @State var viewModel = PlaylistGeneratorViewModel()
+    @State private var text: String = ""
     @State private var showGenerator = false
+    @FocusState var isFocused: Bool
+    @Query var playlistas: [Playlista]
+
+    private var playlists: [Playlista] {
+        if text.isEmpty {
+            return playlistas
+        } else {
+            return playlistas.filter { $0.name.lowercased().contains(text.lowercased()) }
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -36,7 +43,7 @@ struct PlaylistList: View {
                             }
                             CustomDivider()
                             
-                            ForEach(playlistas, id: \.id) { playlist in
+                            ForEach(playlists, id: \.id) { playlist in
                                 PlaylistListRow(playlist: playlist)
                             }
                         }
@@ -116,22 +123,9 @@ struct PlaylistList: View {
             
             Spacer()
             
-            Button {
-                withAnimation(.bouncy(duration: 0.4)) {
-                    
-                }
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(.oreo)
-                        .frame(width: 44)
-                        .shadow(radius: 2)
-                    Image(systemName: "line.3.horizontal.decrease.circle.fill")
-                        .foregroundStyle(.white)
-                        .font(.title2)
-                        .fontWeight(.heavy)
-                }
-            }
+            Circle()
+                .fill(.clear)
+                .frame(width: 44)
         }
         .padding(.top)
         .padding(.bottom, 8)
@@ -142,6 +136,9 @@ struct PlaylistList: View {
             .autocorrectionDisabled()
             .padding(.vertical, 8)
             .focused($isFocused)
+            .onChange(of: text) { _, _ in
+                text = text
+            }
     }
 }
 
