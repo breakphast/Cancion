@@ -32,6 +32,8 @@ import MusicKit
     var limitSortType: String? = LimitSortType.mostPlayed.rawValue
     var liveUpdating: Bool = true
     
+    var genError: GenErrors?
+    
     // MARK: - Generator Functions
     func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?) async -> [String] {
         var filteredSongs = songs
@@ -118,6 +120,17 @@ import MusicKit
             image = Image(uiImage: uiImage)
         }
         let songIDS = await fetchMatchingSongIDs(songs: songs, filters: filters, matchRules: matchRules, limitType: limitType)
+        
+        guard !songIDS.isEmpty else {
+            genError = .emptySongs
+            return nil
+        }
+        
+        guard !playlistName.isEmpty else {
+            genError = .emptyName
+            return nil
+        }
+        
         do {
             let model = Playlista()
             model.name = name
@@ -217,4 +230,18 @@ import MusicKit
 enum MatchRules: String {
     case all = "all"
     case any = "any"
+}
+
+enum GenErrors: LocalizedError {
+    case emptySongs
+    case emptyName
+    
+    var errorDescription: String? { // Note the change to String?
+        switch self {
+        case .emptySongs:
+            return "Filters do not match any songs in your library."
+        case .emptyName:
+            return "Please enter a valid name for your playlist."
+        }
+    }
 }

@@ -17,16 +17,22 @@ struct PlaylistGenerator: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
-    @State private var playlistName = ""
     @State private var item: PhotosPickerItem?
     @State private var imageData: Data?
     @FocusState var isFocused: Bool
+    @State private var showError = false
+    @State private var playlistName = ""
     
     var image: Image? {
         if let imageData, let uiiImage = UIImage(data: imageData) {
             return Image(uiImage: uiiImage)
         }
         return nil
+    }
+    
+    var genError: Bool? {
+        showError = viewModel.genError != nil
+        return viewModel.genError != nil
     }
     
     var body: some View {
@@ -63,6 +69,16 @@ struct PlaylistGenerator: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .padding(.top)
+            .alert(isPresented: $showError, error: viewModel.genError) { _ in
+                Button("OK") {
+                    viewModel.genError = nil
+                }
+            } message: { _ in
+                Text("Please try again.")
+            }
+            .onChange(of: playlistName) { _, newName in
+                viewModel.playlistName = newName
+            }
         }
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false
@@ -166,8 +182,9 @@ struct PlaylistGenerator: View {
     
     func handleCancelPlaylist() {
         homeViewModel.generatorActive = false
-        viewModel.playlistName = ""
-        viewModel.filters = []
+        Task { @MainActor in
+            viewModel.resetViewModelValues()
+        }
         dismiss()
     }
     
@@ -200,12 +217,7 @@ struct PlaylistGenerator: View {
             
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    Task {
-                        await addPlaylistToDatabase()
-                    }
-                    
-                    homeViewModel.generatorActive = false
-                    dismiss()
+                    addPlaylist()
                 }
             } label: {
                 ZStack {
@@ -222,14 +234,25 @@ struct PlaylistGenerator: View {
         }
     }
     
+    private func addPlaylist() {
+        Task { @MainActor in
+            let addedSuccess = await addPlaylistToDatabase()
+            if addedSuccess {
+                homeViewModel.generatorActive = false
+                dismiss()
+            }
+        }
+    }
+    
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: homeViewModel.songService.sortedSongs, name: playlistName, cover: imageData) {
+        if let model = await viewModel.generatePlaylist(songs: homeViewModel.songService.sortedSongs, name: viewModel.playlistName, cover: imageData) {
             modelContext.insert(model)
             viewModel.filters = []
             
             return true
         }
+        showError = true
         return false
     }
     
@@ -264,4 +287,3 @@ struct PlaylistGenerator: View {
         .environment(SongService())
         .environment(HomeViewModel())
 }
-

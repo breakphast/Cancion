@@ -55,7 +55,7 @@ func matches(song: Song, filter: FilterModel, date: Date?) -> Bool {
         
     case Condition.before.rawValue, Condition.after.rawValue:
         if let songDate = (filter.type == FilterType.dateAdded.rawValue ? song.libraryAddedDate : filter.type == FilterType.lastPlayedDate.rawValue ? song.lastPlayedDate : nil), let filterDate = date {
-            return filter.condition == Condition.before.rawValue ? songDate < filterDate : songDate > filterDate
+            return filter.condition == Condition.before.rawValue ? isDateBefore(date1: songDate, date2: filterDate) : isDateAfter(date1: songDate, date2: filterDate)
         }
         
     default:
@@ -70,6 +70,18 @@ func areDatesEqual(date1: Date, date2: Date) -> Bool {
     return calendar.isDate(date1, equalTo: date2, toGranularity: .day) &&
     calendar.isDate(date1, equalTo: date2, toGranularity: .month) &&
     calendar.isDate(date1, equalTo: date2, toGranularity: .year)
+}
+
+func isDateBefore(date1: Date, date2: Date) -> Bool {
+    let calendar = Calendar.current
+    let order = calendar.compare(date1, to: date2, toGranularity: .day)
+    return order == .orderedAscending
+}
+
+func isDateAfter(date1: Date, date2: Date) -> Bool {
+    let calendar = Calendar.current
+    let order = calendar.compare(date1, to: date2, toGranularity: .day)
+    return order == .orderedDescending
 }
 
 enum FilterType: String, CaseIterable {

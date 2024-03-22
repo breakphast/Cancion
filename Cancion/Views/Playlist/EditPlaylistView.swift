@@ -19,6 +19,12 @@ struct EditPlaylistView: View {
     @Query var playlistas: [Playlista]
     @State private var playlistName = ""
     @State private var item: PhotosPickerItem?
+    @State private var showError = false
+    
+    var genError: Bool? {
+        showError = viewModel.genError != nil
+        return viewModel.genError != nil
+    }
     
     var image: Image? {
         if let coverData = viewModel.coverData, let uiiImage = UIImage(data: coverData) {
@@ -63,6 +69,13 @@ struct EditPlaylistView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .padding(.top)
+            .alert(isPresented: $showError, error: viewModel.genError) { _ in
+                Button("OK") {
+                    viewModel.genError = nil
+                }
+            } message: { _ in
+                Text("Please try again.")
+            }
         }
         .task {
             viewModel.assignViewModelValues(playlist: playlist)
@@ -213,8 +226,6 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     handleEditPlaylist()
-                    dismiss()
-                    homeViewModel.generatorActive = false
                 }
             } label: {
                 ZStack {
@@ -234,6 +245,17 @@ struct EditPlaylistView: View {
     private func handleEditPlaylist() {
         Task { @MainActor in
             let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
+            
+            guard !songIDs.isEmpty else {
+                viewModel.genError = .emptySongs
+                showError = true
+                return
+            }
+            guard !viewModel.playlistName.isEmpty else {
+                viewModel.genError = .emptyName
+                return
+            }
+            
             if !songIDs.isEmpty && songIDs != playlist.songs {
                 playlist.songs = songIDs
                 homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
@@ -291,9 +313,10 @@ struct EditPlaylistView: View {
                 }
             }
             viewModel.resetViewModelValues()
+            
+            dismiss()
+            homeViewModel.generatorActive = false
         }
-        dismiss()
-        homeViewModel.generatorActive = false
     }
     
     @MainActor
