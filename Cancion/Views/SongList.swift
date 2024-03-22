@@ -60,6 +60,8 @@ struct SongList: View {
             Color.white.opacity(0.000001).ignoresSafeArea()
             VStack {
                 navHeaderItems
+                    .padding(.horizontal, 24)
+
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
@@ -70,6 +72,7 @@ struct SongList: View {
                             .id(33)
                         songList
                     }
+                    .padding(.horizontal, 24)
                     .scrollTargetLayout()
                 }
                 .scrollIndicators(.never)
@@ -82,7 +85,6 @@ struct SongList: View {
                     scrollID = 33
                 }
             }
-            .padding(.horizontal, 24)
         }
         .gesture(homeViewModel.swipeGesture)
         .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width)

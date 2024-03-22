@@ -36,6 +36,7 @@ struct PlaylistView: View {
     var body: some View {
         VStack(spacing: 16) {
             navHeaderItems
+                .padding(.horizontal, 24)
             
             ScrollView {
                 VStack(alignment: .leading) {
@@ -46,6 +47,7 @@ struct PlaylistView: View {
                     songList
                 }
                 .padding(.top, 4)
+                .padding(.horizontal, 24)
             }
             .scrollIndicators(.never)
             .scrollPosition(id: $scrollID)
@@ -54,7 +56,6 @@ struct PlaylistView: View {
         }
         .frame(maxWidth: .infinity)
         .gesture(homeViewModel.swipeGesture)
-        .padding(.horizontal, 24)
         .fullScreenCover(isPresented: $showGenerator) {
             EditPlaylistView(playlist: playlist)
                 .environment(playlistGeneratorViewModel)

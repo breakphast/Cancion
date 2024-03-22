@@ -23,6 +23,7 @@ struct ContentView: View {
             }
         }
         .environment(authService)
+        .preferredColorScheme(.light)
     }
 }
 
