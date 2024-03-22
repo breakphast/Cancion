@@ -282,6 +282,13 @@ struct EditPlaylistView: View {
             if viewModel.filters != playlist.filters {
                 playlist.filters = []
                 playlist.filters = viewModel.filters
+                Task { @MainActor in
+                    do {
+                        try modelContext.save()
+                    } catch {
+                        print("Could not save.")
+                    }
+                }
             }
             
             if viewModel.matchRules != playlist.matchRules {
