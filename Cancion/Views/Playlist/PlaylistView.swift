@@ -27,7 +27,7 @@ struct PlaylistView: View {
     
     var playlist: Playlista
     
-    private var sortOption: PlaylistSongSortOption? {
+    private var sortOption: LimitSortType? {
         return homeViewModel.playlistSongSort
     }
     
@@ -69,11 +69,11 @@ struct PlaylistView: View {
             switch sortOption {
             case .artist:
                 sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
-            case .plays:
+            case .mostPlayed:
                 sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
             case .lastPlayed:
                 sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
-            case .dateAdded:
+            case .mostRecentlyAdded:
                 sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
             case .title:
                 sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
@@ -92,19 +92,19 @@ struct PlaylistView: View {
                     homeViewModel.playlistSongSort = .artist
                     sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
                 case .mostPlayed:
-                    homeViewModel.playlistSongSort = .plays
+                    homeViewModel.playlistSongSort = .mostPlayed
                     sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                 case .lastPlayed:
                     homeViewModel.playlistSongSort = .lastPlayed
                     sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
                 case .mostRecentlyAdded:
-                    homeViewModel.playlistSongSort = .dateAdded
+                    homeViewModel.playlistSongSort = .mostRecentlyAdded
                     sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
                 case .title:
                     homeViewModel.playlistSongSort = .title
                     sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
                 default:
-                    homeViewModel.playlistSongSort = .plays
+                    homeViewModel.playlistSongSort = .mostPlayed
                     sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                 }
             }
@@ -261,9 +261,9 @@ struct PlaylistView: View {
         switch viewModel.playCountAscending {
         case false:
             switch sortOption {
-            case .dateAdded:
+            case .mostRecentlyAdded:
                 return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
-            case .plays:
+            case .mostPlayed:
                 return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
             case .lastPlayed:
                 return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
@@ -271,14 +271,14 @@ struct PlaylistView: View {
                 return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() < $1.title.lowercased()}
             case .artist:
                 return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() < $1.artistName.lowercased()}
-            case .none:
+            default:
                 return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
             }
         case true:
             switch sortOption {
-            case .dateAdded:
+            case .mostRecentlyAdded:
                 return homeViewModel.songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
-            case .plays:
+            case .mostPlayed:
                 return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             case .lastPlayed:
                 return homeViewModel.songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
@@ -286,7 +286,7 @@ struct PlaylistView: View {
                 return homeViewModel.songService.playlistSongs.sorted { $0.title.lowercased() > $1.title.lowercased()}
             case .artist:
                 return homeViewModel.songService.playlistSongs.sorted { $0.artistName.lowercased() > $1.artistName.lowercased()}
-            case .none:
+            default:
                 return homeViewModel.songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             }
         }

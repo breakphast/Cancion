@@ -30,7 +30,7 @@ import MusicKit
     var queueActive = false
     
     var songSort: SongSortOption = .plays
-    var playlistSongSort: PlaylistSongSortOption?
+    var playlistSongSort: LimitSortType?
     
     let dateFormatter = DateFormatter()
     init() {

@@ -15,7 +15,7 @@ struct SongListRow: View {
     var songSort: SongSortOption {
         return homeViewModel.songSort
     }
-    var playlistSongSort: PlaylistSongSortOption? {
+    var playlistSongSort: LimitSortType? {
         return homeViewModel.playlistSongSort
     }
     var body: some View {
@@ -60,10 +60,10 @@ struct SongListRow: View {
     private func sortInfoDetails() -> (info: String?, format: TextFormat) {
         if let playlistSort = playlistSongSort {
             switch playlistSort {
-            case .dateAdded, .lastPlayed:
-                let date = (playlistSort == .dateAdded) ? song.libraryAddedDate : song.lastPlayedDate
+            case .mostRecentlyAdded, .lastPlayed:
+                let date = (playlistSort == .mostRecentlyAdded) ? song.libraryAddedDate : song.lastPlayedDate
                 return (homeViewModel.dateFormatter.string(from: date ?? Date()), .date)
-            case .plays:
+            case .mostPlayed:
                 return ("\(song.playCount ?? 0)", .count)
             default:
                 return ("\(song.playCount ?? 0)", .count)

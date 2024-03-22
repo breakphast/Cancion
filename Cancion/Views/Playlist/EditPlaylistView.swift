@@ -278,15 +278,15 @@ struct EditPlaylistView: View {
                     case .artist:
                         homeViewModel.playlistSongSort = .artist
                     case .mostPlayed:
-                        homeViewModel.playlistSongSort = .plays
+                        homeViewModel.playlistSongSort = .mostPlayed
                     case .lastPlayed:
                         homeViewModel.playlistSongSort = .lastPlayed
                     case .mostRecentlyAdded:
-                        homeViewModel.playlistSongSort = .dateAdded
+                        homeViewModel.playlistSongSort = .mostRecentlyAdded
                     case .title:
                         homeViewModel.playlistSongSort = .title
                     default:
-                        homeViewModel.playlistSongSort = .plays
+                        homeViewModel.playlistSongSort = .mostPlayed
                     }
                 }
             }

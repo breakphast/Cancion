@@ -77,7 +77,7 @@ struct PlaylistListRow: View {
         homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.searchResultSongs).filter {
             playlist.songs.contains($0.id.rawValue)
         }
-        if let limitSortType = playlist.limitSortType, let sortOption = PlaylistSongSortOption(rawValue: limitSortType) {
+        if let limitSortType = playlist.limitSortType, let sortOption = LimitSortType(rawValue: limitSortType) {
             homeViewModel.playlistSongSort = sortOption
         }
         return !homeViewModel.songService.playlistSongs.isEmpty
