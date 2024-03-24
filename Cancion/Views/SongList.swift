@@ -114,7 +114,7 @@ struct SongList: View {
             
             Spacer()
             
-            Text("Desmond's Songs")
+            Text("My Songs")
                 .foregroundStyle(.oreo)
                 .font(.title2.bold())
                 .fontDesign(.rounded)

@@ -26,7 +26,7 @@ import MusicKit
     var songService = SongService()
     var selectionChange = false
     let swipeThreshold: CGFloat = 50.0
-    var currentScreen: Screen = .player
+    var currentScreen: Screen = .playlists
     var queueActive = false
     
     var songSort: SongSortOption = .plays
