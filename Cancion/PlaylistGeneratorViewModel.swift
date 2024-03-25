@@ -31,6 +31,7 @@ import MusicKit
     var limitType: String? = LimitType.items.rawValue
     var limitSortType: String? = LimitSortType.mostPlayed.rawValue
     var liveUpdating: Bool = true
+    var addedToApple = false
     
     var genError: GenErrors?
     
@@ -153,15 +154,25 @@ import MusicKit
         }
     }
     
-//    func createAppleMusicPlaylist(using playlist: Playlista) {
-//        Task {
-//            let lib = MusicLibrary.shared
-//            var listt = try await MusicLibrary.shared.createPlaylist(name: playlist.title)
-//            for song in playlist.songs {
-//                try await lib.add(song, to: listt)
-//            }
-//        }
-//    }
+    func createAppleMusicPlaylist(using playlist: Playlista, songs: [Song]) {
+        Task {
+            let lib = MusicLibrary.shared
+            let listt = try await MusicLibrary.shared.createPlaylist(name: playlist.name)
+            withAnimation {
+                addedToApple = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                    self?.addedToApple = false
+                }
+            }
+            var playlistSongs = [Song]()
+            playlistSongs = songs.filter {
+                playlist.songs.contains($0.id.rawValue)
+            }
+            for song in playlistSongs {
+                try await lib.add(song, to: listt)
+            }
+        }
+    }
     
     func smartFilterSongs(songs: [Song], using filter: SongFilterModel) -> [Song] {
         return songs.filter { filter.matches(song: $0) }

@@ -17,6 +17,10 @@ struct PlaylistListRow: View {
     @Environment(\.modelContext) var modelContext
     @State private var showMenu = false
     
+    var addedToApple: Bool {
+        return playlistViewModel.addedToApple
+    }
+    
     var song: Song? {
         if let songID = playlist.songs.first, let song = Array(homeViewModel.songService.ogSongs).first(where: {$0.id.rawValue == songID}) {
             return song
@@ -57,11 +61,19 @@ struct PlaylistListRow: View {
                     } label: {
                         Label("Delete Playlist", systemImage: "trash")
                     }
+                    Button {
+                        Task { @MainActor in
+                            playlistViewModel.createAppleMusicPlaylist(using: playlist, songs: homeViewModel.songService.ogSongs)
+                        }
+                    } label: {
+                        Label("Add To Apple Music", systemImage: "folder.fill.badge.plus")
+                    }
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Image(systemName: addedToApple ? "checkmark" : "ellipsis")
                         .font(.title.bold())
                         .contentShape(Rectangle())
                         .frame(height: 55)
+                        .foregroundStyle(addedToApple ? .naranja : .oreo)
                 }
             }
             
