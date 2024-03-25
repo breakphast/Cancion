@@ -72,7 +72,7 @@ import MusicKit
     func findMatchingSong(entry: MusicPlayer.Queue.Entry) {
         switch entry.item {
         case .song(let song):
-            if let songSong = Array(songService.searchResultSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
+            if let songSong = Array(songService.sortedSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
                 cancion = songSong
                 startObservingCurrentTrack(cancion: songSong)
             }

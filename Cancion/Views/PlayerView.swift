@@ -97,7 +97,7 @@ struct PlayerView: View {
     }
     private var mainSongElement: some View {
         VStack {
-            if let cancion, let _ = cancion.artwork {
+            if let cancion {
                 albumElement
                     .padding(.top, UIScreen.main.bounds.height * 0.05)
                 VStack {

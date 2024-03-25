@@ -23,15 +23,15 @@ struct Home: View {
             if viewModel.isPlaybackQueueSet {
                 ZStack(alignment: .bottom) {
                     Color.white.ignoresSafeArea()
-                    
-                    if let art = viewModel.cancion?.artwork {
+                    if !viewModel.songService.sortedSongs.isEmpty {
                         PlayerView()
                         
                         SongList()
                         
                         PlaylistList()
                         
-                        tabs(UIScreen.main.bounds.size, artwork: art)
+                        tabs(UIScreen.main.bounds.size)
+                            .padding(.horizontal)
                             .offset(x: !viewModel.isPlaying ? viewModel.moveSet : .zero)
                             .opacity(!viewModel.generatorActive ? 1 : 0)
                             .overlay {
@@ -42,7 +42,7 @@ struct Home: View {
                     }
                 }
                 .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newSong in
-                    Task {
+                    Task { @MainActor in
                         guard let oldValue, let newSong else {
                             if viewModel.selectionChange, let newSong {
                                 viewModel.findMatchingSong(entry: newSong)
@@ -67,7 +67,7 @@ struct Home: View {
         .environment(viewModel)
     }
     
-    private func tabs(_ size: CGSize, artwork: Artwork) -> some View {
+    private func tabs(_ size: CGSize) -> some View {
         HStack {
             Spacer()
             TabIcon(icon: "backward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
@@ -99,12 +99,8 @@ struct Home: View {
         }
         .frame(height: 120)
         .background(
-            ArtworkImage(artwork, width: UIScreen.main.bounds.width * 0.9, height: 120)
-                .aspectRatio(contentMode: .fill)
-                .blur(radius: 2, opaque: false)
-                .overlay(.ultraThinMaterial.opacity(0.99))
-                .overlay(viewModel.generatorActive ? .white.opacity(0.2) : .primary.opacity(0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(.ultraThinMaterial)
                 .shadow(radius: 2)
         )
         .sensoryFeedback(.selection, trigger: viewModel.isPlaying)

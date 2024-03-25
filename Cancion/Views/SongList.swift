@@ -148,7 +148,7 @@ struct SongList: View {
             .padding(.vertical, 8)
             .onChange(of: text) { _, _ in
                 text = text
-                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, songItems: homeViewModel.songService.searchResultSongs, using: homeViewModel.songService.sortedSongs)
+                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, using: homeViewModel.songService.sortedSongs)
             }
             .padding(.horizontal)
     }
