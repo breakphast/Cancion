@@ -24,6 +24,7 @@ struct PlaylistView: View {
     @Binding var showView: Bool
     @State private var showGenerator = false
     @State private var scrollID: String?
+    @State private var coverImage: Image?
     
     var playlist: Playlista
     
@@ -86,6 +87,9 @@ struct PlaylistView: View {
             playlistGeneratorViewModel.assignViewModelValues(playlist: playlist)
             if let coverData = playlist.cover {
                 playlistGeneratorViewModel.coverData = coverData
+                if let uiImage = UIImage(data: coverData) {
+                    coverImage = Image(uiImage: uiImage)
+                }
             }
             if let limitSortType = playlist.limitSortType {
                 switch LimitSortType(rawValue: limitSortType) {
@@ -206,10 +210,8 @@ struct PlaylistView: View {
     }
     private var playlistCover: some View {
         ZStack {
-            if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
-                let image = Image(uiImage: uiImage)
-                
-                image
+            if let coverImage {
+                coverImage
                     .resizable()
                     .scaledToFill()
                     .frame(height: 200)

@@ -20,6 +20,7 @@ struct EditPlaylistView: View {
     @State private var playlistName = ""
     @State private var item: PhotosPickerItem?
     @State private var showError = false
+    @State private var coverImage: Image?
     
     var genError: Bool? {
         showError = viewModel.genError != nil
@@ -81,6 +82,9 @@ struct EditPlaylistView: View {
             viewModel.assignViewModelValues(playlist: playlist)
             if let coverData = playlist.cover {
                 viewModel.coverData = coverData
+                if let uiImage = UIImage(data: coverData) {
+                    coverImage = Image(uiImage: uiImage)
+                }
             }
         }
     }
@@ -88,8 +92,8 @@ struct EditPlaylistView: View {
     private var coverPicker: some View {
         VStack {
             PhotosPicker(selection: $item) {
-                if let image {
-                    image
+                if let coverImage {
+                    coverImage
                         .resizable()
                         .scaledToFill()
                         .frame(height: 200)
