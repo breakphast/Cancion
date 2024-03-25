@@ -86,6 +86,7 @@ struct PlaylistList: View {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(.naranja.opacity(0.8))
                         .frame(width: 44, height: 44)
+                        .shadow(radius: 1)
                     Image(systemName: "plus")
                         .font(.title2.bold())
                 }

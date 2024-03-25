@@ -96,7 +96,10 @@ import MusicKit
         Task {
             do {
                 if let song = songService.randomSongs.first {
-                    let endIndex = max(songService.randomSongs.count / 20, 500)
+                    var endIndex = max(songService.randomSongs.count / 20, 500)
+                    if songService.randomSongs.count < endIndex {
+                        endIndex = songService.randomSongs.count
+                    }
                     cancion = song
                     player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs[0 ..< endIndex], startingAt: song)
                     do {

@@ -16,6 +16,7 @@ struct PlaylistListRow: View {
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @State private var showMenu = false
+    @State private var activePlaylist = false
     
     var addedToApple: Bool {
         return playlistViewModel.addedToApple
@@ -57,23 +58,58 @@ struct PlaylistListRow: View {
                 
                 Menu {
                     Button {
-                        self.deletePlaylist()
-                    } label: {
-                        Label("Delete Playlist", systemImage: "trash")
-                    }
-                    Button {
                         Task { @MainActor in
+                            self.activePlaylist = true
                             playlistViewModel.createAppleMusicPlaylist(using: playlist, songs: homeViewModel.songService.ogSongs)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+                                withAnimation {
+                                    activePlaylist = false
+                                }
+                            }
                         }
                     } label: {
                         Label("Add To Apple Music", systemImage: "folder.fill.badge.plus")
                     }
                 } label: {
-                    Image(systemName: addedToApple ? "checkmark" : "ellipsis")
+                    if !activePlaylist {
+                        Image(.appleMusic)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 33, height: 33)
+                            .clipped()
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(.white)
+                                    .shadow(radius: 2)
+                            )
+                    } else if addedToApple {
+                        Image(systemName: "checkmark")
+                            .font(.title2)
+                            .fontWeight(.heavy)
+                            .frame(width: 33, height: 33)
+                            .contentShape(Rectangle())
+                            .foregroundStyle(.naranja)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(.white)
+                            )
+                    }
+                }
+                .disabled(addedToApple)
+                
+                Menu {
+                    Button {
+                        self.deletePlaylist()
+                    } label: {
+                        Label("Delete Playlist", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                         .font(.title.bold())
                         .contentShape(Rectangle())
                         .frame(height: 55)
-                        .foregroundStyle(addedToApple ? .naranja : .oreo)
+                        .foregroundStyle(.oreo)
                 }
             }
             

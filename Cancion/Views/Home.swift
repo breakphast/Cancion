@@ -22,7 +22,7 @@ struct Home: View {
         GeometryReader { geo in
             if viewModel.isPlaybackQueueSet {
                 ZStack(alignment: .bottom) {
-                    Color.white.ignoresSafeArea()
+                    Color.white.opacity(0.97).ignoresSafeArea()
                     if !viewModel.songService.ogSongs.isEmpty {
                         PlayerView()
                         

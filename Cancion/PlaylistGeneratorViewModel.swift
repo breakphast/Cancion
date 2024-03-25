@@ -155,12 +155,12 @@ import MusicKit
     }
     
     func createAppleMusicPlaylist(using playlist: Playlista, songs: [Song]) {
-        Task {
+        Task { @MainActor in
             let lib = MusicLibrary.shared
             let listt = try await MusicLibrary.shared.createPlaylist(name: playlist.name)
             withAnimation {
                 addedToApple = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
                     self?.addedToApple = false
                 }
             }

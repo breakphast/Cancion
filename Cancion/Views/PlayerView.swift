@@ -97,9 +97,7 @@ struct PlayerView: View {
     }
     
     private var backgroundCard: some View {
-        let shape = screenHeight < 700 ?
-        AnyShape(UnevenRoundedRectangle(cornerRadii: .init(topLeading: 0, bottomLeading: 24, bottomTrailing: 24, topTrailing: 0))) :
-        AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        let shape = UnevenRoundedRectangle(cornerRadii: .init(topLeading: 0, bottomLeading: 24, bottomTrailing: 24, topTrailing: 0))
         
         return Color.white.opacity(0.97)
             .clipShape(shape)
