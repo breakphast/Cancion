@@ -72,7 +72,7 @@ import MusicKit
     func findMatchingSong(entry: MusicPlayer.Queue.Entry) {
         switch entry.item {
         case .song(let song):
-            if let songSong = Array(songService.sortedSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
+            if let songSong = Array(songService.ogSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
                 cancion = songSong
                 startObservingCurrentTrack(cancion: songSong)
             }
@@ -96,8 +96,9 @@ import MusicKit
         Task {
             do {
                 if let song = songService.randomSongs.first {
+                    let endIndex = max(songService.randomSongs.count / 20, 500)
                     cancion = song
-                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs[..<500], startingAt: song)
+                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs[0 ..< endIndex], startingAt: song)
                     do {
                         try await player.prepareToPlay()
                     } catch {
@@ -164,17 +165,10 @@ import MusicKit
     }
     
     @MainActor
-    func handleSongSelected(song: Song, songs: [Song]) {
-        var playableItems: [Song]?
-        if let songIndex = songs.firstIndex(where: { $0.id == song.id }) {
-            let endIndex = min(songs.count, songIndex + 200)
-            playableItems = Array(songs[songIndex..<endIndex])
-        }
+    func handleSongSelected(song: Song) {
         selectionChange = true
         Task {
-            if let playableItems {
-                try await player.queue.insert(playableItems, position: .afterCurrentEntry)
-            }
+            try await player.queue.insert(song, position: .afterCurrentEntry)
             try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()

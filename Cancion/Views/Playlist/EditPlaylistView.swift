@@ -262,7 +262,7 @@ struct EditPlaylistView: View {
             
             if !songIDs.isEmpty && songIDs != playlist.songs {
                 playlist.songs = songIDs
-                homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.sortedSongs).filter {
+                homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.ogSongs).filter {
                     songIDs.contains($0.id.rawValue)
                 }
             }

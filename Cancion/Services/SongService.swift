@@ -11,6 +11,7 @@ import MusicKit
 @Observable class SongService {
     var randomSongs = [Song]()
     var searchResultSongs = MusicItemCollection<Song>()
+    var ogSongs = [Song]()
     var sortedSongs = [Song]()
     var limitFilter = LimitFilter(active: false, limit: "25", limitTypeSelection: "items", limitSortSelection: "most played", condition: .contains, value: "")
     var filters: [any SongFilterModel] = [TitleFilter(value: "", condition: .contains)]
@@ -43,6 +44,7 @@ import MusicKit
     @MainActor
     private func apply(_ libraryResponse: MusicLibraryResponse<Song>) {
         self.searchResultSongs = libraryResponse.items
+        self.ogSongs = Array(libraryResponse.items).filter { $0.artwork != nil }.filter  {$0.playParameters != nil}
         self.sortedSongs = Array(libraryResponse.items).filter { $0.artwork != nil }.filter  {$0.playParameters != nil}
         self.randomSongs = self.sortedSongs.filter { $0.artwork != nil }.shuffled()
     }

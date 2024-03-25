@@ -223,7 +223,7 @@ struct PlaylistView: View {
                             .shadow(radius: 3)
                     )
                     .padding()
-            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = Array(homeViewModel.songService.sortedSongs).first(where: { $0.id.rawValue == songID }), let song2 = Array(homeViewModel.songService.sortedSongs).first(where: { $0.id.rawValue == songID2 }) {
+            } else if let songID = playlist.songs.first, let songID2 = playlist.songs.last, let song1 = Array(homeViewModel.songService.ogSongs).first(where: { $0.id.rawValue == songID }), let song2 = Array(homeViewModel.songService.ogSongs).first(where: { $0.id.rawValue == songID2 }) {
                 if let artwork1 = song1.artwork, let artwork2 = song2.artwork  {
                     HStack(spacing: 0) {
                         ArtworkImage(artwork1, width: 200)
@@ -254,7 +254,7 @@ struct PlaylistView: View {
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song, songs: homeViewModel.songService.playlistSongs)
+                            await homeViewModel.handleSongSelected(song: song)
                         }
                     }
             }

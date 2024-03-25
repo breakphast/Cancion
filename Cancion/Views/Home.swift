@@ -23,7 +23,7 @@ struct Home: View {
             if viewModel.isPlaybackQueueSet {
                 ZStack(alignment: .bottom) {
                     Color.white.ignoresSafeArea()
-                    if !viewModel.songService.sortedSongs.isEmpty {
+                    if !viewModel.songService.ogSongs.isEmpty {
                         PlayerView()
                         
                         SongList()

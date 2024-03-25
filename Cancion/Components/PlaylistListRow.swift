@@ -18,7 +18,7 @@ struct PlaylistListRow: View {
     @State private var showMenu = false
     
     var song: Song? {
-        if let songID = playlist.songs.first, let song = Array(homeViewModel.songService.sortedSongs).first(where: {$0.id.rawValue == songID}) {
+        if let songID = playlist.songs.first, let song = Array(homeViewModel.songService.ogSongs).first(where: {$0.id.rawValue == songID}) {
             return song
         }
         return nil
@@ -74,7 +74,7 @@ struct PlaylistListRow: View {
     }
     
     private func setPlaylistSongs() async -> Bool {
-        homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.sortedSongs).filter {
+        homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.ogSongs).filter {
             playlist.songs.contains($0.id.rawValue)
         }
         if let limitSortType = playlist.limitSortType, let sortOption = LimitSortType(rawValue: limitSortType) {

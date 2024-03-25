@@ -148,7 +148,7 @@ struct SongList: View {
             .padding(.vertical, 8)
             .onChange(of: text) { _, _ in
                 text = text
-                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, using: homeViewModel.songService.sortedSongs)
+                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, using: homeViewModel.songService.ogSongs)
             }
             .padding(.horizontal)
     }
@@ -176,7 +176,7 @@ struct SongList: View {
                 SongListRow(song: song, index: homeViewModel.songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song, songs: homeViewModel.songService.sortedSongs)
+                            await homeViewModel.handleSongSelected(song: song)
                         }
                     }
             }
