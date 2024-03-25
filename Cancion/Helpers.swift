@@ -45,3 +45,17 @@ struct Helpers {
         dateFormatter.dateFormat = "M/d/yy"
     }
 }
+
+struct AnyShape: Shape {
+    private let _path: @Sendable (CGRect) -> Path
+
+    init<S: Shape>(_ wrapped: S) {
+        _path = { rect in
+            wrapped.path(in: rect)
+        }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        _path(rect)
+    }
+}

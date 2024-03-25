@@ -18,6 +18,7 @@ struct PlayerView: View {
     private var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
     }
+    @State private var songDateAdded: String?
     
     var body: some View {
         ZStack {
@@ -36,6 +37,16 @@ struct PlayerView: View {
         }
         .offset(x: viewModel.moveSet)
         .gesture(viewModel.swipeGesture)
+        .task {
+            if let date = cancion?.libraryAddedDate {
+                songDateAdded = Helpers().dateFormatter.string(from: date)
+            }
+        }
+        .onChange(of: cancion) { oldValue, newValue in
+            if let date = cancion?.libraryAddedDate {
+                songDateAdded = Helpers().dateFormatter.string(from: date)
+            }
+        }
     }
     
     @ViewBuilder
@@ -86,62 +97,99 @@ struct PlayerView: View {
     }
     
     private var backgroundCard: some View {
-        Color.white.opacity(0.97)
-            .clipShape(.rect(cornerRadius: 24, style: .continuous))
+        let shape = screenHeight < 700 ?
+        AnyShape(UnevenRoundedRectangle(cornerRadii: .init(topLeading: 0, bottomLeading: 24, bottomTrailing: 24, topTrailing: 0))) :
+        AnyShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        
+        return Color.white.opacity(0.97)
+            .clipShape(shape)
             .ignoresSafeArea()
-            .conditionalFrame(isZero: viewModel.moveSet.isZero, height: UIScreen.main.bounds.height / 2.5, alignment: .top)
+            .frame(height: UIScreen.main.bounds.height / 2.5, alignment: .top)
             .overlay(viewModel.filterActive ? .black.opacity(0.1) : .clear)
             .onTapGesture {
                 viewModel.filterActive = false
             }
     }
+
     private var mainSongElement: some View {
         VStack {
             if let cancion {
-                albumElement
-                    .padding(.top, UIScreen.main.bounds.height * 0.05)
                 VStack {
-                    HStack(spacing: 4) {
-                        Text(cancion.title)
-                            .lineLimit(1)
-                            .font(.title.bold())
-                        if cancion.contentRating == .explicit {
-                            Image(systemName: "e.square.fill")
-                                .font(.subheadline)
-                                .foregroundStyle(.naranja)
+                    albumElement
+                        .padding(.top, UIScreen.main.bounds.height * 0.05)
+                    Spacer()
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 4) {
+                                Text(cancion.title)
+                                    .lineLimit(1)
+                                    .font(.title.bold())
+                                if cancion.contentRating == .explicit {
+                                    Image(systemName: "e.square.fill")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.naranja)
+                                }
+                            }
+                            
+                            Text(cancion.artistName)
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 8) {
+                            playsCapsule
+                            dateAdded
                         }
                     }
-                    
-                    Text(cancion.artistName)
-                        .font(.title3)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    
-                    playsCapsule
+                    .padding(.horizontal, (screenWidth > 1000 ? 40 : 16))
+                    Rectangle()
+                        .fill(.clear)
+                        .frame(height: screenHeight < 700 ? 80 : 100)
+                    Spacer()
                 }
                 .foregroundStyle(.white)
-                .padding(.vertical, UIScreen.main.bounds.height * 0.03)
-                .padding(.horizontal, 24)
             }
         }
         .offset(x: viewModel.moveSet, y: 0)
     }
     private var playsCapsule: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "star.fill")
-            Text("\(cancion?.playCount ?? 0) Plays")
+        HStack(alignment: .center ,spacing: 4) {
+            Image(systemName: "memories")
+                .font(.title3)
+            Text("\(cancion?.playCount ?? 0)")
         }
-        .font(.caption)
-        .foregroundStyle(.secondary)
+        .font(.title.bold())
+        .foregroundStyle(.white)
         .fontWeight(.semibold)
-        .padding(.horizontal)
-        .padding(.vertical, 12)
-        .background(
-            Capsule()
-                .fill(.oreo)
-                .shadow(color: .white.opacity(0.1), radius: 3)
-        )
+    }
+    
+    private var dateAdded: some View {
+        HStack(alignment: .center, spacing: 4) {
+            Image(systemName: "calendar.badge.plus")
+                .font(.headline)
+                .offset(y: 2)
+            Text(songDateAdded ?? "")
+                .kerning(1.1)
+        }
+        .font(.title3)
+        .foregroundStyle(.secondary)
+        .fontWeight(.medium)
+    }
+    private var screenHeight: CGFloat {
+        return UIScreen.main.bounds.height
+    }
+    private var screenWidth: CGFloat {
+        return UIScreen.main.bounds.width
+    }
+    
+    private var backgroundRect: UnevenRoundedRectangle? {
+        if screenHeight < 700 {
+            return UnevenRoundedRectangle(cornerRadii: .init(topLeading: 0, bottomLeading: 24, bottomTrailing: 24, topTrailing: 0))
+        }
+        return nil
     }
 }
 
