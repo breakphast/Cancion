@@ -17,7 +17,6 @@ struct PlaylistView: View {
     
     @State var viewModel = PlaylistViewModel()
     @State private var text: String = ""
-    @State var filteredSongs: [Song] = []
     var playCountAscending = false
     
     @FocusState var isFocused: Bool
@@ -187,6 +186,10 @@ struct PlaylistView: View {
             .autocorrectionDisabled()
             .padding(.horizontal)
             .focused($isFocused)
+            .onChange(of: text) { _, _ in
+                text = text
+                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.playlistSongs, using: homeViewModel.songService.ogPlaylistSongs)
+            }
     }
     private var headerItems: some View {
         HStack {

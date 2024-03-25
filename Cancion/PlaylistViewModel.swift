@@ -15,15 +15,11 @@ import MusicKit
     var selectedFilter: String? = nil
     var songSort: PlaylistSongSortOption = .plays
         
-    func filterSongsByText(text: String, songs: [Song], using staticSongs: [Song]) -> [Song] {
-        var filteredSongs = songs
-        
+    func filterSongsByText(text: String, songs: inout [Song], using staticSongs: [Song]){
         if !text.isEmpty {
-            filteredSongs = songs.filter { $0.title.contains(text) || $0.artistName.contains(text) && $0.artwork != nil }
+            songs = staticSongs.filter { $0.title.lowercased().contains(text.lowercased()) || $0.artistName.lowercased().contains(text.lowercased()) && $0.artwork != nil }
         } else {
-            filteredSongs = songs.filter { $0.artwork != nil }
+            songs = staticSongs.filter { $0.artwork != nil }
         }
-        
-        return filteredSongs
     }
 }

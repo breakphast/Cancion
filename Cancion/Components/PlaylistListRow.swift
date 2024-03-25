@@ -76,7 +76,10 @@ struct PlaylistListRow: View {
     private func setPlaylistSongs() async -> Bool {
         homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.ogSongs).filter {
             playlist.songs.contains($0.id.rawValue)
-        }
+            }
+        homeViewModel.songService.ogPlaylistSongs = Array(homeViewModel.songService.ogSongs).filter {
+            playlist.songs.contains($0.id.rawValue)
+            }
         if let limitSortType = playlist.limitSortType, let sortOption = LimitSortType(rawValue: limitSortType) {
             homeViewModel.playlistSongSort = sortOption
         }

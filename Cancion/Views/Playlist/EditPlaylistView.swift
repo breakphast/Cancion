@@ -152,6 +152,9 @@ struct EditPlaylistView: View {
             Task { @MainActor in
                 if let loaded = try? await item?.loadTransferable(type: Data.self) {
                     viewModel.coverData = loaded
+                    if let uiImage = UIImage(data: loaded) {
+                        coverImage = Image(uiImage: uiImage)
+                    }
                 } else {
                     print("Failed")
                 }
