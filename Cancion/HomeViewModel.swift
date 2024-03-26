@@ -87,6 +87,7 @@ import MusicKit
     func getSongs() {
         Task {
             try await songService.smartFilterSongs(limit: 1500, by: .playCount)
+            initializeQueue()
             if songService.randomSongs.isEmpty {
                 getSongs()
             }

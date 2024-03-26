@@ -253,7 +253,7 @@ enum GenErrors: LocalizedError {
         case .emptySongs:
             return "Filters do not match any songs in your library."
         case .emptySongsInit:
-            return "Your Apple Music library did not return any songs."
+            return "Your Apple Music library did not return any songs"
         case .emptyName:
             return "Please enter a valid name for your playlist."
         }

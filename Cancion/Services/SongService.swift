@@ -18,6 +18,7 @@ import MusicKit
     var fetchLimit: Int = 1500
     var ogPlaylistSongs = [Song]()
     var playlistSongs = [Song]()
+    var emptyLibrary = false
     
     public func smartFilterSongs(limit: Int, by sortProperty: LibrarySongSortProperties, artist: String? = nil) async throws {
         var libraryRequest = MusicLibraryRequest<Song>()
@@ -33,8 +34,12 @@ import MusicKit
             libraryRequest.filter(matching: \.artistName, equalTo: artist)
         }
         
-        let libraryResponse = try await libraryRequest.response()
-        await self.apply(libraryResponse)
+        do {
+            let libraryResponse = try await libraryRequest.response()
+            await self.apply(libraryResponse)
+        } catch {
+            emptyLibrary = true
+        }
     }
     
     public enum LibrarySongSortProperties: String {
