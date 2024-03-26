@@ -17,6 +17,7 @@ struct Home: View {
     private var cancion: Song? {
         return viewModel.cancion
     }
+    @State private var emptySongsInit = false
     
     var body: some View {
         GeometryReader { geo in
@@ -61,6 +62,16 @@ struct Home: View {
                     .task {
                         viewModel.getSongs()
                         viewModel.initializeQueue()
+                    }
+                    .alert(isPresented: $emptySongsInit, error: GenErrors.emptySongsInit) { _ in
+                        Button("OK") {
+                            emptySongsInit = true
+                        }
+                    } message: { _ in
+                        Text("Please reset and try again.")
+                    }
+                    .onChange(of: viewModel.emptySongsInit) { oldValue, newValue in
+                        emptySongsInit = newValue
                     }
             }
         }

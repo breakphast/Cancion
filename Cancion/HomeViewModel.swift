@@ -32,6 +32,8 @@ import MusicKit
     var songSort: SongSortOption = .plays
     var playlistSongSort: LimitSortType?
     
+    var emptySongsInit = false
+    
     let dateFormatter = DateFormatter()
     init() {
         dateFormatter.dateFormat = "M/d/yy"
@@ -112,6 +114,8 @@ import MusicKit
                     if let cancion {
                         startObservingCurrentTrack(cancion: cancion)
                     }
+                } else if songService.randomSongs.isEmpty {
+                    emptySongsInit = true
                 } else {
                     initializeQueue()
                 }

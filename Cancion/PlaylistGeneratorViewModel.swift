@@ -245,12 +245,15 @@ enum MatchRules: String {
 
 enum GenErrors: LocalizedError {
     case emptySongs
+    case emptySongsInit
     case emptyName
     
     var errorDescription: String? { // Note the change to String?
         switch self {
         case .emptySongs:
             return "Filters do not match any songs in your library."
+        case .emptySongsInit:
+            return "Your Apple Music library did not return any songs."
         case .emptyName:
             return "Please enter a valid name for your playlist."
         }
