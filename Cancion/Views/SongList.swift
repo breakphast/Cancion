@@ -25,6 +25,7 @@ enum PlaylistSongSortOption: String {
 struct SongList: View {
     @Environment(SongListViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
+    @Environment(SongService.self) var songService
     @State private var text: String = ""
     @State var scrollID: Int?
     @FocusState var isFocused: Bool
@@ -37,20 +38,20 @@ struct SongList: View {
         case false:
             switch sortOption {
             case .dateAdded:
-                return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
+                return songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
             case .plays:
-                return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
+                return songService.sortedSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
             case .lastPlayed:
-                return homeViewModel.songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
+                return songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
             }
         case true:
             switch sortOption {
             case .dateAdded:
-                return homeViewModel.songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
+                return songService.sortedSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
             case .plays:
-                return homeViewModel.songService.sortedSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
+                return songService.sortedSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             case .lastPlayed:
-                return homeViewModel.songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
+                return songService.sortedSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
             }
         }
     }
@@ -148,7 +149,7 @@ struct SongList: View {
             .padding(.vertical, 8)
             .onChange(of: text) { _, _ in
                 text = text
-                viewModel.filterSongsByText(text: text, songs: &homeViewModel.songService.sortedSongs, using: homeViewModel.songService.ogSongs)
+                viewModel.filterSongsByText(text: text, songs: &songService.sortedSongs, using: songService.ogSongs)
             }
             .padding(.horizontal)
     }
@@ -173,7 +174,7 @@ struct SongList: View {
     private var songList: some View {
         LazyVStack {
             ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
-                SongListRow(song: song, index: homeViewModel.songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
+                SongListRow(song: song, index: songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
                         Task {
                             await homeViewModel.handleSongSelected(song: song)

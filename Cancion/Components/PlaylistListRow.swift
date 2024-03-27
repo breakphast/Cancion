@@ -23,7 +23,7 @@ struct PlaylistListRow: View {
     }
     
     var song: Song? {
-        if let songID = playlist.songs.first, let song = Array(homeViewModel.songService.ogSongs).first(where: {$0.id.rawValue == songID}) {
+        if let songID = playlist.songs.first, let song = Array(songService.ogSongs).first(where: {$0.id.rawValue == songID}) {
             return song
         }
         return nil
@@ -60,7 +60,7 @@ struct PlaylistListRow: View {
                     Button {
                         Task { @MainActor in
                             self.activePlaylist = true
-                            playlistViewModel.createAppleMusicPlaylist(using: playlist, songs: homeViewModel.songService.ogSongs)
+                            playlistViewModel.createAppleMusicPlaylist(using: playlist, songs: songService.ogSongs)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
                                 withAnimation {
                                     activePlaylist = false
@@ -122,16 +122,16 @@ struct PlaylistListRow: View {
     }
     
     private func setPlaylistSongs() async -> Bool {
-        homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.ogSongs).filter {
+        songService.playlistSongs = Array(songService.ogSongs).filter {
             playlist.songs.contains($0.id.rawValue)
             }
-        homeViewModel.songService.ogPlaylistSongs = Array(homeViewModel.songService.ogSongs).filter {
+        songService.ogPlaylistSongs = Array(songService.ogSongs).filter {
             playlist.songs.contains($0.id.rawValue)
             }
         if let limitSortType = playlist.limitSortType, let sortOption = LimitSortType(rawValue: limitSortType) {
             homeViewModel.playlistSongSort = sortOption
         }
-        return !homeViewModel.songService.playlistSongs.isEmpty
+        return !songService.playlistSongs.isEmpty
     }
     
     private var playlistCoverIcon: some View {

@@ -246,7 +246,7 @@ struct PlaylistGenerator: View {
     
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: homeViewModel.songService.sortedSongs, name: viewModel.playlistName, cover: imageData) {
+        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: viewModel.playlistName, cover: imageData) {
             modelContext.insert(model)
             viewModel.filters = []
             

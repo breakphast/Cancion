@@ -16,17 +16,16 @@ import MusicKit
     var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
     }
-    @MainActor var cancion: Song?
+    var cancion: Song?
     var filterActive = false
     var progress: CGFloat = .zero
     var currentTimer: Timer? = nil
     
     var generatorActive = false
     var isPlaybackQueueSet = false
-    var songService = SongService()
     var selectionChange = false
     let swipeThreshold: CGFloat = 50.0
-    var currentScreen: Screen = .playlists
+    var currentScreen: Screen = .player
     var queueActive = false
     
     var songSort: SongSortOption = .plays
@@ -38,6 +37,11 @@ import MusicKit
     init() {
         dateFormatter.dateFormat = "M/d/yy"
     }
+    
+    var ogSongs = [Song]()
+    var sortedSongs = [Song]()
+    var randomSongs = [Song]()
+    
     
     var moveSet: CGFloat {
         switch currentScreen {
@@ -74,7 +78,7 @@ import MusicKit
     func findMatchingSong(entry: MusicPlayer.Queue.Entry) {
         switch entry.item {
         case .song(let song):
-            if let songSong = Array(songService.ogSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
+            if let songSong = Array(ogSongs).first(where: { $0.title == song.title && $0.artistName == song.artistName }) {
                 cancion = songSong
                 startObservingCurrentTrack(cancion: songSong)
             }
@@ -83,72 +87,79 @@ import MusicKit
         }
     }
     
-    @MainActor
-    func getSongs() {
-        Task {
+    func handleSongsInit(songService: SongService) async throws {
+        do {
             try await songService.smartFilterSongs(limit: 1500, by: .playCount)
-            initializeQueue()
-            if songService.randomSongs.isEmpty {
-                getSongs()
+            ogSongs = songService.ogSongs
+            await initializeQueue(songs: songService.randomSongs)
+        } catch {
+            print("Failed to initialize queue.")
+        }
+    }
+
+    func initializeQueue(songs: [Song]) async {
+        guard let song = songs.first else {
+            if songs.isEmpty {
+                emptySongsInit = true
+            }
+            return
+        }
+
+        var endIndex = max(songs.count / 20, 1)
+        endIndex = min(endIndex, songs.count)
+
+        player.queue = ApplicationMusicPlayer.Queue(for: songs[0 ..< endIndex], startingAt: song)
+        do {
+            try await player.prepareToPlay()
+            isPlaybackQueueSet = true
+        } catch {
+            print("Failed to play.")
+        }
+        
+        cancion = song
+        if let cancion {
+            startObservingCurrentTrack(cancion: cancion)
+        }
+    }
+    
+    func handlePlayButtonSelected() {
+        if !isPlaying {
+            if !isPlaybackQueueSet, let cancion {
+                player.queue = [cancion]
+                isPlaybackQueueSet = true
+                beginPlaying()
+            } else if let cancion = cancion {
+                Task {
+                    do {
+                        try await player.play()
+                        startObservingCurrentTrack(cancion: cancion)
+                    } catch {
+                        print("Failed to resume playing with error: \(error.localizedDescription).")
+                        player = ApplicationMusicPlayer.shared
+                        player.queue.entries.removeAll()
+                        isPlaybackQueueSet = false
+                    }
+                }
+            }
+        } else {
+            withAnimation {
+                player.pause()
             }
         }
     }
     
-    @MainActor
-    func initializeQueue() {
-        Task {
-            do {
-                if let song = songService.randomSongs.first {
-                    var endIndex = max(songService.randomSongs.count / 20, 500)
-                    if songService.randomSongs.count < endIndex {
-                        endIndex = songService.randomSongs.count
-                    }
-                    cancion = song
-                    player.queue = ApplicationMusicPlayer.Queue(for: songService.randomSongs[0 ..< endIndex], startingAt: song)
-                    do {
-                        try await player.prepareToPlay()
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                    
-                    isPlaybackQueueSet = true
-                    if let cancion {
-                        startObservingCurrentTrack(cancion: cancion)
-                    }
-                } else if songService.randomSongs.isEmpty {
-                    emptySongsInit = true
-                } else {
-                    initializeQueue()
+    func handleQueueChange(old: MusicPlayer.Queue.Entry?, new: MusicPlayer.Queue.Entry?) {
+        Task { @MainActor in
+            guard old != nil, let new else {
+                if selectionChange, let new {
+                    findMatchingSong(entry: new)
                 }
+                return
             }
-        }
-    }
-    @MainActor
-    func handlePlayButtonSelected() {
-        Task {
-            if !isPlaying {
-                if !isPlaybackQueueSet, let cancion {
-                    player.queue = [cancion]
-                    isPlaybackQueueSet = true
-                    beginPlaying()
-                } else if let cancion = cancion {
-                    Task {
-                        do {
-                            try await player.play()
-                            startObservingCurrentTrack(cancion: cancion)
-                        } catch {
-                            print("Failed to resume playing with error: \(error.localizedDescription).")
-                            player = ApplicationMusicPlayer.shared
-                            player.queue.entries.removeAll()
-                            isPlaybackQueueSet = false
-                        }
-                    }
-                }
-            } else {
-                withAnimation {
-                    player.pause()
-                }
-            }
+            
+            selectionChange = false
+            queueActive = true
+            findMatchingSong(entry: new)
         }
     }
     
@@ -175,14 +186,15 @@ import MusicKit
         }
     }
     
-    @MainActor
-    func handleSongSelected(song: Song) {
+    func handleSongSelected(song: Song) async {
         selectionChange = true
-        Task {
+        do {
             try await player.queue.insert(song, position: .afterCurrentEntry)
             try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()
+        } catch {
+            
         }
     }
     
@@ -228,12 +240,4 @@ import MusicKit
                 }
             }
     }
-}
-
-enum Screen {
-    case player
-    case songs
-    case playlists
-    case playlistView
-    case playlistGen
 }

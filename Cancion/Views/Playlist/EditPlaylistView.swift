@@ -251,7 +251,7 @@ struct EditPlaylistView: View {
     
     private func handleEditPlaylist() {
         Task { @MainActor in
-            let songIDs = await viewModel.fetchMatchingSongIDs(songs: homeViewModel.songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
             
             guard !songIDs.isEmpty else {
                 viewModel.genError = .emptySongs
@@ -265,7 +265,7 @@ struct EditPlaylistView: View {
             
             if !songIDs.isEmpty && songIDs != playlist.songs {
                 playlist.songs = songIDs
-                homeViewModel.songService.playlistSongs = Array(homeViewModel.songService.ogSongs).filter {
+                songService.playlistSongs = Array(songService.ogSongs).filter {
                     songIDs.contains($0.id.rawValue)
                 }
             }

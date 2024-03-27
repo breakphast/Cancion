@@ -10,6 +10,7 @@ import MusicKit
 
 struct Home: View {
     @Environment(HomeViewModel.self) var viewModel
+    @Environment(SongService.self) var songService
     @ObservedObject private var playerState = ApplicationMusicPlayer.shared.state
     private var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
@@ -24,7 +25,7 @@ struct Home: View {
             if viewModel.isPlaybackQueueSet {
                 ZStack(alignment: .bottom) {
                     Color.white.opacity(0.97).ignoresSafeArea()
-                    if !viewModel.songService.ogSongs.isEmpty {
+                    if !viewModel.ogSongs.isEmpty {
                         PlayerView()
                         
                         SongList()
@@ -43,33 +44,27 @@ struct Home: View {
                     }
                 }
                 .onChange(of: viewModel.player.queue.currentEntry) { oldValue, newSong in
-                    Task { @MainActor in
-                        guard let oldValue, let newSong else {
-                            if viewModel.selectionChange, let newSong {
-                                viewModel.findMatchingSong(entry: newSong)
-                            }
-                            return
-                        }
-                        
-                        viewModel.selectionChange = false
-                        viewModel.queueActive = true
-                        viewModel.findMatchingSong(entry: newSong)
-                    }
+                    viewModel.handleQueueChange(old: oldValue, new: newSong)
                 }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                     .task {
-                        viewModel.getSongs()
+                        do {
+                            try await viewModel.handleSongsInit(songService: songService)
+                        } catch {
+                            
+                        }
                     }
                     .alert(isPresented: $emptyLibrary, error: GenErrors.emptySongsInit) { _ in
                         Button("OK") {
                             
                         }
+                        .disabled(emptyLibrary)
                     } message: { _ in
                         Text("Please reset and try again.")
                     }
-                    .onChange(of: viewModel.songService.emptyLibrary) { oldValue, newValue in
+                    .onChange(of: songService.emptyLibrary) { oldValue, newValue in
                         emptyLibrary = newValue
                     }
             }
@@ -88,7 +83,7 @@ struct Home: View {
                 .disabled(!viewModel.queueActive)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleChangePress(songs: viewModel.songService.randomSongs, forward: false)
+                        try await viewModel.handleChangePress(songs: songService.randomSongs, forward: false)
                     }
                 }
             Spacer()
@@ -102,7 +97,7 @@ struct Home: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleChangePress(songs: viewModel.songService.randomSongs, forward: true)
+                        try await viewModel.handleChangePress(songs: songService.randomSongs, forward: true)
                     }
                 }
             Spacer()
