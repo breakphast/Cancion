@@ -51,4 +51,56 @@ final class PlayerTests: XCTestCase {
             }
         }
     }
+    
+    func testEmptySongsInitializeQueue() throws {
+        Task {
+            await homeViewModel.initializeQueue(songs: [])
+            XCTAssertTrue(homeViewModel.emptySongsInit)
+        }
+    }
+    
+    func testFindMatchingSong() async throws {
+        do {
+            try await homeViewModel.handleSongsInit(songService: songService)
+            let queue = homeViewModel.player.queue
+            if let entry = queue.entries.first {
+                await homeViewModel.findMatchingSong(entry: entry)
+                XCTAssertTrue(homeViewModel.cancion?.title == entry.title)
+            } else {
+                XCTFail()
+            }
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testHandleChangePress() async throws {
+        do {
+            try await homeViewModel.handleSongsInit(songService: songService)
+            let queue = homeViewModel.player.queue
+            if let originalEntry = queue.currentEntry {
+                try await homeViewModel.handleChangePress(songs: songService.randomSongs, forward: true)
+                try await Task.sleep(for: .seconds(3))
+                if let newEntry = queue.currentEntry {
+                    print(newEntry.title, originalEntry.title)
+                    XCTAssertNotEqual(originalEntry, newEntry)
+                }
+            } else {
+               XCTFail()
+            }
+        } catch {
+            XCTFail()
+        }
+    }
+    
+    func testBeginPlaying() async throws {
+        do {
+            try await homeViewModel.handleSongsInit(songService: songService)
+            homeViewModel.beginPlaying()
+            try await Task.sleep(for: .seconds(3))
+            XCTAssertTrue(homeViewModel.playerState.playbackStatus == .playing)
+        } catch {
+            XCTFail()
+        }
+    }
 }

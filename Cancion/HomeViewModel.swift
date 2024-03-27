@@ -163,8 +163,8 @@ import MusicKit
         }
     }
     
-    private func beginPlaying() {
-        Task { @MainActor in
+    func beginPlaying() {
+        Task {
             do {
                 try await player.play()
                 if let cancion {
@@ -176,10 +176,11 @@ import MusicKit
         }
     }
     
-    @MainActor
     func handleChangePress(songs: [Song], forward: Bool) async throws {
-        do {
+        Task { @MainActor in
             progress = .zero
+        }
+        do {
             try await (forward ? player.skipToNextEntry() : player.skipToPreviousEntry())
         } catch {
             print("ERROR:", error.localizedDescription)
