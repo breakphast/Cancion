@@ -137,7 +137,10 @@ import MusicKit
                             try await player.play()
                             startObservingCurrentTrack(cancion: cancion)
                         } catch {
-                            print("Failed to resume playing with error: \(error).")
+                            print("Failed to resume playing with error: \(error.localizedDescription).")
+                            player = ApplicationMusicPlayer.shared
+                            player.queue.entries.removeAll()
+                            isPlaybackQueueSet = false
                         }
                     }
                 }

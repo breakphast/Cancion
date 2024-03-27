@@ -14,6 +14,7 @@ struct CancionApp: App {
     @State var homeViewModel = HomeViewModel()
     @State var authService = AuthService.shared
     @State var songService = SongService()
+    @State private var backgroundTimestamp: Date?
     
     var body: some Scene {
         WindowGroup {
@@ -22,6 +23,23 @@ struct CancionApp: App {
                 .environment(homeViewModel)
                 .environment(authService)
                 .environment(songService)
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+                    // App is going to the background, store the current time
+                    backgroundTimestamp = Date()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                    // App is coming back to the foreground
+                    if let backgroundTime = backgroundTimestamp {
+                        let currentTime = Date()
+                        let timeDifference = currentTime.timeIntervalSince(backgroundTime)
+                        
+                        if timeDifference > 3600 { // More than an hour
+                            // Perform your specific action here
+                            // For example, refreshing app data
+                            homeViewModel.isPlaybackQueueSet = false
+                        }
+                    }
+                }
         }
         .modelContainer(for: Playlista.self)
     }
