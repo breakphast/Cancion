@@ -11,17 +11,15 @@ struct DatePickr: View {
     let filter: FilterModel
     @State private var filteredDate = Date()
     @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
-    let dateFormatter = DateFormatter()
     init(filter: FilterModel) {
         self.filter = filter
-        dateFormatter.dateFormat = "MMM dd, yyyy"
     }
     
     var filterDateText: String {
         if let filterDateString = playlistGeneratorViewModel.filteredDates[filter.id.uuidString] {
             return filterDateString
         }
-        return dateFormatter.string(from: Date())
+        return Helpers().datePickerFormatter.string(from: Date())
     }
     
     var body: some View {
@@ -39,14 +37,14 @@ struct DatePickr: View {
                 }
                 .allowsHitTesting(false)
                 .onChange(of: filteredDate) { oldValue, newValue in
-                    let dateeee = dateFormatter.string(from: newValue)
+                    let dateeee = Helpers().datePickerFormatter.string(from: newValue)
                     playlistGeneratorViewModel.filteredDates[filter.id.uuidString] = dateeee
                 }
                 .task {
                     if let filterDateString = filter.date {
                         playlistGeneratorViewModel.filteredDates[filter.id.uuidString] = filterDateString
                     } else {
-                        playlistGeneratorViewModel.filteredDates[filter.id.uuidString] = dateFormatter.string(from: Date())
+                        playlistGeneratorViewModel.filteredDates[filter.id.uuidString] = Helpers().datePickerFormatter.string(from: Date())
                     }
                 }
             }

@@ -36,16 +36,14 @@ final class PlayerTests: XCTestCase {
         do {
             try await homeViewModel.handleSongsInit(songService: songService)
             let queue = homeViewModel.player.queue
-
             if let song = songService.randomSongs.last {
-                await homeViewModel.handleSongSelected(song: song)
+                let _ = await homeViewModel.handleSongSelected(song: song)
                 guard queue.entries.count > 1 else {
                     XCTFail("Queue does not contain expected number of entries.")
                     return
                 }
                 let newEntry = queue.entries[1]
                 XCTAssertTrue(newEntry.title == song.title)
-                
             } else {
                 XCTFail("No songs available.")
             }

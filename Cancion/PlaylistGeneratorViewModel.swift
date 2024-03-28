@@ -211,7 +211,12 @@ import MusicKit
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false
-        filters = playlist.filters ?? []
+        
+        if let playlistFilters = playlist.filters, playlistFilters.isEmpty {
+            filters = filters
+        } else {
+            filters = playlist.filters ?? []
+        }
         liveUpdating = playlist.liveUpdating
         limit = playlist.limit
         limitType = playlist.limitType

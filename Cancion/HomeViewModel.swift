@@ -123,27 +123,29 @@ import MusicKit
     }
     
     func handlePlayButtonSelected() {
-        if !isPlaying {
-            if !isPlaybackQueueSet, let cancion {
-                player.queue = [cancion]
-                isPlaybackQueueSet = true
-                beginPlaying()
-            } else if let cancion = cancion {
-                Task {
-                    do {
-                        try await player.play()
-                        startObservingCurrentTrack(cancion: cancion)
-                    } catch {
-                        print("Failed to resume playing with error: \(error.localizedDescription).")
-                        player = ApplicationMusicPlayer.shared
-                        player.queue.entries.removeAll()
-                        isPlaybackQueueSet = false
+        Task { @MainActor in
+            if !isPlaying {
+                if !isPlaybackQueueSet, let cancion {
+                    player.queue = [cancion]
+                    isPlaybackQueueSet = true
+                    beginPlaying()
+                } else if let cancion = cancion {
+                    Task {
+                        do {
+                            try await player.play()
+                            startObservingCurrentTrack(cancion: cancion)
+                        } catch {
+                            print("Failed to resume playing with error: \(error.localizedDescription).")
+                            player = ApplicationMusicPlayer.shared
+                            player.queue.entries.removeAll()
+                            isPlaybackQueueSet = false
+                        }
                     }
                 }
-            }
-        } else {
-            withAnimation {
-                player.pause()
+            } else {
+                withAnimation {
+                    player.pause()
+                }
             }
         }
     }
@@ -187,15 +189,20 @@ import MusicKit
         }
     }
     
-    func handleSongSelected(song: Song) async {
+    @MainActor
+    func handleSongSelected(song: Song) async -> Bool {
         selectionChange = true
         do {
             try await player.queue.insert(song, position: .afterCurrentEntry)
             try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()
+            return true
         } catch {
-            
+            player = ApplicationMusicPlayer.shared
+            player.queue.entries.removeAll()
+            isPlaybackQueueSet = false
+            return false
         }
     }
     

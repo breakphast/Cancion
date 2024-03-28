@@ -16,23 +16,83 @@ final class PlaylistGeneratorTests: XCTestCase {
     var songService: SongService!
     
     override func setUpWithError() throws {
+        super.setUp()
+
         authService = AuthService()
         viewModel = PlaylistGeneratorViewModel()
         songService = SongService()
+
+        let expectation = XCTestExpectation(description: "Setup async operations")
+        
+        Task {
+            try await setupSongsForTesting()
+
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 10.0)
+    }
+    
+    func setupSongsForTesting() async throws {
+        try await songService.smartFilterSongs(limit: 2000, by: .playCount)
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func testFetchMatchingSongsUsingArtistNameUsingEqualsCondition() async throws {
+        if let testArtistSong = songService.ogSongs.first {
+            let artist = testArtistSong.artistName
+            let filter = FilterModel(type: FilterType.artist.rawValue, value: artist, condition: Condition.equals.rawValue)
+            
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
+            let nonMatching = actualSongs.filter { $0.artistName != artist }
+            
+            XCTAssertTrue(!songIDs.isEmpty)
+            XCTAssertTrue(nonMatching.isEmpty)
+            XCTAssertTrue(actualSongs.map {$0.artistName == artist}.count == songIDs.count)
+        } else {
+            XCTFail("No songs to test.")
+        }
     }
-
-    func testFetchMatchingSongsUsingArtistName() async throws {
-        try await songService.smartFilterSongs(limit: 2000, by: .playCount) 
-        let filter = FilterModel(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+    
+    func testFetchMatchingSongsUsingArtistNameUsingContainsCondition() async throws {
+        if let testArtistSong = songService.ogSongs.first {
+            let ogArtistName = testArtistSong.artistName
+            let artistNameChunk = Helpers.getRandomSubstring(from: testArtistSong.artistName)
+            let filter = FilterModel(type: FilterType.artist.rawValue, value: artistNameChunk, condition: Condition.contains.rawValue)
+            
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
+            
+            XCTAssertTrue(!songIDs.isEmpty)
+            XCTAssert(!actualSongs.map {$0.artistName == ogArtistName}.isEmpty)
+        } else {
+            XCTFail("No songs to test.")
+        }
+    }
+    
+    func testAssignValues() async throws {
+        let playlista = Playlista(title: "Desmond's")
+        let filter = FilterModel(date: Helpers().dateFormatter.string(from: Date()))
+        viewModel.filters = [filter]
+        await viewModel.assignViewModelValues(playlist: playlista)
+        XCTAssertTrue(viewModel.playlistName == playlista.name)
+        XCTAssertTrue(!viewModel.filteredDates.isEmpty)
         
-        let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
-        let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
-        let nonMatching = actualSongs.filter { $0.artistName != "Yeat" }
-        
-        XCTAssertTrue(nonMatching.isEmpty)
+        await viewModel.resetViewModelValues()
+        XCTAssertTrue(viewModel.playlistName.isEmpty)
+    }
+    
+    func testGeneratePlaylistUsingDates() async throws {
+        if let songWithDate = songService.ogSongs.first(where: {$0.libraryAddedDate != nil}), let date = songWithDate.libraryAddedDate {
+            let dateString = Helpers().datePickerFormatter.string(from: date)
+            
+            let filter = FilterModel(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
+            viewModel.filteredDates[filter.id.uuidString] = dateString
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            
+            XCTAssertTrue(songIDs.contains(songWithDate.id.rawValue))
+        } else {
+            XCTFail("Matching function did not return given song.")
+        }
     }
 }

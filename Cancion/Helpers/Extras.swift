@@ -41,8 +41,24 @@ struct CustomTextFieldStyle: TextFieldStyle {
 
 struct Helpers {
     var dateFormatter = DateFormatter()
+    var datePickerFormatter = DateFormatter()
     init() {
         dateFormatter.dateFormat = "M/d/yy"
+        datePickerFormatter.dateFormat = "MMM dd, yyyy"
+    }
+    
+    static func getRandomSubstring(from string: String) -> String {
+        guard string.count > 1 else { return string }
+        
+        let startOffset = Int.random(in: 0..<(string.count - 1))
+        let maxLength = string.count - startOffset
+        // Ensure the substring length is at least 1 character and does not exceed the remaining length.
+        let substringLength = Int.random(in: 1...maxLength)
+        
+        let startIndex = string.index(string.startIndex, offsetBy: startOffset)
+        let endIndex = string.index(startIndex, offsetBy: substringLength - 1)
+        
+        return String(string[startIndex...endIndex])
     }
 }
 
