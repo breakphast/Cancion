@@ -42,14 +42,13 @@ import MusicKit
         }
     }
     
-    func fetchMatchingSongIDs(playlist: Playlista, dates: [String:String]?, filters: [FilterModel]?) async -> [String] {
+    func fetchMatchingSongIDs(playlist: Playlista, dates: [String:String]?, filterrs: [Filter]?) async -> [String] {
         var filteredSongs = ogSongs
-        print(filteredSongs.count)
         var totalDuration = 0.0
         if let rules = playlist.matchRules, let rulesActive = playlist.smartRules, rulesActive {
-            if rules == MatchRules.all.rawValue, let filters {
+            if rules == MatchRules.all.rawValue, let filterrs {
                 filteredSongs = ogSongs
-                for filter in filters {
+                for filter in filterrs {
                     if let dates, let filterrDate = dates[filter.id.uuidString] {
                         let datedate = Helpers().dateFormatter.date(from: filterrDate)
                         filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: datedate) }
@@ -57,9 +56,9 @@ import MusicKit
                         filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: nil) }
                     }
                 }
-            } else if rules == MatchRules.any.rawValue, let filters {
+            } else if rules == MatchRules.any.rawValue, let filterrs {
                 filteredSongs = ogSongs.filter { song in
-                    filters.contains { filter in
+                    filterrs.contains { filter in
                         matches(song: song, filter: filter, date: filter.date == nil ? nil : Helpers().dateFormatter.date(from: filter.date!))
                     }
                 }

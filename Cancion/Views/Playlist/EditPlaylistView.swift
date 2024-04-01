@@ -16,7 +16,8 @@ struct EditPlaylistView: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
-    @State var filterrs: [FilterModel] = []
+    @Query var filtersQuery: [Filter]
+    @State var playlistFilters: [Filter] = []
     
     @Bindable var editPlaylistViewModel = EditPlaylistViewModel()
     
@@ -31,7 +32,7 @@ struct EditPlaylistView: View {
         }
         return nil
     }
-        
+    
     var playlist: Playlista
     
     var body: some View {
@@ -83,12 +84,11 @@ struct EditPlaylistView: View {
                     editPlaylistViewModel.coverImage = Image(uiImage: uiImage)
                 }
             }
-            if let filters = playlist.filters {
-                let filterIDS = filters.map({$0.id.uuidString})
-                let matchingFilters = filters.filter {
-                    filterIDS.contains($0.id.uuidString)
+            if let playlistFilterStrings = playlist.filters {
+                let matchingFilters = filtersQuery.filter {
+                    playlistFilterStrings.contains($0.id.uuidString)
                 }
-                self.filterrs = matchingFilters
+                self.playlistFilters = matchingFilters
             }
         }
     }
@@ -185,9 +185,9 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(filterrs, id: \.id) { filter in
-                    if let index = filterrs.firstIndex(where: {$0.id == filter.id}) {
-                        SmartFilterStack(filter: filter, filterss: $filterrs)
+                ForEach(playlistFilters, id: \.id) { filter in
+                    if let index = playlistFilters.firstIndex(where: {$0.id == filter.id}) {
+                        SmartFilterStack(filter: filter, filterss: $playlistFilters)
                             .disabled(!(editPlaylistViewModel.smartRulesActive))
                             .zIndex(Double(100 - index))
                     } else {
@@ -238,7 +238,7 @@ struct EditPlaylistView: View {
             
             Button {
                 Task { @MainActor in
-                    if await editPlaylistViewModel.handleEditPlaylist(songService: songService, playlist: playlist, filters: filterrs) {
+                    if await editPlaylistViewModel.handleEditPlaylist(songService: songService, playlist: playlist, filters: playlistFilters) {
                         dismiss()
                         editPlaylistViewModel.resetViewModelValues()
                         homeViewModel.generatorActive = false

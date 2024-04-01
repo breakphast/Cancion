@@ -24,7 +24,8 @@ import MusicKit
     var coverData: Data?
     var matchRules: String? = MatchRules.all.rawValue
     var smartRulesActive: Bool = true
-    var filters: [FilterModel] = []
+    var filters: [String] = []
+    var filterModels = [Filter]()
     var filteredDates = [String : String]()
     var limitActive: Bool = true
     var limit: Int? = 25
@@ -36,7 +37,7 @@ import MusicKit
     var genError: GenErrors?
     
     // MARK: - Generator Functions
-    func fetchMatchingSongIDs(songs: [Song], filters: [FilterModel]?, matchRules: String?, limitType: String?) async -> [String] {
+    func fetchMatchingSongIDs(songs: [Song], filters: [Filter]?, matchRules: String?, limitType: String?) async -> [String] {
         var filteredSongs = songs
         var totalDuration = 0.0
         
@@ -116,7 +117,7 @@ import MusicKit
         return filteredSongs.map { $0.id.rawValue }
     }
 
-    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil) async -> Playlista? {
+    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter]) async -> Playlista? {
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)
         }
@@ -149,7 +150,7 @@ import MusicKit
                     filter.date = filterrDate
                 }
             }
-            model.filters = filters
+            model.filters = filters.map {$0.id.uuidString}
             return model
         }
     }
@@ -207,23 +208,31 @@ import MusicKit
     }
     
     @MainActor
-    func assignViewModelValues(playlist: Playlista) {
+    func assignViewModelValues(playlist: Playlista, filters: [Filter]) {
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false
         
         if let playlistFilters = playlist.filters, playlistFilters.isEmpty {
-            filters = filters
+            let matchingFilters = filters.filter {
+                playlistFilters.contains($0.id.uuidString)
+            }
+            self.filters = matchingFilters.map {$0.id.uuidString}
         } else {
-            filters = playlist.filters ?? []
+            self.filters = playlist.filters ?? []
         }
         liveUpdating = playlist.liveUpdating
         limit = playlist.limit
         limitType = playlist.limitType
         limitSortType = playlist.limitSortType
-        for filter in filters {
-            if let filterDateString = filter.date {
-                filteredDates[filter.id.uuidString] = filterDateString
+        if let playlistFilters = playlist.filters {
+            let matchingFilters = filters.filter {
+                playlistFilters.contains($0.id.uuidString)
+            }
+            for filter in matchingFilters {
+                if let filterDateString = filter.date {
+                    filteredDates[filter.id.uuidString] = filterDateString
+                }
             }
         }
     }

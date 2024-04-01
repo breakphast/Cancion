@@ -17,6 +17,7 @@ struct PlaylistGenerator: View {
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
+    @Query var filters: [Filter]
     @State private var item: PhotosPickerItem?
     @State private var imageData: Data?
     @FocusState var isFocused: Bool
@@ -84,7 +85,7 @@ struct PlaylistGenerator: View {
             isFocused = false
         }
         .task {
-            viewModel.filters.append(FilterModel())
+            viewModel.filterModels.append(Filter())
         }
     }
     
@@ -149,8 +150,8 @@ struct PlaylistGenerator: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.filters[index], filterss: $viewModel.filters)
+                ForEach(viewModel.filterModels.indices, id: \.self) { index in
+                    SmartFilterStack(filter: viewModel.filterModels[index], filterss: $viewModel.filterModels)
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -246,8 +247,17 @@ struct PlaylistGenerator: View {
     
     @MainActor
     private func addPlaylistToDatabase() async -> Bool {
-        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: viewModel.playlistName, cover: imageData) {
+        if let model = await viewModel.generatePlaylist(songs: songService.sortedSongs, name: viewModel.playlistName, cover: imageData, filters: viewModel.filterModels) {
             modelContext.insert(model)
+            if let playlistFilters = model.filters {
+                let matchingFilters = viewModel.filterModels.filter {
+                    playlistFilters.contains($0.id.uuidString)
+                }
+                for filter in matchingFilters {
+                    modelContext.insert(filter)
+                }
+            }
+            try? modelContext.save()
             viewModel.filters = []
             
             return true

@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct Dropdown: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
     // MARK: - Main State Properties
-    @State var filter = FilterModel()
+    @State var filter = Filter()
     @State var options: [String] = []
     @State var selection = ""
     @State var type: DropdownType
@@ -127,19 +128,19 @@ struct Dropdown: View {
     }
     
     func handleSmartFilters(option: String) {
-        playlistViewModel.filters.enumerated().forEach { index, filterModel in
+        playlistViewModel.filterModels.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 switch option {
                 case FilterTitle.artist.rawValue:
-                    playlistViewModel.filters[index].type = FilterType.artist.rawValue
+                    playlistViewModel.filterModels[index].type = FilterType.artist.rawValue
                 case FilterTitle.title.rawValue:
-                    playlistViewModel.filters[index].type = FilterType.title.rawValue
+                    playlistViewModel.filterModels[index].type = FilterType.title.rawValue
                 case FilterTitle.playCount.rawValue:
-                    playlistViewModel.filters[index].type = FilterType.plays.rawValue
+                    playlistViewModel.filterModels[index].type = FilterType.plays.rawValue
                 case FilterTitle.dateAdded.rawValue:
-                    playlistViewModel.filters[index].type = FilterType.dateAdded.rawValue
+                    playlistViewModel.filterModels[index].type = FilterType.dateAdded.rawValue
                 case FilterTitle.lastPlayedDate.rawValue.capitalized:
-                    playlistViewModel.filters[index].type = FilterType.lastPlayedDate.rawValue
+                    playlistViewModel.filterModels[index].type = FilterType.lastPlayedDate.rawValue
                 default:
                     print("No type found.")
                 }
@@ -148,23 +149,23 @@ struct Dropdown: View {
     }
     
     func handleSmartConditions(option: String) {
-        playlistViewModel.filters.enumerated().forEach { index, filterModel in
+        playlistViewModel.filterModels.enumerated().forEach { index, filterModel in
             if filterModel.id == filter.id {
                 switch option {
                 case Condition.equals.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.equals.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.equals.rawValue
                 case Condition.contains.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.contains.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.contains.rawValue
                 case Condition.doesNotContain.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.doesNotContain.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.doesNotContain.rawValue
                 case Condition.greaterThan.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.greaterThan.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.greaterThan.rawValue
                 case Condition.lessThan.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.lessThan.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.lessThan.rawValue
                 case Condition.before.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.before.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.before.rawValue
                 case Condition.after.rawValue:
-                    playlistViewModel.filters[index].condition = Condition.after.rawValue
+                    playlistViewModel.filterModels[index].condition = Condition.after.rawValue
                 default:
                     print("No type found.")
                 }
@@ -174,7 +175,7 @@ struct Dropdown: View {
         }
     }
     
-    func handleFilterType(filter: FilterModel) {
+    func handleFilterType(filter: Filter) {
         switch type {
         case .smartFilter:
             self.options = FilterType.allCases.map { $0.rawValue.capitalized }

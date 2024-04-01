@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 struct PlaylistView: View {
     @Environment(SongService.self) var songService
@@ -14,6 +15,7 @@ struct PlaylistView: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
+    @Query var filtersQuery: [Filter]
     
     @State var viewModel = PlaylistViewModel()
     @State private var text: String = ""
@@ -82,7 +84,18 @@ struct PlaylistView: View {
             }
         })
         .task {
-            playlistGeneratorViewModel.assignViewModelValues(playlist: playlist)
+            if let playlistFilters = playlist.filters {
+                let matchingFilters = filtersQuery.filter {
+                    playlistFilters.contains($0.id.uuidString)
+                }
+                playlistGeneratorViewModel.assignViewModelValues(playlist: playlist, filters: matchingFilters)
+                if playlist.liveUpdating {
+                    let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limitType: playlist.limitType)
+                    if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
+                        playlist.songs = updatedSongs
+                    }
+                }
+            }
             if let coverData = playlist.cover {
                 playlistGeneratorViewModel.coverData = coverData
                 if let uiImage = UIImage(data: coverData) {
@@ -109,13 +122,6 @@ struct PlaylistView: View {
                 default:
                     homeViewModel.playlistSongSort = .mostPlayed
                     sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-                }
-            }
-            
-            if playlist.liveUpdating {
-                let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: playlist.filters, matchRules: playlist.matchRules, limitType: playlist.limitType)
-                if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
-                    playlist.songs = updatedSongs
                 }
             }
         }

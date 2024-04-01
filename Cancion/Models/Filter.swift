@@ -8,9 +8,10 @@
 import Foundation
 import SwiftData
 import MusicKit
+import SwiftUI
 
 @Model
-class FilterModel {
+class Filter {
     var id: UUID
     var type: String
     var value: String
@@ -26,7 +27,7 @@ class FilterModel {
     }
 }
 
-func matches(song: Song, filter: FilterModel, date: Date?) -> Bool {
+func matches(song: Song, filter: Filter, date: Date?) -> Bool {
     let filterValue = filter.value.lowercased().trimmingCharacters(in: .whitespaces)
     
     switch filter.condition {

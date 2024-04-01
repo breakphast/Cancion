@@ -24,8 +24,9 @@ import PhotosUI
     var smartRulesActive: Bool = true
     var dropdownActive = false
     
-    func handleEditPlaylist(songService: SongService, playlist: Playlista, filters: [FilterModel]) async -> Bool {
-        let songIDs = await songService.fetchMatchingSongIDs(playlist: playlist, dates: filteredDates, filters: filters)
+    func handleEditPlaylist(songService: SongService, playlist: Playlista, filters: [Filter]) async -> Bool {
+        let songIDs = await songService.fetchMatchingSongIDs(playlist: playlist, dates: filteredDates, filterrs: filters)
+        let filterStrings = filters.map {$0.id.uuidString}
         
         guard !songIDs.isEmpty else {
             genError = .emptySongs
@@ -42,14 +43,18 @@ import PhotosUI
 //            return false
 //        }
         
+        if playlistName != playlist.name && !playlistName.isEmpty {
+            playlist.name = playlistName
+        } else if playlist.name.isEmpty {
+            genError = .emptyName
+            return false
+        }
+        
         if !songIDs.isEmpty && songIDs != playlist.songs {
             playlist.songs = songIDs
             songService.playlistSongs = Array(songService.ogSongs).filter {
                 songIDs.contains($0.id.rawValue)
             }
-        }
-        if playlistName != playlist.name && !playlistName.isEmpty {
-            playlist.name = playlistName
         }
         if let cover = coverData {
             playlist.cover = cover
@@ -60,12 +65,15 @@ import PhotosUI
         if playlist.limitType != playlist.limitType {
             playlist.limitType = playlist.limitType
         }
-        if filters != playlist.filters {
+        if filterStrings != playlist.filters {
             playlist.filters = []
-            playlist.filters = filters
+            playlist.filters = filterStrings
         }
         if let playlistFilters = playlist.filters {
-            for filter in playlistFilters {
+            let matchingFilters = filters.filter {
+                playlistFilters.contains($0.id.uuidString)
+            }
+            for filter in matchingFilters {
                 if let filterrDate = filteredDates?[filter.id.uuidString] {
                     filter.date = filterrDate
                 }

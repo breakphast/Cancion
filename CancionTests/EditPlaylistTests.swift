@@ -6,30 +6,54 @@
 //
 
 import XCTest
+import MusicKit
+import SwiftUI
+@testable import Cancion
 
 final class EditPlaylistTests: XCTestCase {
-
+    var authService: AuthService!
+    var viewModel: EditPlaylistViewModel!
+    var songService: SongService!
+    var playlista: Playlista!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        super.setUp()
+
+        authService = AuthService()
+        viewModel = EditPlaylistViewModel()
+        songService = SongService()
+        playlista = Playlista()
+
+        let expectation = XCTestExpectation(description: "Setup async operations")
+        
+        Task {
+            try await setupSongsForTesting()
+
+            expectation.fulfill()
+        }
+
+        wait(for: [expectation], timeout: 10.0)
+    }
+    
+    func setupSongsForTesting() async throws {
+        try await songService.smartFilterSongs(limit: 2000, by: .playCount)
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+    func testEditPlaylistName() async throws {
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        playlista.name = "HIHI"
+        viewModel.playlistName = "GOGO"
+        let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        
+        if edit {
+            print(playlista.name, viewModel.playlistName)
+            XCTAssertTrue(playlista.name == viewModel.playlistName)
+        } else {
+            XCTFail()
         }
     }
-
 }

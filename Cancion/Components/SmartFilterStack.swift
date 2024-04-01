@@ -9,10 +9,10 @@ import SwiftData
 
 struct SmartFilterStack: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
-    let filter: FilterModel
+    let filter: Filter
     
     @State var filterText = ""
-    @Binding var filterss: [FilterModel]
+    @Binding var filterss: [Filter]
     
     var isDateStack: Bool {
         return [FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue].contains(filter.type)
@@ -44,7 +44,7 @@ struct SmartFilterStack: View {
         HStack(spacing: 4) {
             Button {
                 withAnimation(.bouncy) {
-                    filterss.append(FilterModel())
+                    filterss.append(Filter())
                 }
             } label: {
                 ZStack {
@@ -63,7 +63,7 @@ struct SmartFilterStack: View {
             Button {
                 withAnimation(.bouncy) {
                     guard playlistViewModel.filters.count > 1 else { return }
-                    playlistViewModel.filters.removeAll(where: { $0.id == filter.id })
+                    playlistViewModel.filters.removeAll(where: { $0 == filter.id.uuidString })
                 }
             } label: {
                 ZStack {
@@ -80,7 +80,7 @@ struct SmartFilterStack: View {
         }
     }
     
-    private func handleSmartFilterText(filters: [FilterModel]) {
+    private func handleSmartFilterText(filters: [Filter]) {
         if let filter = filters.first(where: {$0.id.uuidString == filter.id.uuidString}) {
             filter.value = filterText
         }

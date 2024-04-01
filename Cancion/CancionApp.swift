@@ -41,6 +41,6 @@ struct CancionApp: App {
                     }
                 }
         }
-        .modelContainer(for: Playlista.self)
+        .modelContainer(for: [Playlista.self, Filter.self])
     }
 }

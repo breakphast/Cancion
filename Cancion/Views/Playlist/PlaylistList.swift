@@ -17,7 +17,6 @@ struct PlaylistList: View {
     @State private var showGenerator = false
     @FocusState var isFocused: Bool
     @Query var playlistas: [Playlista]
-    @Query var filters: [FilterModel]
 
     private var playlists: [Playlista] {
         if text.isEmpty {

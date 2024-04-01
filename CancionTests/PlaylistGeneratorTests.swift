@@ -40,7 +40,7 @@ final class PlaylistGeneratorTests: XCTestCase {
     func testFetchMatchingSongsUsingArtistNameUsingEqualsCondition() async throws {
         if let testArtistSong = songService.ogSongs.first {
             let artist = testArtistSong.artistName
-            let filter = FilterModel(type: FilterType.artist.rawValue, value: artist, condition: Condition.equals.rawValue)
+            let filter = Filter(type: FilterType.artist.rawValue, value: artist, condition: Condition.equals.rawValue)
             
             let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
             let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
@@ -58,7 +58,7 @@ final class PlaylistGeneratorTests: XCTestCase {
         if let testArtistSong = songService.ogSongs.first {
             let ogArtistName = testArtistSong.artistName
             let artistNameChunk = Helpers.getRandomSubstring(from: testArtistSong.artistName)
-            let filter = FilterModel(type: FilterType.artist.rawValue, value: artistNameChunk, condition: Condition.contains.rawValue)
+            let filter = Filter(type: FilterType.artist.rawValue, value: artistNameChunk, condition: Condition.contains.rawValue)
             
             let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
             let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
@@ -72,7 +72,7 @@ final class PlaylistGeneratorTests: XCTestCase {
     
     func testAssignValues() async throws {
         let playlista = Playlista(title: "Desmond's")
-        let filter = FilterModel(date: Helpers().dateFormatter.string(from: Date()))
+        let filter = Filter(date: Helpers().dateFormatter.string(from: Date()))
         viewModel.filters = [filter]
         await viewModel.assignViewModelValues(playlist: playlista)
         XCTAssertTrue(viewModel.playlistName == playlista.name)
@@ -86,7 +86,7 @@ final class PlaylistGeneratorTests: XCTestCase {
         if let songWithDate = songService.ogSongs.first(where: {$0.libraryAddedDate != nil}), let date = songWithDate.libraryAddedDate {
             let dateString = Helpers().datePickerFormatter.string(from: date)
             
-            let filter = FilterModel(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
+            let filter = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
             viewModel.filteredDates[filter.id.uuidString] = dateString
             let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
             

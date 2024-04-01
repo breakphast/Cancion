@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct DatePickr: View {
-    let filter: FilterModel
+    let filter: Filter
     @State private var filteredDate = Date()
     @Environment(PlaylistGeneratorViewModel.self) var playlistGeneratorViewModel
-    init(filter: FilterModel) {
+    init(filter: Filter) {
         self.filter = filter
     }
     
