@@ -17,6 +17,7 @@ struct PlaylistList: View {
     @State private var showGenerator = false
     @FocusState var isFocused: Bool
     @Query var playlistas: [Playlista]
+    @Query var filters: [FilterModel]
 
     private var playlists: [Playlista] {
         if text.isEmpty {
@@ -61,7 +62,7 @@ struct PlaylistList: View {
                 }
             }
             .fullScreenCover(isPresented: $showGenerator) {
-                PlaylistGenerator()
+                PlaylistGenerator(viewModel: viewModel)
                     .environment(viewModel)
             }
             .onChange(of: text) { _, _ in

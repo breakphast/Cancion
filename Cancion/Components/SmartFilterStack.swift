@@ -3,7 +3,6 @@
 //  Cancion
 //
 //  Created by Desmond Fitch on 2/21/24.
-//
 
 import SwiftUI
 import SwiftData
@@ -13,9 +12,7 @@ struct SmartFilterStack: View {
     let filter: FilterModel
     
     @State var filterText = ""
-    var filters: [FilterModel]? {
-        return playlistViewModel.filters
-    }
+    @Binding var filterss: [FilterModel]
     
     var isDateStack: Bool {
         return [FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue].contains(filter.type)
@@ -32,7 +29,7 @@ struct SmartFilterStack: View {
                 } else {
                     SmartFilterTextField(text: $filterText, type: .filter)
                         .onChange(of: filterText) { oldValue, newValue in
-                            if let filters { handleSmartFilterText(filters: filters) }
+                            handleSmartFilterText(filters: filterss)
                         }
                 }
                 addFilterButton
@@ -47,7 +44,7 @@ struct SmartFilterStack: View {
         HStack(spacing: 4) {
             Button {
                 withAnimation(.bouncy) {
-                    playlistViewModel.filters.append(FilterModel())
+                    filterss.append(FilterModel())
                 }
             } label: {
                 ZStack {

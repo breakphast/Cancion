@@ -58,7 +58,6 @@ struct PlaylistView: View {
         .gesture(homeViewModel.swipeGesture)
         .fullScreenCover(isPresented: $showGenerator) {
             EditPlaylistView(playlist: playlist)
-                .environment(playlistGeneratorViewModel)
         }
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false

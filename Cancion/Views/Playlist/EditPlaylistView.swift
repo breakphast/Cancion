@@ -12,28 +12,26 @@ import PhotosUI
 
 struct EditPlaylistView: View {
     @Environment(SongService.self) var songService
-    @Environment(PlaylistGeneratorViewModel.self) var viewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
-    @State private var playlistName = ""
-    @State private var item: PhotosPickerItem?
-    @State private var showError = false
-    @State private var coverImage: Image?
+    @State var filterrs: [FilterModel] = []
+    
+    @Bindable var editPlaylistViewModel = EditPlaylistViewModel()
     
     var genError: Bool? {
-        showError = viewModel.genError != nil
-        return viewModel.genError != nil
+        editPlaylistViewModel.showError = editPlaylistViewModel.genError != nil
+        return editPlaylistViewModel.genError != nil
     }
     
     var image: Image? {
-        if let coverData = viewModel.coverData, let uiiImage = UIImage(data: coverData) {
+        if let coverData = editPlaylistViewModel.coverData, let uiiImage = UIImage(data: coverData) {
             return Image(uiImage: uiiImage)
         }
         return nil
     }
-    
+        
     var playlist: Playlista
     
     var body: some View {
@@ -55,7 +53,7 @@ struct EditPlaylistView: View {
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
-                                if viewModel.dropdownActive {
+                                if editPlaylistViewModel.dropdownActive {
                                     Rectangle()
                                         .fill(.clear.opacity(0.1))
                                         .frame(height: 200)
@@ -70,29 +68,35 @@ struct EditPlaylistView: View {
                 .scrollDismissesKeyboard(.interactively)
             }
             .padding(.top)
-            .alert(isPresented: $showError, error: viewModel.genError) { _ in
+            .alert(isPresented: $editPlaylistViewModel.showError, error: editPlaylistViewModel.genError) { _ in
                 Button("OK") {
-                    viewModel.genError = nil
+                    editPlaylistViewModel.genError = nil
                 }
             } message: { _ in
                 Text("Please try again.")
             }
         }
         .task {
-            viewModel.assignViewModelValues(playlist: playlist)
             if let coverData = playlist.cover {
-                viewModel.coverData = coverData
+                editPlaylistViewModel.coverData = coverData
                 if let uiImage = UIImage(data: coverData) {
-                    coverImage = Image(uiImage: uiImage)
+                    editPlaylistViewModel.coverImage = Image(uiImage: uiImage)
                 }
+            }
+            if let filters = playlist.filters {
+                let filterIDS = filters.map({$0.id.uuidString})
+                let matchingFilters = filters.filter {
+                    filterIDS.contains($0.id.uuidString)
+                }
+                self.filterrs = matchingFilters
             }
         }
     }
     
     private var coverPicker: some View {
         VStack {
-            PhotosPicker(selection: $item) {
-                if let coverImage {
+            PhotosPicker(selection: $editPlaylistViewModel.item) {
+                if let coverImage = editPlaylistViewModel.coverImage {
                     coverImage
                         .resizable()
                         .scaledToFill()
@@ -123,8 +127,8 @@ struct EditPlaylistView: View {
                                         .font(.title2.bold())
                                 }
                                 .onTapGesture {
-                                    viewModel.coverData = nil
-                                    item = nil
+                                    editPlaylistViewModel.coverData = nil
+                                    editPlaylistViewModel.item = nil
                                 }
                             }
                         }
@@ -148,20 +152,21 @@ struct EditPlaylistView: View {
             }
         }
         .padding(.horizontal, 24)
-        .onChange(of: item) { oldValue, newValue in
+        .onChange(of: editPlaylistViewModel.item) { oldValue, newValue in
             Task { @MainActor in
-                if let loaded = try? await item?.loadTransferable(type: Data.self) {
-                    viewModel.coverData = loaded
+                if let loaded = try? await editPlaylistViewModel.item?.loadTransferable(type: Data.self) {
+                    editPlaylistViewModel.coverData = loaded
                     if let uiImage = UIImage(data: loaded) {
-                        coverImage = Image(uiImage: uiImage)
+                        editPlaylistViewModel.coverImage = Image(uiImage: uiImage)
                     }
                 } else {
                     print("Failed")
                 }
             }
         }
-        .onChange(of: playlistName) { _, newName in
-            viewModel.playlistName = newName
+        .onChange(of: editPlaylistViewModel.playlistName) { _, newName in
+            print(newName)
+            editPlaylistViewModel.playlistName = newName
         }
     }
     
@@ -169,7 +174,7 @@ struct EditPlaylistView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: viewModel.matchRules ?? "all", type: .matchRules)
+                Dropdown(options: ["all", "any"], selection: playlist.matchRules ?? "all", type: .matchRules)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -180,15 +185,16 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.filters, id: \.self) { filter in
-                    if let index = viewModel.filters.firstIndex(where: {$0.id == filter.id}) {
-                        SmartFilterStack(filter: filter)
-                            .disabled(!(viewModel.smartRulesActive))
+                ForEach(filterrs, id: \.id) { filter in
+                    if let index = filterrs.firstIndex(where: {$0.id == filter.id}) {
+                        SmartFilterStack(filter: filter, filterss: $filterrs)
+                            .disabled(!(editPlaylistViewModel.smartRulesActive))
                             .zIndex(Double(100 - index))
-                            .environment(viewModel)
+                    } else {
+                        Text("NOpe")
                     }
                 }
-                .blur(radius: !(viewModel.smartRulesActive) ? 2 : 0)
+                .blur(radius: !(editPlaylistViewModel.smartRulesActive) ? 2 : 0)
                 
                 RoundedRectangle(cornerRadius: 1)
                     .frame(height: 1)
@@ -205,7 +211,7 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
-                        await viewModel.resetViewModelValues()
+                        await editPlaylistViewModel.resetViewModelValues()
                     }
                     dismiss()
                 }
@@ -231,8 +237,17 @@ struct EditPlaylistView: View {
             Spacer()
             
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
-                    handleEditPlaylist()
+                Task { @MainActor in
+                    if await editPlaylistViewModel.handleEditPlaylist(songService: songService, playlist: playlist, filters: filterrs) {
+                        dismiss()
+                        editPlaylistViewModel.resetViewModelValues()
+                        homeViewModel.generatorActive = false
+                        do {
+                            try modelContext.save()
+                        } catch {
+                            print("Failed to save.")
+                        }
+                    }
                 }
             } label: {
                 ZStack {
@@ -249,99 +264,9 @@ struct EditPlaylistView: View {
         }
     }
     
-    private func handleEditPlaylist() {
-        Task { @MainActor in
-            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: viewModel.filters, matchRules: viewModel.matchRules, limitType: viewModel.limitType)
-            
-            guard !songIDs.isEmpty else {
-                viewModel.genError = .emptySongs
-                showError = true
-                return
-            }
-            guard !viewModel.playlistName.isEmpty else {
-                viewModel.genError = .emptyName
-                return
-            }
-            
-            if !songIDs.isEmpty && songIDs != playlist.songs {
-                playlist.songs = songIDs
-                songService.playlistSongs = Array(songService.ogSongs).filter {
-                    songIDs.contains($0.id.rawValue)
-                }
-            }
-            if viewModel.playlistName != playlist.name && !viewModel.playlistName.isEmpty {
-                playlist.name = viewModel.playlistName
-            }
-            if let cover = viewModel.coverData {
-                playlist.cover = cover
-            }
-            if viewModel.limit != playlist.limit {
-                playlist.limit = viewModel.limit
-            }
-            if viewModel.limitType != playlist.limitType {
-                playlist.limitType = viewModel.limitType
-            }
-            for filter in viewModel.filters {
-                if let filterrDate = viewModel.filteredDates[filter.id.uuidString] {
-                    filter.date = filterrDate
-                }
-            }
-            if viewModel.filters != playlist.filters {
-                playlist.filters = []
-                playlist.filters = viewModel.filters
-                Task { @MainActor in
-                    do {
-                        try modelContext.save()
-                    } catch {
-                        print("Could not save.")
-                    }
-                }
-            }
-            
-            if viewModel.matchRules != playlist.matchRules {
-                playlist.matchRules = viewModel.matchRules
-            }
-            if viewModel.liveUpdating != playlist.liveUpdating {
-                playlist.liveUpdating = viewModel.liveUpdating
-            }
-            if viewModel.smartRulesActive != playlist.smartRules {
-                playlist.smartRules = viewModel.smartRulesActive
-            }
-            if viewModel.limitSortType != playlist.limitSortType {
-                playlist.limitSortType = viewModel.limitSortType
-                if let limitSortType = playlist.limitSortType {
-                    switch LimitSortType(rawValue: limitSortType) {
-                    case .artist:
-                        homeViewModel.playlistSongSort = .artist
-                    case .mostPlayed:
-                        homeViewModel.playlistSongSort = .mostPlayed
-                    case .lastPlayed:
-                        homeViewModel.playlistSongSort = .lastPlayed
-                    case .mostRecentlyAdded:
-                        homeViewModel.playlistSongSort = .mostRecentlyAdded
-                    case .title:
-                        homeViewModel.playlistSongSort = .title
-                    default:
-                        homeViewModel.playlistSongSort = .mostPlayed
-                    }
-                }
-            }
-            viewModel.resetViewModelValues()
-            
-            dismiss()
-            homeViewModel.generatorActive = false
-        }
-    }
-    
-    @MainActor
-    private func addPlaylistToDatabase(playlist: Playlista) async -> Bool {
-        modelContext.insert(playlist)
-        return true
-    }
-    
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField(playlist.name, text: $playlistName)
+            TextField(playlist.name, text: $editPlaylistViewModel.playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)

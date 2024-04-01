@@ -12,7 +12,7 @@ import PhotosUI
 
 struct PlaylistGenerator: View {
     @Environment(SongService.self) var songService
-    @Environment(PlaylistGeneratorViewModel.self) var viewModel
+    @Bindable var viewModel: PlaylistGeneratorViewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
@@ -150,7 +150,7 @@ struct PlaylistGenerator: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(viewModel.filters.indices, id: \.self) { index in
-                    SmartFilterStack(filter: viewModel.filters[index])
+                    SmartFilterStack(filter: viewModel.filters[index], filterss: $viewModel.filters)
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -280,10 +280,4 @@ struct PlaylistGenerator: View {
             .padding(.vertical, 12)
             .foregroundStyle(.secondary.opacity(0.2))
     }
-}
-
-#Preview {
-    PlaylistGenerator()
-        .environment(SongService())
-        .environment(HomeViewModel())
 }

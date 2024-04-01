@@ -46,6 +46,7 @@
 		3EB45AED2B8541A5006F4EDB /* PlaylistGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB45AEC2B8541A5006F4EDB /* PlaylistGenerator.swift */; };
 		3EB45AEF2B86241D006F4EDB /* FilterCheckbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB45AEE2B86241D006F4EDB /* FilterCheckbox.swift */; };
 		3EB45AF12B862980006F4EDB /* SmartFilterComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB45AF02B862980006F4EDB /* SmartFilterComponent.swift */; };
+		3EC58C142BB7197100E77E71 /* EditPlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC58C132BB7197100E77E71 /* EditPlaylistViewModel.swift */; };
 		3EE3FA672B9FA23600735A54 /* EditPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3FA662B9FA23600735A54 /* EditPlaylistView.swift */; };
 /* End PBXBuildFile section */
 
@@ -102,6 +103,7 @@
 		3EB45AEC2B8541A5006F4EDB /* PlaylistGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistGenerator.swift; sourceTree = "<group>"; };
 		3EB45AEE2B86241D006F4EDB /* FilterCheckbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterCheckbox.swift; sourceTree = "<group>"; };
 		3EB45AF02B862980006F4EDB /* SmartFilterComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartFilterComponent.swift; sourceTree = "<group>"; };
+		3EC58C132BB7197100E77E71 /* EditPlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlaylistViewModel.swift; sourceTree = "<group>"; };
 		3EE3FA662B9FA23600735A54 /* EditPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditPlaylistView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -244,6 +246,7 @@
 				3EA08C862B88175B0079BA18 /* SongListViewModel.swift */,
 				3E3AE4362B86B33900FBDE10 /* PlaylistGeneratorViewModel.swift */,
 				3E59B9402B9A226E00B8EC74 /* PlaylistViewModel.swift */,
+				3EC58C132BB7197100E77E71 /* EditPlaylistViewModel.swift */,
 			);
 			name = ViewModels;
 			sourceTree = "<group>";
@@ -392,6 +395,7 @@
 				3E5D89202B920AAF00C9EEEB /* FilterModel.swift in Sources */,
 				3E7B2E392B7FAA1500476A76 /* Home.swift in Sources */,
 				3EA42AAD2B83FB9500F0A4C0 /* Dropdown.swift in Sources */,
+				3EC58C142BB7197100E77E71 /* EditPlaylistViewModel.swift in Sources */,
 				3E3AE4372B86B33900FBDE10 /* PlaylistGeneratorViewModel.swift in Sources */,
 				3E59B9412B9A226E00B8EC74 /* PlaylistViewModel.swift in Sources */,
 				3EE3FA672B9FA23600735A54 /* EditPlaylistView.swift in Sources */,
