@@ -17,7 +17,6 @@ struct EditPlaylistView: View {
     @Environment(\.dismiss) var dismiss
     @Query var playlistas: [Playlista]
     @Query var filtersQuery: [Filter]
-    @State var playlistFilters: [Filter] = []
     @State private var coverImage: Image?
     
     @State var editPlaylistViewModel = EditPlaylistViewModel()
@@ -44,7 +43,7 @@ struct EditPlaylistView: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack()
+                                LimitToStack(filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, editing: true)
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -159,7 +158,7 @@ struct EditPlaylistView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], selection: playlist.matchRules ?? "all", type: .matchRules)
+                Dropdown(options: ["all", "any"], type: .matchRules, matchRules: playlist.matchRules ?? "", editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -170,9 +169,9 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(editPlaylistViewModel.playlistFilters, id: \.id) { filter in
-                    if let index = editPlaylistViewModel.playlistFilters.firstIndex(where: {$0.id == filter.id}) {
-                        SmartFilterStack(filter: filter, filterss: $editPlaylistViewModel.playlistFilters)
+                ForEach(editPlaylistViewModel.playlistFilters ?? [], id: \.id) { filter in
+                    if let index = editPlaylistViewModel.playlistFilters?.firstIndex(where: {$0.id == filter.id}) {
+                        SmartFilterStack(filter: filter, editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit)
                             .disabled(!(editPlaylistViewModel.smartRulesActive))
                             .zIndex(Double(100 - index))
                             .environment(editPlaylistViewModel)
@@ -224,7 +223,7 @@ struct EditPlaylistView: View {
             
             Button {
                 Task { @MainActor in
-                    if await editPlaylistViewModel.handleEditPlaylist(songService: songService, playlist: playlist, filters: playlistFilters) {
+                    if await editPlaylistViewModel.handleEditPlaylist(songService: songService, playlist: playlist, filters: editPlaylistViewModel.playlistFilters ?? []) {
                         dismiss()
                         editPlaylistViewModel.resetViewModelValues()
                         homeViewModel.generatorActive = false

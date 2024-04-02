@@ -128,7 +128,7 @@ import MusicKit
                 if !isPlaybackQueueSet, let cancion {
                     player.queue = [cancion]
                     isPlaybackQueueSet = true
-                    beginPlaying()
+                    try await beginPlaying()
                 } else if let cancion = cancion {
                     Task {
                         do {
@@ -165,16 +165,14 @@ import MusicKit
         }
     }
     
-    func beginPlaying() {
-        Task {
-            do {
-                try await player.play()
-                if let cancion {
-                    startObservingCurrentTrack(cancion: cancion)
-                }
-            } catch {
-                print("Failed to play with error: \(error).")
+    func beginPlaying() async throws {
+        do {
+            try await player.play()
+            if let cancion {
+                startObservingCurrentTrack(cancion: cancion)
             }
+        } catch {
+            print("Failed to play with error: \(error).")
         }
     }
     

@@ -118,7 +118,7 @@ final class EditPlaylistTests: XCTestCase {
         
         XCTAssertTrue(viewModel.playlistName == "Shrek")
         XCTAssertTrue(viewModel.liveUpdating == false)
-        XCTAssertEqual(viewModel.playlistFilters.count, 2)
+        XCTAssertEqual(viewModel.playlistFilters?.count, 2)
         XCTAssertFalse(viewModel.filteredDates.isEmpty)
         XCTAssertTrue(viewModel.matchRules == MatchRules.all.rawValue)
     }

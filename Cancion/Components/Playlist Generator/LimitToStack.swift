@@ -13,6 +13,10 @@ struct LimitToStack: View {
     @State var selected = false
     @State var limitTypeSelection = "items"
     @State var limitSortSelection = "sorted by"
+    @Binding var filters: [Filter]?
+    @Binding var limit: Int?
+    
+    let editing: Bool
     
     var limitOptions: [String] {
         let limits = Limit.limits(forType: viewModel.limitType ?? LimitType.items.rawValue).map { $0.value }
@@ -56,9 +60,11 @@ struct LimitToStack: View {
                 .fontWeight(.semibold)
                 .font(.title3)
             
-            Dropdown(options: limitOptions, selection: String(viewModel.limit ?? 25), type: .limit)
-                .frame(width: 44, height: 44)
-            Dropdown(options: ["items", "minutes", "hours"], selection: viewModel.limitType ?? "items", type: .limitType)
+            if let filterrs = self.filters {
+                Dropdown(options: limitOptions, type: .limit, editing: editing, filters: $filters, limit: $limit)
+                    .frame(width: 44, height: 44)
+                Dropdown(options: ["items", "minutes", "hours"], type: .limitType, editing: editing, filters: $filters, limit: $limit)
+            }
         }
         .foregroundStyle(.oreo)
     }
@@ -72,7 +78,9 @@ struct LimitToStack: View {
                 Text("sorted by")
                     .fontWeight(.semibold)
                     .font(.title3)
-                Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, selection: viewModel.limitSortType ?? LimitSortType.mostPlayed.rawValue, type: .limitSortType)
+                if let _ = self.filters {
+                    Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, type: .limitSortType, editing: false, filters: $filters, limit: $limit)
+                }
             }
             .foregroundStyle(.oreo)
         }

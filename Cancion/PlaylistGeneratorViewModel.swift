@@ -25,7 +25,7 @@ import MusicKit
     var matchRules: String? = MatchRules.all.rawValue
     var smartRulesActive: Bool = true
     var filters: [String] = []
-    var filterModels = [Filter]()
+    var filterModels: [Filter]?
     var filteredDates = [String : String]()
     var limitActive: Bool = true
     var limit: Int? = 25
@@ -37,7 +37,7 @@ import MusicKit
     var genError: GenErrors?
     
     // MARK: - Generator Functions
-    func fetchMatchingSongIDs(songs: [Song], filters: [Filter]?, matchRules: String?, limitType: String?) async -> [String] {
+    func fetchMatchingSongIDs(songs: [Song], filters: [Filter]?, matchRules: String?, limit: Int?, limitType: String?, limitSortType: String?) async -> [String] {
         var filteredSongs = songs
         var totalDuration = 0.0
         
@@ -117,11 +117,11 @@ import MusicKit
         return filteredSongs.map { $0.id.rawValue }
     }
 
-    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter]) async -> Playlista? {
+    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter], limit: Int?, limitType: String?, limitSortType: String?) async -> Playlista? {
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)
         }
-        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: filters, matchRules: matchRules, limitType: limitType)
+        let songIDS = await fetchMatchingSongIDs(songs: songs, filters: filters, matchRules: matchRules, limit: limit, limitType: limitType, limitSortType: limitSortType)
         
         guard !songIDS.isEmpty else {
             genError = .emptySongs

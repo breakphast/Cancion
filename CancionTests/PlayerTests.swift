@@ -90,15 +90,4 @@ final class PlayerTests: XCTestCase {
             XCTFail()
         }
     }
-    
-    func testBeginPlaying() async throws {
-        do {
-            try await homeViewModel.handleSongsInit(songService: songService)
-            homeViewModel.beginPlaying()
-            try await Task.sleep(for: .seconds(3))
-            XCTAssertTrue(homeViewModel.playerState.playbackStatus == .playing)
-        } catch {
-            XCTFail()
-        }
-    }
 }

@@ -42,7 +42,7 @@ final class PlaylistGeneratorTests: XCTestCase {
             let artist = testArtistSong.artistName
             let filter = Filter(type: FilterType.artist.rawValue, value: artist, condition: Condition.equals.rawValue)
             
-            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
             let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
             let nonMatching = actualSongs.filter { $0.artistName != artist }
             
@@ -60,7 +60,7 @@ final class PlaylistGeneratorTests: XCTestCase {
             let artistNameChunk = Helpers.getRandomSubstring(from: testArtistSong.artistName)
             let filter = Filter(type: FilterType.artist.rawValue, value: artistNameChunk, condition: Condition.contains.rawValue)
             
-            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
             let actualSongs = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }
             
             XCTAssertTrue(!songIDs.isEmpty)
@@ -87,7 +87,7 @@ final class PlaylistGeneratorTests: XCTestCase {
             
             let filter = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
             viewModel.filteredDates[filter.id.uuidString] = dateString
-            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limitType: LimitType.items.rawValue)
+            let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
             
             XCTAssertTrue(songIDs.contains(songWithDate.id.rawValue))
         } else {

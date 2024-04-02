@@ -2,34 +2,183 @@
 //  DropdownTests.swift
 //  CancionTests
 //
-//  Created by Desmond Fitch on 3/28/24.
+//  Created by Desmond Fitch on 4/2/24.
 //
 
 import XCTest
+import MusicKit
+import SwiftUI
+@testable import Cancion
 
 final class DropdownTests: XCTestCase {
-
+    var authService: AuthService!
+    var viewModel: DropdownViewModel!
+    var songService: SongService!
+    var playlista: Playlista!
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-    }
+        super.setUp()
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
+        authService = AuthService()
+        viewModel = DropdownViewModel()
+        songService = SongService()
+        playlista = Playlista()
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
-    }
+        let expectation = XCTestExpectation(description: "Setup async operations")
+        
+        Task {
+            try await setupSongsForTesting()
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
+            expectation.fulfill()
         }
+
+        wait(for: [expectation], timeout: 10.0)
+    }
+    
+    func setupSongsForTesting() async throws {
+        try await songService.smartFilterSongs(limit: 2000, by: .playCount)
     }
 
+    func testHandleSmartFiltersArtist() async throws {
+        let filter = Filter(value: "Yeat")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartFilters(option: FilterTitle.title.rawValue)
+        XCTAssertTrue(viewModel.filter?.type == FilterType.title.rawValue)
+    }
+    
+    func testHandleSmartFiltersPlayCount() async throws {
+        let filter = Filter(value: "Yeat")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartFilters(option: FilterTitle.playCount.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.type == FilterType.plays.rawValue, "Filter type should be set to plays")
+    }
+    
+    func testHandleSmartFiltersDateAdded() async throws {
+        let filter = Filter(value: "Yeat")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartFilters(option: FilterTitle.dateAdded.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.type == FilterType.dateAdded.rawValue, "Filter type should be set to dateAdded")
+    }
+
+    func testHandleSmartFiltersLastPlayedDate() async throws {
+        let filter = Filter(value: "Yeat")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartFilters(option: FilterTitle.lastPlayedDate.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.type == FilterType.lastPlayedDate.rawValue, "Filter type should be set to lastPlayed")
+    }
+    
+    func testAssignViewModelValues() async throws {
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Playboi Carti", condition: Condition.contains.rawValue)
+        
+        viewModel.assignViewModelValues(filter: filter, matchRules: MatchRules.any.rawValue, type: DropdownType.smartCondition, limit: nil)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.contains.rawValue)
+    }
+    
+    func testHandleSmartConditionsIs() async throws {
+        let filter = Filter(value: "Yeat")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.equals.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.equals.rawValue, "Filter condition should be set to equals")
+    }
+    
+    func testHandleSmartConditionsContains() async throws {
+        let filter = Filter(value: "Rock")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.contains.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.contains.rawValue, "Filter condition should be set to contains")
+    }
+    
+    func testHandleSmartConditionsDoesNotContain() async throws {
+        let filter = Filter(value: "Pop")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.doesNotContain.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.doesNotContain.rawValue, "Filter condition should be set to does not contain")
+    }
+    
+    func testHandleSmartConditionsGreaterThan() async throws {
+        let filter = Filter(value: "1000")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.greaterThan.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.greaterThan.rawValue, "Filter condition should be set to greater than")
+    }
+
+    func testHandleSmartConditionsLessThan() async throws {
+        let filter = Filter(value: "500")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.lessThan.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.lessThan.rawValue, "Filter condition should be set to less than")
+    }
+    
+    func testHandleSmartConditionsIsBefore() async throws {
+        let filter = Filter(value: "2022-01-01")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.before.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.before.rawValue, "Filter condition should be set to before")
+    }
+    
+    func testHandleSmartConditionsIsAfter() async throws {
+        let filter = Filter(value: "2022-12-31")
+        viewModel.filter = filter
+        
+        viewModel.handleSmartConditions(option: Condition.after.rawValue)
+        
+        XCTAssertTrue(viewModel.filter?.condition == Condition.after.rawValue, "Filter condition should be set to after")
+    }
+
+    func testHandleLimitFilters() async throws {
+        viewModel.handleLimitFilters(option: LimitSortType.mostPlayed.rawValue)
+        
+        XCTAssertNotNil(viewModel.limitSortType)
+    }
+    
+    func testHandleOptionSelectedSmartFilter() async throws {
+        viewModel.type = DropdownType.smartFilter
+        let filter = Filter(value: "2022-12-31")
+        viewModel.filter = filter
+        viewModel.handleOptionSelected(selection: FilterTitle.title.rawValue)
+        XCTAssertTrue(viewModel.filter?.type == FilterTitle.title.rawValue.lowercased())
+    }
+    
+    func testHandleOptionSelectedSmartConditionContains() async throws {
+        viewModel.type = DropdownType.smartCondition
+        let filter = Filter(value: "Pop")
+        viewModel.filter = filter
+        viewModel.handleOptionSelected(selection: Condition.contains.rawValue)
+        XCTAssertTrue(viewModel.filter?.condition == Condition.contains.rawValue, "Filter condition should be set to 'contains'")
+    }
+    
+    func testHandleOptionSelectedMatchRulesSpecificRule() async throws {
+        viewModel.type = DropdownType.matchRules
+        let matchRule = MatchRules.all
+        viewModel.handleOptionSelected(selection: matchRule.rawValue)
+        XCTAssertTrue(viewModel.matchRules == matchRule.rawValue, "Match rule should be set to the specific rule")
+    }
+    
+    func testHandleOptionSelectedInvalidSelection() async throws {
+        viewModel.type = DropdownType.smartFilter
+        let filter = Filter(value: "2022-12-31")
+        viewModel.filter = filter
+        viewModel.handleOptionSelected(selection: "titlee")
+        XCTAssertFalse(viewModel.filter?.type == FilterTitle.title.rawValue.lowercased())
+    }
 }
