@@ -28,6 +28,7 @@
 		3E3AE43A2B86B48500FBDE10 /* SmartFilterStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E3AE4392B86B48500FBDE10 /* SmartFilterStack.swift */; };
 		3E46EB462BBC474B00274BB4 /* DropdownViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB452BBC474B00274BB4 /* DropdownViewModel.swift */; };
 		3E46EB482BBC719600274BB4 /* DropdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB472BBC719600274BB4 /* DropdownTests.swift */; };
+		3E46EB4A2BBCB77500274BB4 /* PlaylistViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB492BBCB77500274BB4 /* PlaylistViewTests.swift */; };
 		3E4D14EC2B9200960095D733 /* Playlista.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14EB2B9200960095D733 /* Playlista.swift */; };
 		3E59B9412B9A226E00B8EC74 /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E59B9402B9A226E00B8EC74 /* PlaylistViewModel.swift */; };
 		3E5B3BE72BA1FB83005DF2A5 /* DatePickr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5B3BE62BA1FB83005DF2A5 /* DatePickr.swift */; };
@@ -87,6 +88,7 @@
 		3E3AE4392B86B48500FBDE10 /* SmartFilterStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartFilterStack.swift; sourceTree = "<group>"; };
 		3E46EB452BBC474B00274BB4 /* DropdownViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownViewModel.swift; sourceTree = "<group>"; };
 		3E46EB472BBC719600274BB4 /* DropdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownTests.swift; sourceTree = "<group>"; };
+		3E46EB492BBCB77500274BB4 /* PlaylistViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewTests.swift; sourceTree = "<group>"; };
 		3E4D14EB2B9200960095D733 /* Playlista.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlista.swift; sourceTree = "<group>"; };
 		3E59B9402B9A226E00B8EC74 /* PlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewModel.swift; sourceTree = "<group>"; };
 		3E5B3BE62BA1FB83005DF2A5 /* DatePickr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickr.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 				3E5E9A062BB45EE50066E3ED /* PlayerTests.swift */,
 				3ED8A9A12BBB01850059571E /* EditPlaylistTests.swift */,
 				3E46EB472BBC719600274BB4 /* DropdownTests.swift */,
+				3E46EB492BBCB77500274BB4 /* PlaylistViewTests.swift */,
 			);
 			path = CancionTests;
 			sourceTree = "<group>";
@@ -424,6 +427,7 @@
 			files = (
 				3E46EB482BBC719600274BB4 /* DropdownTests.swift in Sources */,
 				3E5E9A072BB45EE50066E3ED /* PlayerTests.swift in Sources */,
+				3E46EB4A2BBCB77500274BB4 /* PlaylistViewTests.swift in Sources */,
 				3E8C017F2BAC82D300B8E53A /* SongServiceTests.swift in Sources */,
 				3E8C017D2BAC7C8400B8E53A /* AuthorizationTests.swift in Sources */,
 				3E39238F2BA38E6E00BDF80C /* CancionTests.swift in Sources */,

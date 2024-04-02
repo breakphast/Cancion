@@ -158,7 +158,7 @@ struct EditPlaylistView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(options: ["all", "any"], type: .matchRules, matchRules: playlist.matchRules ?? "", editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit)
+                Dropdown(type: .matchRules, matchRules: playlist.matchRules ?? "", editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)

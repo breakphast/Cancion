@@ -90,6 +90,18 @@ final class PlaylistGeneratorTests: XCTestCase {
             let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
             
             XCTAssertTrue(songIDs.contains(songWithDate.id.rawValue))
+            
+            viewModel.playlistName = "Patrick"
+            let newPlaylist = await viewModel.generatePlaylist(songs: songService.ogSongs, name: "Patrick", filters: [filter], limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
+            XCTAssertNotNil(newPlaylist)
+            
+            let matchingSongs = songService.ogSongs.filter {
+                songIDs.contains($0.id.rawValue)
+            }.compactMap { $0.libraryAddedDate }
+            
+            
+            let songDates = matchingSongs.filter { !areDatesEqual(date1: $0, date2: date) }
+            XCTAssertTrue(songDates.isEmpty)
         } else {
             XCTFail("Matching function did not return given song.")
         }

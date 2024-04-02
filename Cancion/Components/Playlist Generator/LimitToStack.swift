@@ -60,10 +60,10 @@ struct LimitToStack: View {
                 .fontWeight(.semibold)
                 .font(.title3)
             
-            if let filterrs = self.filters {
-                Dropdown(options: limitOptions, type: .limit, editing: editing, filters: $filters, limit: $limit)
+            if let _ = self.filters {
+                Dropdown(type: .limit, editing: editing, filters: $filters, limit: $limit)
                     .frame(width: 44, height: 44)
-                Dropdown(options: ["items", "minutes", "hours"], type: .limitType, editing: editing, filters: $filters, limit: $limit)
+                Dropdown(type: .limitType, editing: editing, filters: $filters, limit: $limit)
             }
         }
         .foregroundStyle(.oreo)
@@ -79,7 +79,7 @@ struct LimitToStack: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                 if let _ = self.filters {
-                    Dropdown(options: LimitSortType.allCases.map {$0.rawValue}, type: .limitSortType, editing: false, filters: $filters, limit: $limit)
+                    Dropdown(type: .limitSortType, editing: false, filters: $filters, limit: $limit)
                 }
             }
             .foregroundStyle(.oreo)

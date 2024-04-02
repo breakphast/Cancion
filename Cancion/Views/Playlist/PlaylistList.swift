@@ -11,6 +11,7 @@ import SwiftData
 
 struct PlaylistList: View {
     @Environment(HomeViewModel.self) var homeViewModel
+    @Environment(PlaylistViewModel.self) var playlistViewModel
     @Environment(\.modelContext) var modelContext
     @State var viewModel = PlaylistGeneratorViewModel()
     @State private var text: String = ""
@@ -57,7 +58,7 @@ struct PlaylistList: View {
             .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 2))
             .fullScreenCover(isPresented: $viewModel.showView) {
                 if let activePlaylist = viewModel.activePlaylist {
-                    PlaylistView(showView: $viewModel.showView, playlist: activePlaylist)
+                    PlaylistView(showView: $viewModel.showView, activePlaylist: $viewModel.activePlaylist, playlist: activePlaylist)
                 }
             }
             .fullScreenCover(isPresented: $showGenerator) {
@@ -67,9 +68,13 @@ struct PlaylistList: View {
             .onChange(of: text) { _, _ in
                 text = text
             }
+            .onChange(of: viewModel.activePlaylist != nil) { _, playlistActive in
+                viewModel.showView = playlistActive
+            }
         }
         .gesture(homeViewModel.swipeGesture)
         .environment(viewModel)
+        .environment(playlistViewModel)
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false
         }
@@ -141,10 +146,4 @@ struct PlaylistList: View {
                 text = text
             }
     }
-}
-
-#Preview {
-    PlaylistList()
-        .environment(PlaylistGeneratorViewModel())
-        .environment(SongService())
 }

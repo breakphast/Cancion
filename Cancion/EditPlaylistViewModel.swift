@@ -138,10 +138,4 @@ import PhotosUI
         smartRulesActive = true
         filteredDates = [:]
     }
-    
-    @MainActor
-    func addPlaylistToDatabase(playlist: Playlista, modelContext: ModelContext) async -> Bool {
-        modelContext.insert(playlist)
-        return true
-    }
 }

@@ -11,8 +11,9 @@ import SwiftData
 
 struct PlaylistListRow: View {
     @State var playlist: Playlista
+    @Environment(PlaylistViewModel.self) var viewModel
     @Environment(SongService.self) var songService
-    @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    @Environment(PlaylistGeneratorViewModel.self) var playlistGenViewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @State private var showMenu = false
@@ -21,7 +22,7 @@ struct PlaylistListRow: View {
     @Query var playlistas: [Playlista]
     
     var addedToApple: Bool {
-        return playlistViewModel.addedToApple
+        return playlistGenViewModel.addedToApple
     }
     
     var song: Song? {
@@ -48,12 +49,7 @@ struct PlaylistListRow: View {
 
                 }
                 .onTapGesture {
-                    Task {
-                        let setSongs = await setPlaylistSongs()
-                        if setSongs {
-                            playlistViewModel.setActivePlaylist(playlist: playlist)
-                        }
-                    }
+                    playlistGenViewModel.activePlaylist = playlist
                 }
                 
                 Spacer()
@@ -62,7 +58,7 @@ struct PlaylistListRow: View {
                     Button {
                         Task { @MainActor in
                             self.activePlaylist = true
-                            playlistViewModel.createAppleMusicPlaylist(using: playlist, songs: songService.ogSongs)
+                            playlistGenViewModel.createAppleMusicPlaylist(using: playlist, songs: songService.ogSongs)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
                                 withAnimation {
                                     activePlaylist = false
@@ -133,19 +129,6 @@ struct PlaylistListRow: View {
                 coverImage = Image(uiImage: uiImage)
             }
         }
-    }
-    
-    private func setPlaylistSongs() async -> Bool {
-        songService.playlistSongs = Array(songService.ogSongs).filter {
-            playlist.songs.contains($0.id.rawValue)
-            }
-        songService.ogPlaylistSongs = Array(songService.ogSongs).filter {
-            playlist.songs.contains($0.id.rawValue)
-            }
-        if let limitSortType = playlist.limitSortType, let sortOption = LimitSortType(rawValue: limitSortType) {
-            homeViewModel.playlistSongSort = sortOption
-        }
-        return !songService.playlistSongs.isEmpty
     }
     
     private var playlistCoverIcon: some View {

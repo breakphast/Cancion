@@ -17,23 +17,18 @@ struct PlaylistView: View {
     @Environment(\.dismiss) var dismiss
     @Query var filtersQuery: [Filter]
     
-    @State var viewModel = PlaylistViewModel()
+    @Environment(PlaylistViewModel.self) var viewModel
     @State private var text: String = ""
     var playCountAscending = false
     
     @FocusState var isFocused: Bool
     @Binding var showView: Bool
+    @Binding var activePlaylist: Playlista?
     @State private var showGenerator = false
     @State private var scrollID: String?
     @State private var coverImage: Image?
     
     var playlist: Playlista
-    
-    private var sortOption: LimitSortType? {
-        return homeViewModel.playlistSongSort
-    }
-    
-    @State var sortTitle: String = ""
     
     var body: some View {
         VStack(spacing: 16) {
@@ -73,45 +68,19 @@ struct PlaylistView: View {
         .onAppear {
             scrollID = "cover"
         }
-        .onChange(of: sortOption, { oldValue, newValue in
-            switch sortOption {
-            case .artist:
-                sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
-            case .mostPlayed:
-                sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-            case .lastPlayed:
-                sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
-            case .mostRecentlyAdded:
-                sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
-            case .title:
-                sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
-            default:
-                sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-            }
+        .onChange(of: viewModel.songSort, { _, songSort in
+            viewModel.assignSortTitles(sortType: songSort)
         })
         .task {
             Task { @MainActor in
+                viewModel.playlist = playlist
+                viewModel.assignSongs(sortType: homeViewModel.playlistSongSort ?? LimitSortType.artist)
+                let setSongs = await viewModel.setPlaylistSongs(songs: songService.ogSongs)
+                if setSongs {
+                    activePlaylist = playlist
+                }
                 if let limitSortType = playlist.limitSortType {
-                    switch LimitSortType(rawValue: limitSortType) {
-                    case .artist:
-                        homeViewModel.playlistSongSort = .artist
-                        sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
-                    case .mostPlayed:
-                        homeViewModel.playlistSongSort = .mostPlayed
-                        sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-                    case .lastPlayed:
-                        homeViewModel.playlistSongSort = .lastPlayed
-                        sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
-                    case .mostRecentlyAdded:
-                        homeViewModel.playlistSongSort = .mostRecentlyAdded
-                        sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
-                    case .title:
-                        homeViewModel.playlistSongSort = .title
-                        sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
-                    default:
-                        homeViewModel.playlistSongSort = .mostPlayed
-                        sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-                    }
+                    viewModel.assignSortTitles(sortType: LimitSortType(rawValue: limitSortType) ?? LimitSortType.artist)
                 }
                 
                 if let coverData = playlist.cover {
@@ -214,7 +183,7 @@ struct PlaylistView: View {
                 
             } label: {
                 HStack(spacing: 4) {
-                    Text(sortTitle)
+                    Text(viewModel.sortTitle)
                     Image(systemName: "chevron.down")
                         .bold()
                         .rotationEffect(.degrees(viewModel.playCountAscending ? 180 : 0))
@@ -267,47 +236,13 @@ struct PlaylistView: View {
     }
     private var songList: some View {
         VStack {
-            ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
-                SongListRow(song: song, index: viewModel.playCountAscending ? ((songs.count - 1) - index) : index)
+            ForEach(Array(viewModel.playlistSongs.enumerated()), id: \.offset) { index, song in
+                SongListRow(song: song, index: viewModel.playCountAscending ? ((viewModel.playlistSongs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {
                             await homeViewModel.handleSongSelected(song: song)
                         }
                     }
-            }
-        }
-    }
-    var songs: [Song] {
-        switch viewModel.playCountAscending {
-        case false:
-            switch sortOption {
-            case .mostRecentlyAdded:
-                return songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! > $1.libraryAddedDate! }
-            case .mostPlayed:
-                return songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
-            case .lastPlayed:
-                return songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! > $1.lastPlayedDate! }
-            case .title:
-                return songService.playlistSongs.sorted { $0.title.lowercased() < $1.title.lowercased()}
-            case .artist:
-                return songService.playlistSongs.sorted { $0.artistName.lowercased() < $1.artistName.lowercased()}
-            default:
-                return songService.playlistSongs.sorted { $0.playCount ?? 0 > $1.playCount ?? 0 }
-            }
-        case true:
-            switch sortOption {
-            case .mostRecentlyAdded:
-                return songService.playlistSongs.filter { $0.libraryAddedDate != nil }.sorted { $0.libraryAddedDate! < $1.libraryAddedDate! }
-            case .mostPlayed:
-                return songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
-            case .lastPlayed:
-                return songService.playlistSongs.filter { $0.lastPlayedDate != nil }.sorted { $0.lastPlayedDate! < $1.lastPlayedDate! }
-            case .title:
-                return songService.playlistSongs.sorted { $0.title.lowercased() > $1.title.lowercased()}
-            case .artist:
-                return songService.playlistSongs.sorted { $0.artistName.lowercased() > $1.artistName.lowercased()}
-            default:
-                return songService.playlistSongs.sorted { $0.playCount ?? 0 < $1.playCount ?? 0 }
             }
         }
     }

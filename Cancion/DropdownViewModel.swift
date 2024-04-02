@@ -19,6 +19,20 @@ import SwiftUI
     var dropdownActive = false
     var showOptions = false
     
+    var limitOptions: [String] {
+        switch type {
+        case .limit:
+            let limits = Limit.limits(forType: limitType ?? LimitType.items.rawValue).map { $0.value }
+            return limits
+        case .limitType:
+            return LimitType.allCases.map { $0.rawValue }
+        case .limitSortType:
+            return LimitSortType.allCases.map { $0.rawValue }
+        default:
+            return []
+        }
+    }
+    
     func handleSmartFilters(option: String) {
         guard let filter else { return }
         
@@ -43,7 +57,7 @@ import SwiftUI
         self.filter = filter
         self.matchRules = matchRules
         self.type = type
-        handleFilterType(filter: filter)
+        assignFilterOptionsAndSelection(filter: filter)
     }
     
     func handleSmartConditions(option: String) {
@@ -88,7 +102,7 @@ import SwiftUI
         }
     }
     
-    func handleFilterType(filter: Filter) {
+    func assignFilterOptionsAndSelection(filter: Filter) {
         switch type {
         case .smartFilter:
             self.options = FilterType.allCases.map { $0.rawValue.capitalized }
@@ -115,14 +129,18 @@ import SwiftUI
             }
         case .limit:
             self.selection = String(limit ?? 25)
+            self.options = limitOptions
             handleLimitFilters(option: String(limit ?? 25))
         case .limitType:
             self.selection = limitType ?? LimitType.items.rawValue
+            self.options = limitOptions
             handleLimitFilters(option: limitType ?? LimitType.items.rawValue)
         case .limitSortType:
             self.selection = limitSortType ?? LimitSortType.mostPlayed.rawValue
+            self.options = limitOptions
             handleLimitFilters(option: limitSortType ?? LimitSortType.mostPlayed.rawValue)
         case .matchRules:
+            self.options = ["all", "any"]
             self.selection = matchRules ?? MatchRules.any.rawValue
         default:
             return

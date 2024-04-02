@@ -1,5 +1,5 @@
 //
-//  PlaylistGeneratorViewModel.swift
+//  PlaylistGeneratorswift
 //  Cancion
 //
 //  Created by Desmond Fitch on 2/21/24.
@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import MusicKit
+import SwiftData
 
 @Observable class PlaylistGeneratorViewModel {
     // MARK: - UI State Properties
@@ -16,6 +17,7 @@ import MusicKit
     var activePlaylist: Playlista? = nil
     var showView = false
     var dropdownActive = false
+    var showError = false
     
     // MARK: - Generator Properties & Values
     var image: Image?
@@ -179,9 +181,42 @@ import MusicKit
         return songs.filter { filter.matches(song: $0) }
     }
     
-    func setActivePlaylist(playlist: Playlista) {
-        activePlaylist = playlist
-        showView = true
+    func handleCancelPlaylist() {
+        Task { @MainActor in
+            resetViewModelValues()
+        }
+    }
+    
+    @MainActor
+    func addPlaylist(songs: [Song]) async -> Playlista? {
+        let playlista = await addPlaylistToDatabase(songs: songs)
+        return playlista
+    }
+    
+    func addModelAndFiltersToDatabase(model: Playlista, modelContext: ModelContext) {
+        modelContext.insert(model)
+        if let playlistFilters = model.filters {
+            let matchingFilters = filterModels?.filter {
+                playlistFilters.contains($0.id.uuidString)
+            }
+            if let matchingFilters {
+                for filter in matchingFilters {
+                    modelContext.insert(filter)
+                }
+            }
+        }
+        try? modelContext.save()
+    }
+    
+    @MainActor
+    func addPlaylistToDatabase(songs: [Song]) async -> Playlista? {
+        if let model = await generatePlaylist(songs: songs, name: playlistName, cover: coverData, filters: filterModels ?? [], limit: limit, limitType: limitType, limitSortType: limitSortType) {
+            filters = []
+            
+            return model
+        }
+        showError = true
+        return nil
     }
     
     func calculateScrollViewHeight(filterCount: Int) -> CGFloat {
@@ -234,6 +269,7 @@ import MusicKit
     
     @MainActor
     func resetViewModelValues() {
+        activePlaylist = nil
         playlistName = ""
         coverData = nil
         matchRules = MatchRules.all.rawValue

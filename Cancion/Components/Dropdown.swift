@@ -11,7 +11,7 @@ import SwiftData
 struct Dropdown: View {
     // MARK: - Main State Properties
     @State var filter = Filter()
-    @State var options: [String] = []
+//    @State var options: [String] = []
     @State var type: DropdownType
     @State var matchRules = ""
     
@@ -31,11 +31,6 @@ struct Dropdown: View {
     
     @State private var dropdownViewModel = DropdownViewModel()
     
-    var limitOptions: [String] {
-        let limits = Limit.limits(forType: dropdownViewModel.limitType ?? LimitType.items.rawValue).map { $0.value }
-        return limits
-    }
-        
     var body: some View {
         GeometryReader {
             let size = $0.size
@@ -68,7 +63,7 @@ struct Dropdown: View {
             .background(((type == .smartFilter || type == .smartCondition) ? Color.white : .oreo).shadow(.drop(color: .oreo.opacity(0.15), radius: 4)), in: .rect(cornerRadius: cornerRadius, style: .continuous))
             .frame(height: size.height, alignment: anchor == .top ? .bottom : .top)
             .onChange(of: filter.type) { oldValue, newValue in
-                dropdownViewModel.handleFilterType(filter: filter)
+                dropdownViewModel.assignFilterOptionsAndSelection(filter: filter)
             }
             .onChange(of: dropdownViewModel.limit ?? 0, { oldValue, newValue in
                 if type == .limit {
@@ -76,8 +71,8 @@ struct Dropdown: View {
                     dropdownViewModel.selection = String(newValue)
                 }
             })
-            .onChange(of: limitOptions, { oldValue, newValue in
-                if let value = self.limitOptions.first, type == .limit {
+            .onChange(of: dropdownViewModel.limitOptions, { oldValue, newValue in
+                if let value = dropdownViewModel.limitOptions.first, type == .limit {
                     dropdownViewModel.limit = Int(value)
                     dropdownViewModel.selection = value
                 }
@@ -93,7 +88,7 @@ struct Dropdown: View {
     @ViewBuilder
     func optionsView() -> some View {
         VStack(spacing: 10) {
-            ForEach((type != .limit ? dropdownViewModel.options : limitOptions).filter({$0 != dropdownViewModel.selection}), id: \.self) { option in
+            ForEach((type != .limit ? dropdownViewModel.options : dropdownViewModel.limitOptions).filter({$0 != dropdownViewModel.selection}), id: \.self) { option in
                 HStack() {
                     Text(option)
                         .lineLimit(2)

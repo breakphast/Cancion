@@ -12,6 +12,7 @@ import SwiftData
 struct CancionApp: App {
     @State var songListViewModel = SongListViewModel()
     @State var homeViewModel = HomeViewModel()
+    @State var playlistViewModel = PlaylistViewModel()
     @State var authService = AuthService.shared
     @State var songService = SongService()
     @State private var backgroundTimestamp: Date?
@@ -23,6 +24,7 @@ struct CancionApp: App {
                 .environment(homeViewModel)
                 .environment(authService)
                 .environment(songService)
+                .environment(playlistViewModel)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
                     // App is going to the background, store the current time
                     backgroundTimestamp = Date()

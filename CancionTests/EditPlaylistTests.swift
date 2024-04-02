@@ -99,7 +99,7 @@ final class EditPlaylistTests: XCTestCase {
         viewModel.limitType = LimitType.hours.rawValue
         viewModel.limitSortType = LimitSortType.lastPlayed.rawValue
         
-        let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
         
         XCTAssertTrue(playlista.limit == 25)
         XCTAssertTrue(playlista.limitType == LimitType.hours.rawValue)
@@ -129,7 +129,6 @@ final class EditPlaylistTests: XCTestCase {
         let filter = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
         await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         playlista.filters = [filter.id.uuidString]
-        let ogSongs = await songService.fetchMatchingSongIDs(playlist: playlista, dates: viewModel.filteredDates, filterrs: [filter])
         
         let dateString1 = "Jan 20, 2023"
         let filter1 = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString1)
