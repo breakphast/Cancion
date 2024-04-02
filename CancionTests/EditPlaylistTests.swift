@@ -56,4 +56,91 @@ final class EditPlaylistTests: XCTestCase {
             XCTFail()
         }
     }
+    
+    func testEditPlaylistSongs() async throws {
+        playlista.name = "JOJO"
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        let originalSongs = playlista.songs
+
+        let filter1 = Filter(type: FilterType.artist.rawValue, value: "Lil Wop", condition: Condition.equals.rawValue)
+        let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter1])
+        let newSongs = playlista.songs
+        XCTAssertNotEqual(originalSongs, newSongs)
+    }
+    
+    func testEditPlaylistSongsWithInvalidFilter() async throws {
+        playlista.name = "JOJO"
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeaters", condition: Condition.equals.rawValue)
+        let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        
+        XCTAssertFalse(edit)
+    }
+    
+    func testEditPlaylistWithEmptyName() async throws {
+        playlista.name = ""
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        
+        XCTAssertFalse(edit)
+    }
+    
+    func testResetViewModelValues() async throws {
+        viewModel.playlistName = "HELLOOOO"
+        await viewModel.resetViewModelValues()
+        
+        XCTAssertTrue(viewModel.playlistName.isEmpty)
+    }
+    
+    func testEditPlaylisLimitValues() async throws {
+        playlista.name = "Elllo"
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        viewModel.limit = 50
+        viewModel.limitType = LimitType.hours.rawValue
+        viewModel.limitSortType = LimitSortType.lastPlayed.rawValue
+        
+        let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
+        
+        XCTAssertTrue(playlista.limit == 25)
+        XCTAssertTrue(playlista.limitType == LimitType.hours.rawValue)
+        XCTAssertTrue(playlista.limitSortType == LimitSortType.lastPlayed.rawValue)
+    }
+    
+    func testAssignEditViewModelValues() async throws {
+        playlista.name = "Shrek"
+        playlista.liveUpdating = false
+        playlista.matchRules = MatchRules.all.rawValue
+        let dateString = Helpers().datePickerFormatter.string(from: Date())
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        let filter1 = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
+        playlista.filters = [filter.id.uuidString, filter1.id.uuidString]
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter, filter1])
+        
+        XCTAssertTrue(viewModel.playlistName == "Shrek")
+        XCTAssertTrue(viewModel.liveUpdating == false)
+        XCTAssertEqual(viewModel.playlistFilters.count, 2)
+        XCTAssertFalse(viewModel.filteredDates.isEmpty)
+        XCTAssertTrue(viewModel.matchRules == MatchRules.all.rawValue)
+    }
+    
+    func testEditPlaylistDates() async throws {
+        playlista.name = "Ello"
+        let dateString = "May 10, 2023"
+        let filter = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
+        playlista.filters = [filter.id.uuidString]
+        let ogSongs = await songService.fetchMatchingSongIDs(playlist: playlista, dates: viewModel.filteredDates, filterrs: [filter])
+        
+        let dateString1 = "Jan 20, 2023"
+        let filter1 = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString1)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter1])
+        let newSongs = await songService.fetchMatchingSongIDs(playlist: playlista, dates: viewModel.filteredDates, filterrs: [filter1])
+        let matchingSongs = songService.ogSongs.filter {
+            newSongs.contains($0.id.rawValue)
+        }
+        let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter1])
+        
+        XCTAssertEqual(filter1.id.uuidString, playlista.filters?.first)
+        XCTAssertNotNil(matchingSongs.map {$0.libraryAddedDate == Helpers().dateFormatter.date(from: filter1.date ?? "")})
+    }
 }

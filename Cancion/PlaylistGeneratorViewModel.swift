@@ -225,14 +225,9 @@ import MusicKit
         limit = playlist.limit
         limitType = playlist.limitType
         limitSortType = playlist.limitSortType
-        if let playlistFilters = playlist.filters {
-            let matchingFilters = filters.filter {
-                playlistFilters.contains($0.id.uuidString)
-            }
-            for filter in matchingFilters {
-                if let filterDateString = filter.date {
-                    filteredDates[filter.id.uuidString] = filterDateString
-                }
+        for filter in filters {
+            if let filterDateString = filter.date {
+                filteredDates[filter.id.uuidString] = filterDateString
             }
         }
     }

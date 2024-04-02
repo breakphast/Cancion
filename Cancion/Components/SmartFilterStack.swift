@@ -9,6 +9,8 @@ import SwiftData
 
 struct SmartFilterStack: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistViewModel
+    @Environment(EditPlaylistViewModel.self) private var editPlaylistViewModel
+
     let filter: Filter
     
     @State var filterText = ""
@@ -62,8 +64,8 @@ struct SmartFilterStack: View {
             
             Button {
                 withAnimation(.bouncy) {
-                    guard playlistViewModel.filters.count > 1 else { return }
-                    playlistViewModel.filters.removeAll(where: { $0 == filter.id.uuidString })
+                    guard filterss.count > 1 else { return }
+                    filterss.removeAll(where: { $0.id.uuidString == filter.id.uuidString })
                 }
             } label: {
                 ZStack {

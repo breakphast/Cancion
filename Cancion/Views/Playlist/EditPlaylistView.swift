@@ -18,19 +18,13 @@ struct EditPlaylistView: View {
     @Query var playlistas: [Playlista]
     @Query var filtersQuery: [Filter]
     @State var playlistFilters: [Filter] = []
+    @State private var coverImage: Image?
     
-    @Bindable var editPlaylistViewModel = EditPlaylistViewModel()
+    @State var editPlaylistViewModel = EditPlaylistViewModel()
     
     var genError: Bool? {
         editPlaylistViewModel.showError = editPlaylistViewModel.genError != nil
         return editPlaylistViewModel.genError != nil
-    }
-    
-    var image: Image? {
-        if let coverData = editPlaylistViewModel.coverData, let uiiImage = UIImage(data: coverData) {
-            return Image(uiImage: uiiImage)
-        }
-        return nil
     }
     
     var playlist: Playlista
@@ -81,22 +75,17 @@ struct EditPlaylistView: View {
             if let coverData = playlist.cover {
                 editPlaylistViewModel.coverData = coverData
                 if let uiImage = UIImage(data: coverData) {
-                    editPlaylistViewModel.coverImage = Image(uiImage: uiImage)
+                    coverImage = Image(uiImage: uiImage)
                 }
             }
-            if let playlistFilterStrings = playlist.filters {
-                let matchingFilters = filtersQuery.filter {
-                    playlistFilterStrings.contains($0.id.uuidString)
-                }
-                self.playlistFilters = matchingFilters
-            }
+            editPlaylistViewModel.assignViewModelValues(playlist: playlist, filters: filtersQuery)
         }
     }
     
     private var coverPicker: some View {
         VStack {
             PhotosPicker(selection: $editPlaylistViewModel.item) {
-                if let coverImage = editPlaylistViewModel.coverImage {
+                if let coverImage {
                     coverImage
                         .resizable()
                         .scaledToFill()
@@ -154,19 +143,15 @@ struct EditPlaylistView: View {
         .padding(.horizontal, 24)
         .onChange(of: editPlaylistViewModel.item) { oldValue, newValue in
             Task { @MainActor in
-                if let loaded = try? await editPlaylistViewModel.item?.loadTransferable(type: Data.self) {
+                if let loaded = try? await newValue?.loadTransferable(type: Data.self) {
                     editPlaylistViewModel.coverData = loaded
                     if let uiImage = UIImage(data: loaded) {
-                        editPlaylistViewModel.coverImage = Image(uiImage: uiImage)
+                        coverImage = Image(uiImage: uiImage)
                     }
                 } else {
                     print("Failed")
                 }
             }
-        }
-        .onChange(of: editPlaylistViewModel.playlistName) { _, newName in
-            print(newName)
-            editPlaylistViewModel.playlistName = newName
         }
     }
     
@@ -185,11 +170,12 @@ struct EditPlaylistView: View {
             .zIndex(1000)
             
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(playlistFilters, id: \.id) { filter in
-                    if let index = playlistFilters.firstIndex(where: {$0.id == filter.id}) {
-                        SmartFilterStack(filter: filter, filterss: $playlistFilters)
+                ForEach(editPlaylistViewModel.playlistFilters, id: \.id) { filter in
+                    if let index = editPlaylistViewModel.playlistFilters.firstIndex(where: {$0.id == filter.id}) {
+                        SmartFilterStack(filter: filter, filterss: $editPlaylistViewModel.playlistFilters)
                             .disabled(!(editPlaylistViewModel.smartRulesActive))
                             .zIndex(Double(100 - index))
+                            .environment(editPlaylistViewModel)
                     } else {
                         Text("NOpe")
                     }
@@ -266,7 +252,7 @@ struct EditPlaylistView: View {
     
     private var playlistTitle: some View {
         VStack(alignment: .center, spacing: 8) {
-            TextField(playlist.name, text: $editPlaylistViewModel.playlistName)
+            TextField(editPlaylistViewModel.playlistName, text: $editPlaylistViewModel.playlistName)
                 .foregroundStyle(.oreo)
                 .font(.title.bold())
                 .lineLimit(1)

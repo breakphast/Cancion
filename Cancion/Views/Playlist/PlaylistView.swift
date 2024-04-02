@@ -64,6 +64,12 @@ struct PlaylistView: View {
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false
         }
+        .onChange(of: playlist.cover ?? Data(), { _, newCover in
+            playlistGeneratorViewModel.coverData = newCover
+            if let uiImage = UIImage(data: newCover) {
+                coverImage = Image(uiImage: uiImage)
+            }
+        })
         .onAppear {
             scrollID = "cover"
         }
@@ -84,44 +90,47 @@ struct PlaylistView: View {
             }
         })
         .task {
-            if let playlistFilters = playlist.filters {
-                let matchingFilters = filtersQuery.filter {
-                    playlistFilters.contains($0.id.uuidString)
-                }
-                playlistGeneratorViewModel.assignViewModelValues(playlist: playlist, filters: matchingFilters)
-                if playlist.liveUpdating {
-                    let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limitType: playlist.limitType)
-                    if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
-                        playlist.songs = updatedSongs
+            Task { @MainActor in
+                if let limitSortType = playlist.limitSortType {
+                    switch LimitSortType(rawValue: limitSortType) {
+                    case .artist:
+                        homeViewModel.playlistSongSort = .artist
+                        sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
+                    case .mostPlayed:
+                        homeViewModel.playlistSongSort = .mostPlayed
+                        sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
+                    case .lastPlayed:
+                        homeViewModel.playlistSongSort = .lastPlayed
+                        sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
+                    case .mostRecentlyAdded:
+                        homeViewModel.playlistSongSort = .mostRecentlyAdded
+                        sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
+                    case .title:
+                        homeViewModel.playlistSongSort = .title
+                        sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
+                    default:
+                        homeViewModel.playlistSongSort = .mostPlayed
+                        sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
                     }
                 }
-            }
-            if let coverData = playlist.cover {
-                playlistGeneratorViewModel.coverData = coverData
-                if let uiImage = UIImage(data: coverData) {
-                    coverImage = Image(uiImage: uiImage)
+                
+                if let coverData = playlist.cover {
+                    playlistGeneratorViewModel.coverData = coverData
+                    if let uiImage = UIImage(data: coverData) {
+                        coverImage = Image(uiImage: uiImage)
+                    }
                 }
-            }
-            if let limitSortType = playlist.limitSortType {
-                switch LimitSortType(rawValue: limitSortType) {
-                case .artist:
-                    homeViewModel.playlistSongSort = .artist
-                    sortTitle = PlaylistSongSortOption.artist.rawValue.uppercased()
-                case .mostPlayed:
-                    homeViewModel.playlistSongSort = .mostPlayed
-                    sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
-                case .lastPlayed:
-                    homeViewModel.playlistSongSort = .lastPlayed
-                    sortTitle = PlaylistSongSortOption.lastPlayed.rawValue.uppercased()
-                case .mostRecentlyAdded:
-                    homeViewModel.playlistSongSort = .mostRecentlyAdded
-                    sortTitle = PlaylistSongSortOption.dateAdded.rawValue.uppercased()
-                case .title:
-                    homeViewModel.playlistSongSort = .title
-                    sortTitle = PlaylistSongSortOption.title.rawValue.uppercased()
-                default:
-                    homeViewModel.playlistSongSort = .mostPlayed
-                    sortTitle = PlaylistSongSortOption.plays.rawValue.uppercased()
+                if let playlistFilters = playlist.filters {
+                    let matchingFilters = filtersQuery.filter {
+                        playlistFilters.contains($0.id.uuidString)
+                    }
+                    playlistGeneratorViewModel.assignViewModelValues(playlist: playlist, filters: matchingFilters)
+                    if playlist.liveUpdating {
+                        let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limitType: playlist.limitType)
+                        if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
+                            playlist.songs = updatedSongs
+                        }
+                    }
                 }
             }
         }

@@ -73,8 +73,7 @@ final class PlaylistGeneratorTests: XCTestCase {
     func testAssignValues() async throws {
         let playlista = Playlista(title: "Desmond's")
         let filter = Filter(date: Helpers().dateFormatter.string(from: Date()))
-        viewModel.filters = [filter]
-        await viewModel.assignViewModelValues(playlist: playlista)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         XCTAssertTrue(viewModel.playlistName == playlista.name)
         XCTAssertTrue(!viewModel.filteredDates.isEmpty)
         

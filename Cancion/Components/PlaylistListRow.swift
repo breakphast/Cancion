@@ -17,6 +17,8 @@ struct PlaylistListRow: View {
     @Environment(\.modelContext) var modelContext
     @State private var showMenu = false
     @State private var activePlaylist = false
+    @State private var coverImage: Image?
+    @Query var playlistas: [Playlista]
     
     var addedToApple: Bool {
         return playlistViewModel.addedToApple
@@ -119,6 +121,18 @@ struct PlaylistListRow: View {
                 .foregroundStyle(.secondary.opacity(0.2))
         }
         .frame(maxWidth: .infinity)
+        .task {
+            if let coverData = playlist.cover {
+                if let uiImage = UIImage(data: coverData) {
+                    coverImage = Image(uiImage: uiImage)
+                }
+            }
+        }
+        .onChange(of: playlistas.map {$0.cover}) { _, _ in
+            if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
+                coverImage = Image(uiImage: uiImage)
+            }
+        }
     }
     
     private func setPlaylistSongs() async -> Bool {
@@ -136,10 +150,8 @@ struct PlaylistListRow: View {
     
     private var playlistCoverIcon: some View {
         ZStack {
-            if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
-                let image = Image(uiImage: uiImage)
-                
-                image
+            if let coverImage {
+                coverImage
                     .resizable()
                     .scaledToFill()
                     .frame(width: 44, height: 44)
