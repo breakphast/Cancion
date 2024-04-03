@@ -11,17 +11,14 @@ import SwiftData
 struct Dropdown: View {
     // MARK: - Main State Properties
     @State var filter = Filter()
-//    @State var options: [String] = []
     @State var type: DropdownType
     @State var matchRules = ""
-    
-//    @State var limit: Int?
-    @State var limitType: String?
-    @State var limitSortType: String?
     
     let editing: Bool
     @Binding var filters: [Filter]?
     @Binding var limit: Int?
+    @Binding var limitType: String?
+    @Binding var limitSortType: String?
     
     // MARK: - UI Properties
     @SceneStorage("dropDownZIndex") private var index = 1000.0
@@ -34,12 +31,10 @@ struct Dropdown: View {
     var body: some View {
         GeometryReader {
             let size = $0.size
-            
             VStack {
                 if dropdownViewModel.showOptions && anchor == .top {
                     optionsView()
                 }
-                
                 SmartFilterComponent(title: $dropdownViewModel.selection, limit: dropdownViewModel.limit ?? 0, type: type)
                     .frame(width: size.width - 1, height: size.height)
                     .onTapGesture {
@@ -77,8 +72,14 @@ struct Dropdown: View {
                     dropdownViewModel.selection = value
                 }
             })
+            .onChange(of: dropdownViewModel.limitType, { _, newLimitType in
+                limitType = newLimitType
+            })
+            .onChange(of: limitType, { _, newLimit in
+                dropdownViewModel.limitType = newLimit
+            })
             .task {
-                dropdownViewModel.assignViewModelValues(filter: filter, matchRules: matchRules, type: type, limit: limit)
+                dropdownViewModel.assignViewModelValues(filter: filter, matchRules: matchRules, type: type, limit: limit, limitType: limitType, limitSortType: limitSortType)
             }
         }
         .frame(height: 44)

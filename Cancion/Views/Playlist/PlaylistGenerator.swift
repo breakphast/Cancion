@@ -47,7 +47,7 @@ struct PlaylistGenerator: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(filters: $viewModel.filterModels, limit: $viewModel.limit, editing: false)
+                                LimitToStack(filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, editing: false)
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -133,7 +133,7 @@ struct PlaylistGenerator: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(type: .matchRules, matchRules: MatchRules.any.rawValue, editing: false, filters: $viewModel.filterModels, limit: $viewModel.limit)
+                Dropdown(type: .matchRules, matchRules: MatchRules.any.rawValue, editing: false, filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -145,7 +145,7 @@ struct PlaylistGenerator: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach((viewModel.filterModels ?? []).indices, id: \.self) { index in
-                    SmartFilterStack(filter: (viewModel.filterModels ?? [])[index], editing: false, filters: $viewModel.filterModels, limit: $viewModel.limit)
+                    SmartFilterStack(filter: (viewModel.filterModels ?? [])[index], editing: false, filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType)
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)

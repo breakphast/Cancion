@@ -12,6 +12,8 @@ struct SmartFilterStack: View {
     let editing: Bool
     @Binding var filters: [Filter]?
     @Binding var limit: Int?
+    @Binding var limitType: String?
+    @Binding var limitSortType: String?
     
     @State var filterText = ""
 //    @Binding var filterss: [Filter]
@@ -23,8 +25,8 @@ struct SmartFilterStack: View {
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, type: .smartFilter, editing: editing, filters: $filters, limit: $limit)
-                Dropdown(filter: filter, type: .smartCondition, editing: editing, filters: $filters, limit: $limit)
+                Dropdown(filter: filter, type: .smartFilter, editing: editing, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType)
+                Dropdown(filter: filter, type: .smartCondition, editing: editing, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType)
                 if isDateStack {
                     DatePickr(filter: filter)
                         .padding(.trailing, 4)
