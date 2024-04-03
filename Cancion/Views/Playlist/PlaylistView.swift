@@ -240,7 +240,8 @@ struct PlaylistView: View {
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((viewModel.playlistSongs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song)
+                            let upperBound = index + 50 > viewModel.playlistSongs.count ? viewModel.playlistSongs.count : index + 20
+                            let _ = await homeViewModel.handleSongSelected(song: song, songs: Array(viewModel.playlistSongs[index..<upperBound]))
                         }
                     }
             }

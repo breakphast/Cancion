@@ -188,10 +188,16 @@ import MusicKit
     }
     
     @MainActor
-    func handleSongSelected(song: Song) async -> Bool {
+    func handleSongSelected(song: Song, songs: [Song]? = nil) async -> Bool {
+        var index = 0
+        if let songs {
+            if let indexx = songs.firstIndex(where: {$0.id.rawValue == song.id.rawValue}) {
+                index = indexx
+            }
+        }
         selectionChange = true
         do {
-            try await player.queue.insert(song, position: .afterCurrentEntry)
+            try await player.queue.insert(songs?[index...] ?? [song], position: .afterCurrentEntry)
             try await player.skipToNextEntry()
             isPlaybackQueueSet = true
             try await player.play()

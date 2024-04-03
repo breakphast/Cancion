@@ -76,6 +76,7 @@ struct SongList: View {
                     .padding(.horizontal, 24)
                     .scrollTargetLayout()
                 }
+                .simultaneousGesture(homeViewModel.swipeGesture)
                 .scrollIndicators(.never)
                 .scrollPosition(id: $scrollID)
                 .scrollTargetBehavior(.viewAligned)
@@ -87,7 +88,6 @@ struct SongList: View {
                 }
             }
         }
-        .gesture(homeViewModel.swipeGesture)
         .offset(x: homeViewModel.moveSet + UIScreen.main.bounds.width)
         .onChange(of: homeViewModel.currentScreen) { _, _ in
             isFocused = false
@@ -177,7 +177,8 @@ struct SongList: View {
                 SongListRow(song: song, index: songService.sortedSongs.firstIndex(where: {$0.id == song.id}) ?? 0)
                     .onTapGesture {
                         Task {
-                            await homeViewModel.handleSongSelected(song: song)
+                            let upperBound = index + 20 > songs.count ? songs.count : index + 20
+                            let _ = await homeViewModel.handleSongSelected(song: song, songs: Array(songs[index..<upperBound]))
                         }
                     }
             }
