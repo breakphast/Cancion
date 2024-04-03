@@ -30,9 +30,9 @@ import SwiftData
     var filterModels: [Filter]?
     var filteredDates = [String : String]()
     var limitActive: Bool = true
-    var limit: Int? = 25
-    var limitType: String? = LimitType.items.rawValue
-    var limitSortType: String? = LimitSortType.mostPlayed.rawValue
+    var limit: Int?
+    var limitType: String?
+    var limitSortType: String?
     var liveUpdating: Bool = true
     var addedToApple = false
     

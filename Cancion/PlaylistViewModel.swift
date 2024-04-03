@@ -82,7 +82,7 @@ import MusicKit
     }
     
     func setPlaylistSongs(songs: [Song]) async -> Bool {
-        var matchingSongs = Array(songs).filter {
+        let matchingSongs = Array(songs).filter {
             playlist?.songs.contains($0.id.rawValue) ?? false
         }
         
@@ -93,5 +93,18 @@ import MusicKit
             songSort = sortOption
         }
         return !playlistSongs.isEmpty
+    }
+    
+    @MainActor
+    func resetPlaylistViewModelValues() {
+        playCountAscending = false
+        searchActive = false
+        selectedFilter = nil
+        songSort = .artist
+        sortTitle = ""
+        
+        playlistSongs = []
+        ogPlaylistSongs = [Song]()
+        playlist = nil
     }
 }

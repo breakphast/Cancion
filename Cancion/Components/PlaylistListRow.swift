@@ -20,6 +20,7 @@ struct PlaylistListRow: View {
     @State private var activePlaylist = false
     @State private var coverImage: Image?
     @Query var playlistas: [Playlista]
+    @Query var filtersQuery: [Filter]
     
     var addedToApple: Bool {
         return playlistGenViewModel.addedToApple
@@ -49,7 +50,36 @@ struct PlaylistListRow: View {
 
                 }
                 .onTapGesture {
-                    playlistGenViewModel.activePlaylist = playlist
+                    Task { @MainActor in
+                        viewModel.playlist = playlist
+                        viewModel.assignSongs(sortType: homeViewModel.playlistSongSort ?? LimitSortType.artist)
+                        let setSongs = await viewModel.setPlaylistSongs(songs: songService.ogSongs)
+                        if setSongs {
+                            playlistGenViewModel.activePlaylist = playlist
+                        }
+                        if let limitSortType = playlist.limitSortType {
+                            viewModel.assignSortTitles(sortType: LimitSortType(rawValue: limitSortType) ?? LimitSortType.artist)
+                        }
+                        
+                        if let coverData = playlist.cover {
+                            playlistGenViewModel.coverData = coverData
+                            if let uiImage = UIImage(data: coverData) {
+                                coverImage = Image(uiImage: uiImage)
+                            }
+                        }
+                        if let playlistFilters = playlist.filters {
+                            let matchingFilters = filtersQuery.filter {
+                                playlistFilters.contains($0.id.uuidString)
+                            }
+                            playlistGenViewModel.assignViewModelValues(playlist: playlist, filters: matchingFilters)
+                            if playlist.liveUpdating {
+                                let updatedSongs = await playlistGenViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limit: playlist.limit, limitType: playlist.limitType, limitSortType: playlist.limitSortType)
+                                if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
+                                    playlist.songs = updatedSongs
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 Spacer()

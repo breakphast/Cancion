@@ -138,23 +138,3 @@ struct Home: View {
         .opacity(!viewModel.isPlaying ? 0 : viewModel.currentScreen == .playlists ? 1 : 0)
     }
 }
-
-extension View {
-    @ViewBuilder func conditionalFrame(isZero: Bool, height: CGFloat, alignment: Alignment) -> some View {
-        if isZero {
-            self.frame(height: height, alignment: alignment)
-        } else {
-            self // Do not modify the view if isZero is false
-        }
-    }
-}
-
-extension CGFloat {
-    func formatToThreeDecimals() -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.minimumFractionDigits = 3
-        formatter.maximumFractionDigits = 3
-        return formatter.string(from: NSNumber(value: self)) ?? ""
-    }
-}

@@ -20,17 +20,7 @@ import SwiftUI
     var showOptions = false
     
     var limitOptions: [String] {
-        switch type {
-        case .limit:
-            let limits = Limit.limits(forType: limitType ?? LimitType.items.rawValue).map { $0.value }
-            return limits
-        case .limitType:
-            return LimitType.allCases.map { $0.rawValue }
-        case .limitSortType:
-            return LimitSortType.allCases.map { $0.rawValue }
-        default:
-            return []
-        }
+        return Limit.limits(forType: limitType ?? LimitType.items.rawValue).map { $0.value }
     }
     
     func handleSmartFilters(option: String) {
@@ -52,8 +42,10 @@ import SwiftUI
         }
     }
     
-    func assignViewModelValues(filter: Filter, matchRules: String, type: DropdownType, limit: Int?) {
+    func assignViewModelValues(filter: Filter, matchRules: String, type: DropdownType, limit: Int?, limitType: String?, limitSortType: String?) {
         self.limit = limit
+        self.limitType = limitType
+        self.limitSortType = limitSortType
         self.filter = filter
         self.matchRules = matchRules
         self.type = type
@@ -133,11 +125,11 @@ import SwiftUI
             handleLimitFilters(option: String(limit ?? 25))
         case .limitType:
             self.selection = limitType ?? LimitType.items.rawValue
-            self.options = limitOptions
+            self.options = LimitType.allCases.map {$0.rawValue}
             handleLimitFilters(option: limitType ?? LimitType.items.rawValue)
         case .limitSortType:
             self.selection = limitSortType ?? LimitSortType.mostPlayed.rawValue
-            self.options = limitOptions
+            self.options = LimitSortType.allCases.map {$0.rawValue}
             handleLimitFilters(option: limitSortType ?? LimitSortType.mostPlayed.rawValue)
         case .matchRules:
             self.options = ["all", "any"]

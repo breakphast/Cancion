@@ -71,38 +71,6 @@ struct PlaylistView: View {
         .onChange(of: viewModel.songSort, { _, songSort in
             viewModel.assignSortTitles(sortType: songSort)
         })
-        .task {
-            Task { @MainActor in
-                viewModel.playlist = playlist
-                viewModel.assignSongs(sortType: homeViewModel.playlistSongSort ?? LimitSortType.artist)
-                let setSongs = await viewModel.setPlaylistSongs(songs: songService.ogSongs)
-                if setSongs {
-                    activePlaylist = playlist
-                }
-                if let limitSortType = playlist.limitSortType {
-                    viewModel.assignSortTitles(sortType: LimitSortType(rawValue: limitSortType) ?? LimitSortType.artist)
-                }
-                
-                if let coverData = playlist.cover {
-                    playlistGeneratorViewModel.coverData = coverData
-                    if let uiImage = UIImage(data: coverData) {
-                        coverImage = Image(uiImage: uiImage)
-                    }
-                }
-                if let playlistFilters = playlist.filters {
-                    let matchingFilters = filtersQuery.filter {
-                        playlistFilters.contains($0.id.uuidString)
-                    }
-                    playlistGeneratorViewModel.assignViewModelValues(playlist: playlist, filters: matchingFilters)
-                    if playlist.liveUpdating {
-                        let updatedSongs = await playlistGeneratorViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limit: playlist.limit, limitType: playlist.limitType, limitSortType: playlist.limitSortType)
-                        if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
-                            playlist.songs = updatedSongs
-                        }
-                    }
-                }
-            }
-        }
     }
     
     private var navHeaderItems: some View {
@@ -116,6 +84,7 @@ struct PlaylistView: View {
                 withAnimation(.bouncy(duration: 0.4)) {
                     Task {
                         await playlistGeneratorViewModel.resetViewModelValues()
+                        await viewModel.resetPlaylistViewModelValues()
                     }
                     dismiss()
                     showView = false
