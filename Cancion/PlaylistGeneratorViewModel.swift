@@ -181,31 +181,10 @@ import SwiftData
         return songs.filter { filter.matches(song: $0) }
     }
     
-    func handleCancelPlaylist() {
-        Task { @MainActor in
-            resetViewModelValues()
-        }
-    }
-    
     @MainActor
     func addPlaylist(songs: [Song]) async -> Playlista? {
         let playlista = await addPlaylistToDatabase(songs: songs)
         return playlista
-    }
-    
-    func addModelAndFiltersToDatabase(model: Playlista, modelContext: ModelContext) {
-        modelContext.insert(model)
-        if let playlistFilters = model.filters {
-            let matchingFilters = filterModels?.filter {
-                playlistFilters.contains($0.id.uuidString)
-            }
-            if let matchingFilters {
-                for filter in matchingFilters {
-                    modelContext.insert(filter)
-                }
-            }
-        }
-        try? modelContext.save()
     }
     
     @MainActor
@@ -217,6 +196,26 @@ import SwiftData
         }
         showError = true
         return nil
+    }
+    
+    func addModelAndFiltersToDatabase(model: Playlista, modelContext: ModelContext) -> Bool {
+        modelContext.insert(model)
+        if let playlistFilters = model.filters {
+            let matchingFilters = filterModels?.filter {
+                playlistFilters.contains($0.id.uuidString)
+            }
+            if let matchingFilters {
+                for filter in matchingFilters {
+                    modelContext.insert(filter)
+                }
+            }
+        }
+        do {
+            try modelContext.save()
+            return true
+        } catch {
+            return false
+        }
     }
     
     func calculateScrollViewHeight(filterCount: Int) -> CGFloat {
@@ -275,6 +274,7 @@ import SwiftData
         matchRules = MatchRules.all.rawValue
         smartRulesActive = true
         filters = []
+        filterModels = []
         liveUpdating = true
         limit = 25
         limitType = LimitType.items.rawValue

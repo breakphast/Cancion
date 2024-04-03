@@ -179,7 +179,9 @@ struct PlaylistGenerator: View {
         HStack {
             Button {
                 withAnimation(.bouncy(duration: 0.4)) {
-                    viewModel.handleCancelPlaylist()
+                    Task {
+                       await viewModel.resetViewModelValues()
+                    }
                     dismiss()
                     homeViewModel.generatorActive = false
                 }

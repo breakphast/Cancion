@@ -8,6 +8,7 @@
 import XCTest
 import MusicKit
 import SwiftUI
+import SwiftData
 @testable import Cancion
 
 final class PlaylistGeneratorTests: XCTestCase {
@@ -70,6 +71,20 @@ final class PlaylistGeneratorTests: XCTestCase {
         }
     }
     
+    func testFetchMatchingSongsSortedByLastPlayed() async throws {
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.contains.rawValue)
+        
+        let songIDs = await viewModel.fetchMatchingSongIDs(songs: songService.ogSongs, filters: [filter], matchRules: "all", limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.lastPlayed.rawValue)
+        let lastPlayedDates = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }.compactMap { $0.lastPlayedDate }
+        let dateAddedDates = songService.sortedSongs.filter { songIDs.contains($0.id.rawValue) }.compactMap { $0.libraryAddedDate }
+        
+        guard !lastPlayedDates.isEmpty && !dateAddedDates.isEmpty else {
+            XCTFail()
+            return
+        }
+        XCTAssertNotEqual(lastPlayedDates, dateAddedDates)
+    }
+    
     func testAssignValues() async throws {
         let playlista = Playlista(title: "Desmond's")
         let filter = Filter(date: Helpers().dateFormatter.string(from: Date()))
@@ -94,6 +109,8 @@ final class PlaylistGeneratorTests: XCTestCase {
             viewModel.playlistName = "Patrick"
             let newPlaylist = await viewModel.generatePlaylist(songs: songService.ogSongs, name: "Patrick", filters: [filter], limit: 25, limitType: LimitType.items.rawValue, limitSortType: LimitSortType.mostPlayed.rawValue)
             XCTAssertNotNil(newPlaylist)
+            let addedPlaylist = await viewModel.addPlaylist(songs: songService.ogSongs)
+            XCTAssertNotNil(addedPlaylist)
             
             let matchingSongs = songService.ogSongs.filter {
                 songIDs.contains($0.id.rawValue)
@@ -105,5 +122,23 @@ final class PlaylistGeneratorTests: XCTestCase {
         } else {
             XCTFail("Matching function did not return given song.")
         }
+    }
+    
+    func testSaveToModelContext() async throws {
+        var modelContxt: ModelContext = ModelContext(try ModelContainer(for: Playlista.self, Filter.self))
+        let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        viewModel.filterModels = [filter]
+
+        let playlista = Playlista(title: "ELlo", filters: [filter.id.uuidString])
+        let addedToContext = viewModel.addModelAndFiltersToDatabase(model: playlista, modelContext: modelContxt)
+        
+        XCTAssertEqual(modelContxt.container.schema.entities.count, 2)
+        XCTAssertTrue(addedToContext)
+    }
+    
+    func testHandleResetValues() async throws {
+        viewModel.playlistName = "JONATHAN"
+        await viewModel.resetViewModelValues()
+        XCTAssertTrue(viewModel.playlistName.isEmpty)
     }
 }
