@@ -67,8 +67,8 @@ struct SmartFilterStack: View {
             
             Button {
                 withAnimation(.bouncy) {
-                    guard var filters, filters.count > 1 else { return }
-                    filters.removeAll(where: { $0.id.uuidString == filter.id.uuidString })
+                    guard let count = filters?.count, count > 1 else { return }
+                    filters?.removeAll(where: { $0.id == filter.id })
                 }
             } label: {
                 ZStack {

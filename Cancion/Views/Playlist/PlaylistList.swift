@@ -57,7 +57,6 @@ struct PlaylistList: View {
                             .frame(height: 200)
                     }
                 }
-                Spacer()
             }
             .frame(maxWidth: .infinity)
             .offset(x: homeViewModel.moveSet + (UIScreen.main.bounds.width * 2))

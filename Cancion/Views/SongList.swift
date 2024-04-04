@@ -58,11 +58,10 @@ struct SongList: View {
     
     var body: some View {
         ZStack {
-            Color.white.opacity(0.000001).ignoresSafeArea()
+            Color.clear.ignoresSafeArea()
             VStack {
                 navHeaderItems
                     .padding(.horizontal, 24)
-
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
