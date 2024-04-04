@@ -29,6 +29,10 @@ struct PlaylistView: View {
     @State private var coverImage: Image?
     
     var playlist: Playlista
+    var songs: [Song] {
+        let playlistSongs = viewModel.playlistSongs
+        return text.isEmpty ? playlistSongs : playlistSongs.filter { $0.title.contains(text) || $0.artistName.contains(text) }
+    }
     
     var body: some View {
         VStack(spacing: 16) {
@@ -208,7 +212,7 @@ struct PlaylistView: View {
     }
     private var songList: some View {
         VStack {
-            ForEach(Array(viewModel.playlistSongs.enumerated()), id: \.offset) { index, song in
+            ForEach(Array(songs.enumerated()), id: \.offset) { index, song in
                 SongListRow(song: song, index: viewModel.playCountAscending ? ((viewModel.playlistSongs.count - 1) - index) : index)
                     .onTapGesture {
                         Task {

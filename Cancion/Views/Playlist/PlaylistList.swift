@@ -54,7 +54,7 @@ struct PlaylistList: View {
                     if homeViewModel.isPlaying {
                         Rectangle()
                             .fill(.clear)
-                            .frame(height: 60)
+                            .frame(height: 200)
                     }
                 }
                 Spacer()
