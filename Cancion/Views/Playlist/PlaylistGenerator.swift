@@ -47,7 +47,7 @@ struct PlaylistGenerator: View {
                         
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, dropdownActive: $viewModel.dropdownActive)
+                                LimitToStack(filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, matchRules: $viewModel.matchRules, dropdownActive: $viewModel.dropdownActive)
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -133,7 +133,7 @@ struct PlaylistGenerator: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(type: .matchRules, matchRules: MatchRules.any.rawValue, filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, dropdownActive: $viewModel.dropdownActive)
+                Dropdown(type: .matchRules, matchRules: $viewModel.matchRules, filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, dropdownActive: $viewModel.dropdownActive)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -145,7 +145,7 @@ struct PlaylistGenerator: View {
             
             VStack(alignment: .leading, spacing: 12) {
                 ForEach((viewModel.filterModels ?? []).indices, id: \.self) { index in
-                    SmartFilterStack(filter: (viewModel.filterModels ?? [])[index], filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, dropdownActive: $viewModel.dropdownActive)
+                    SmartFilterStack(filter: (viewModel.filterModels ?? [])[index], filters: $viewModel.filterModels, limit: $viewModel.limit, limitType: $viewModel.limitType, limitSortType: $viewModel.limitSortType, matchRules: $viewModel.matchRules, dropdownActive: $viewModel.dropdownActive)
                         .disabled(!viewModel.smartRulesActive)
                         .zIndex(Double(100 - index))
                         .environment(viewModel)
@@ -210,9 +210,9 @@ struct PlaylistGenerator: View {
                 Task {
                     let addedPlaylist = await viewModel.addPlaylist(songs: songService.ogSongs)
                     if let addedPlaylist {
-                        let _ = viewModel.addModelAndFiltersToDatabase(model: addedPlaylist, modelContext: modelContext)
                         dismiss()
                         homeViewModel.generatorActive = false
+                        let _ = viewModel.addModelAndFiltersToDatabase(model: addedPlaylist, modelContext: modelContext)
                     }
                 }
             } label: {

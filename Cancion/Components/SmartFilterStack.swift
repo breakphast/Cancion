@@ -13,6 +13,7 @@ struct SmartFilterStack: View {
     @Binding var limit: Int?
     @Binding var limitType: String?
     @Binding var limitSortType: String?
+    @Binding var matchRules: String?
     @Binding var dropdownActive: Bool
     
     @State var filterText = ""
@@ -25,8 +26,8 @@ struct SmartFilterStack: View {
     var body: some View {
         ZStack {
             HStack {
-                Dropdown(filter: filter, type: .smartFilter, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
-                Dropdown(filter: filter, type: .smartCondition, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
+                Dropdown(filter: filter, type: .smartFilter, matchRules: $matchRules, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
+                Dropdown(filter: filter, type: .smartCondition, matchRules: $matchRules, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
                 if isDateStack {
                     DatePickr(filter: filter)
                         .padding(.trailing, 4)

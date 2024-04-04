@@ -167,7 +167,7 @@ struct PlayerView: View {
     private var dateAdded: some View {
         HStack(alignment: .center, spacing: 4) {
             Image(systemName: "calendar.badge.plus")
-                .font(.headline)
+                .font(.title3)
                 .offset(y: 1)
             Text(songDateAdded ?? "")
                 .kerning(1.1)

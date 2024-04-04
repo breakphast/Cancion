@@ -17,6 +17,7 @@ struct LimitToStack: View {
     @Binding var limit: Int?
     @Binding var limitType: String?
     @Binding var limitSortType: String?
+    @Binding var matchRules: String?
     @Binding var dropdownActive: Bool
     
     var body: some View {
@@ -57,9 +58,9 @@ struct LimitToStack: View {
                 .font(.title3)
             
             if let _ = self.filters {
-                Dropdown(type: .limit, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
+                Dropdown(type: .limit, matchRules: $matchRules, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
                     .frame(width: 44, height: 44)
-                Dropdown(type: .limitType, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
+                Dropdown(type: .limitType, matchRules: $matchRules, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
             }
         }
         .foregroundStyle(.oreo)
@@ -75,7 +76,7 @@ struct LimitToStack: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                 if let _ = self.filters {
-                    Dropdown(type: .limitSortType, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
+                    Dropdown(type: .limitSortType, matchRules: $matchRules, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
                 }
             }
             .foregroundStyle(.oreo)

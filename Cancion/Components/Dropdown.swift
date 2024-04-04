@@ -12,8 +12,7 @@ struct Dropdown: View {
     // MARK: - Main State Properties
     @State var filter = Filter()
     @State var type: DropdownType
-    @State var matchRules = ""
-    
+    @Binding var matchRules: String?
     @Binding var filters: [Filter]?
     @Binding var limit: Int?
     @Binding var limitType: String?
@@ -77,6 +76,9 @@ struct Dropdown: View {
             })
             .onChange(of: limitType, { _, newLimit in
                 dropdownViewModel.limitType = newLimit
+            })
+            .onChange(of: dropdownViewModel.matchRules, { _, newMatchRules in
+                matchRules = newMatchRules
             })
             .task {
                 dropdownViewModel.assignViewModelValues(filter: filter, matchRules: matchRules, type: type, limit: limit, limitType: limitType, limitSortType: limitSortType, dropdownActive: dropdownActive)

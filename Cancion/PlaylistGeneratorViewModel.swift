@@ -42,22 +42,21 @@ import SwiftData
     func fetchMatchingSongIDs(songs: [Song], filters: [Filter]?, matchRules: String?, limit: Int?, limitType: String?, limitSortType: String?) async -> [String] {
         var filteredSongs = songs
         var totalDuration = 0.0
-        
         if let matchRules, smartRulesActive {
             if matchRules == MatchRules.all.rawValue, let filters {
-                filteredSongs = songs
-                for filter in filters {
-                    if let filterrDate = filteredDates[filter.id.uuidString] {
-                        let datedate = Helpers().dateFormatter.date(from: filterrDate)
-                        filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: datedate) }
-                    } else {
-                        filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: nil) }
+                filteredSongs = songs.filter { song in
+                    filters.allSatisfy { filter in
+                        let filterDateStr = filteredDates[filter.id.uuidString] ?? filter.date
+                        let date = filterDateStr != nil ? Helpers().dateFormatter.date(from: filterDateStr!) : nil
+                        return matches(song: song, filter: filter, date: date)
                     }
                 }
             } else if matchRules == MatchRules.any.rawValue, let filters {
                 filteredSongs = songs.filter { song in
                     filters.contains { filter in
-                        matches(song: song, filter: filter, date: filter.date == nil ? nil : Helpers().dateFormatter.date(from: filter.date!))
+                        let filterDateStr = filteredDates[filter.id.uuidString] ?? filter.date
+                        let date = filterDateStr != nil ? Helpers().dateFormatter.date(from: filterDateStr!) : nil
+                        return matches(song: song, filter: filter, date: date)
                     }
                 }
             }
@@ -118,7 +117,8 @@ import SwiftData
         
         return filteredSongs.map { $0.id.rawValue }
     }
-
+    
+    @MainActor
     func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter], limit: Int?, limitType: String?, limitSortType: String?) async -> Playlista? {
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)

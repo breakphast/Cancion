@@ -41,6 +41,10 @@ func matches(song: Song, filter: Filter, date: Date?) -> Bool {
             if let songDate = (filter.type == FilterType.dateAdded.rawValue ? song.libraryAddedDate : song.lastPlayedDate), let filterDate = date {
                 return areDatesEqual(date1: songDate, date2: filterDate)
             }
+        case FilterType.plays.rawValue:
+            if let plays = song.playCount, let value = Int(filterValue) {
+                return plays == value
+            }
         default:
             break
         }
