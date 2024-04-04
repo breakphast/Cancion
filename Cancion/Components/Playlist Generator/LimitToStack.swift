@@ -17,8 +17,7 @@ struct LimitToStack: View {
     @Binding var limit: Int?
     @Binding var limitType: String?
     @Binding var limitSortType: String?
-    
-    let editing: Bool
+    @Binding var dropdownActive: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -58,9 +57,9 @@ struct LimitToStack: View {
                 .font(.title3)
             
             if let _ = self.filters {
-                Dropdown(type: .limit, editing: editing, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType)
+                Dropdown(type: .limit, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
                     .frame(width: 44, height: 44)
-                Dropdown(type: .limitType, editing: editing, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType)
+                Dropdown(type: .limitType, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
             }
         }
         .foregroundStyle(.oreo)
@@ -76,7 +75,7 @@ struct LimitToStack: View {
                     .fontWeight(.semibold)
                     .font(.title3)
                 if let _ = self.filters {
-                    Dropdown(type: .limitSortType, editing: false, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType)
+                    Dropdown(type: .limitSortType, filters: $filters, limit: $limit, limitType: $limitType, limitSortType: $limitSortType, dropdownActive: $dropdownActive)
                 }
             }
             .foregroundStyle(.oreo)

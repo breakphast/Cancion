@@ -125,7 +125,7 @@ final class PlaylistGeneratorTests: XCTestCase {
     }
     
     func testSaveToModelContext() async throws {
-        var modelContxt: ModelContext = ModelContext(try ModelContainer(for: Playlista.self, Filter.self))
+        let modelContxt: ModelContext = ModelContext(try ModelContainer(for: Playlista.self, Filter.self))
         let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
         viewModel.filterModels = [filter]
 

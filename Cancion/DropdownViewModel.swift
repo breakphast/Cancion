@@ -42,13 +42,14 @@ import SwiftUI
         }
     }
     
-    func assignViewModelValues(filter: Filter, matchRules: String, type: DropdownType, limit: Int?, limitType: String?, limitSortType: String?) {
+    func assignViewModelValues(filter: Filter, matchRules: String, type: DropdownType, limit: Int?, limitType: String?, limitSortType: String?, dropdownActive: Bool) {
         self.limit = limit
         self.limitType = limitType
         self.limitSortType = limitSortType
         self.filter = filter
         self.matchRules = matchRules
         self.type = type
+        self.dropdownActive = dropdownActive
         assignFilterOptionsAndSelection(filter: filter)
     }
     

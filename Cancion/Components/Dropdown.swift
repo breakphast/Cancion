@@ -14,11 +14,11 @@ struct Dropdown: View {
     @State var type: DropdownType
     @State var matchRules = ""
     
-    let editing: Bool
     @Binding var filters: [Filter]?
     @Binding var limit: Int?
     @Binding var limitType: String?
     @Binding var limitSortType: String?
+    @Binding var dropdownActive: Bool
     
     // MARK: - UI Properties
     @SceneStorage("dropDownZIndex") private var index = 1000.0
@@ -43,7 +43,7 @@ struct Dropdown: View {
                         withAnimation(.bouncy) {
                             dropdownViewModel.showOptions.toggle()
                             if type == .limitSortType || type == .limit {
-                                dropdownViewModel.dropdownActive.toggle()
+                                dropdownActive.toggle()
                             }
                         }
                     }
@@ -79,7 +79,7 @@ struct Dropdown: View {
                 dropdownViewModel.limitType = newLimit
             })
             .task {
-                dropdownViewModel.assignViewModelValues(filter: filter, matchRules: matchRules, type: type, limit: limit, limitType: limitType, limitSortType: limitSortType)
+                dropdownViewModel.assignViewModelValues(filter: filter, matchRules: matchRules, type: type, limit: limit, limitType: limitType, limitSortType: limitSortType, dropdownActive: dropdownActive)
             }
         }
         .frame(height: 44)

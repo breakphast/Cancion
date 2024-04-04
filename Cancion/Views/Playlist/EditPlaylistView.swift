@@ -42,7 +42,7 @@ struct EditPlaylistView: View {
                             .padding(.top, 24)
                             VStack(alignment: .leading) {
                                 smartFilters
-                                LimitToStack(filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType, editing: true)
+                                LimitToStack(filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType, dropdownActive: $editPlaylistViewModel.dropdownActive)
                                 divider
                                 FilterCheckbox(title: "Live updating", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .liveUpdating)
                                 
@@ -157,7 +157,7 @@ struct EditPlaylistView: View {
         VStack(alignment: .leading, spacing: 24) {
             HStack {
                 FilterCheckbox(title: "Match", icon: nil, cornerRadius: 12, strokeColor: .oreo, type: .match)
-                Dropdown(type: .matchRules, matchRules: playlist.matchRules ?? "", editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType)
+                Dropdown(type: .matchRules, matchRules: playlist.matchRules ?? "", filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType, dropdownActive: $editPlaylistViewModel.dropdownActive)
                     .frame(width: 66, height: 33)
                 Text("of the following rules")
                     .foregroundStyle(.oreo)
@@ -170,12 +170,10 @@ struct EditPlaylistView: View {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(editPlaylistViewModel.playlistFilters ?? [], id: \.id) { filter in
                     if let index = editPlaylistViewModel.playlistFilters?.firstIndex(where: {$0.id == filter.id}) {
-                        SmartFilterStack(filter: filter, editing: true, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType)
+                        SmartFilterStack(filter: filter, filters: $editPlaylistViewModel.playlistFilters, limit: $editPlaylistViewModel.limit, limitType: $editPlaylistViewModel.limitType, limitSortType: $editPlaylistViewModel.limitSortType, dropdownActive: $editPlaylistViewModel.dropdownActive)
                             .disabled(!(editPlaylistViewModel.smartRulesActive))
                             .zIndex(Double(100 - index))
                             .environment(editPlaylistViewModel)
-                    } else {
-                        Text("NOpe")
                     }
                 }
                 .blur(radius: !(editPlaylistViewModel.smartRulesActive) ? 2 : 0)

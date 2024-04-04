@@ -55,9 +55,8 @@ import PhotosUI
     }
     
     func handleEditPlaylist(songService: SongService, playlist: Playlista, filters: [Filter]) async -> Bool {
-        let songIDs = await songService.fetchMatchingSongIDs(playlist: playlist, dates: filteredDates, filterrs: filters)
+        let songIDs = await songService.fetchMatchingSongIDs(dates: filteredDates, filterrs: filters, limit: limit, limitType: limitType, limitSortType: limitSortType, matchRules: matchRules, smartRules: smartRulesActive)
         let filterStrings = filters.map {$0.id.uuidString}
-        
         guard !songIDs.isEmpty else {
             genError = .emptySongs
             showError = true
@@ -82,7 +81,7 @@ import PhotosUI
             playlist.cover = cover
         }
         if let limit, limit != playlist.limit {
-            playlist.limit = playlist.limit
+            playlist.limit = limit
         }
         if let limitType = limitType, limitType != playlist.limitType {
             playlist.limitType = limitType
@@ -103,10 +102,10 @@ import PhotosUI
         }
         
         if matchRules != playlist.matchRules {
-            playlist.matchRules = playlist.matchRules
+            playlist.matchRules = matchRules
         }
         if liveUpdating != playlist.liveUpdating {
-            playlist.liveUpdating = playlist.liveUpdating
+            playlist.liveUpdating = liveUpdating ?? false
         }
         if smartRulesActive != playlist.smartRules {
             playlist.smartRules = smartRulesActive

@@ -71,6 +71,9 @@ struct PlaylistView: View {
         .onChange(of: viewModel.songSort, { _, songSort in
             viewModel.assignSortTitles(sortType: songSort)
         })
+        .onChange(of: songService.playlistSongs) { _, newSongs in
+            viewModel.playlistSongs = newSongs
+        }
     }
     
     private var navHeaderItems: some View {

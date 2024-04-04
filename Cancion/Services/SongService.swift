@@ -42,11 +42,11 @@ import MusicKit
         }
     }
     
-    func fetchMatchingSongIDs(playlist: Playlista, dates: [String:String]?, filterrs: [Filter]?) async -> [String] {
+    func fetchMatchingSongIDs(dates: [String:String]?, filterrs: [Filter]?, limit: Int?, limitType: String?, limitSortType: String?, matchRules: String?, smartRules: Bool?) async -> [String] {
         var filteredSongs = ogSongs
         var totalDuration = 0.0
-        if let rules = playlist.matchRules, let rulesActive = playlist.smartRules, rulesActive {
-            if rules == MatchRules.all.rawValue, let filterrs {
+        if let matchRules, let smartRules, smartRules {
+            if matchRules == MatchRules.all.rawValue, let filterrs {
                 filteredSongs = ogSongs
                 for filter in filterrs {
                     if let dates, let filterrDate = dates[filter.id.uuidString] {
@@ -56,7 +56,7 @@ import MusicKit
                         filteredSongs = filteredSongs.filter { matches(song: $0, filter: filter, date: nil) }
                     }
                 }
-            } else if rules == MatchRules.any.rawValue, let filterrs {
+            } else if matchRules == MatchRules.any.rawValue, let filterrs {
                 filteredSongs = ogSongs.filter { song in
                     filterrs.contains { filter in
                         matches(song: song, filter: filter, date: filter.date == nil ? nil : Helpers().dateFormatter.date(from: filter.date!))
@@ -65,7 +65,7 @@ import MusicKit
             }
         }
         
-        if let limitSortType = playlist.limitSortType, let sort = LimitSortType(rawValue: limitSortType) {
+        if let limitSortType, let sort = LimitSortType(rawValue: limitSortType) {
             switch sort {
             case .mostPlayed:
                 filteredSongs.sort { $0.playCount ?? 0 > $1.playCount ?? 0 }
@@ -82,9 +82,9 @@ import MusicKit
             }
         }
                 
-        if let limit = playlist.limit {
+        if let limit = limit {
             var limitedSongs = [Song]()
-            switch playlist.limitType {
+            switch limitType {
             case LimitType.items.rawValue:
                 limitedSongs = Array(filteredSongs.prefix(limit))
             case LimitType.hours.rawValue:

@@ -77,7 +77,7 @@ final class DropdownTests: XCTestCase {
     func testAssignViewModelValues() async throws {
         let filter = Filter(type: FilterType.artist.rawValue, value: "Playboi Carti", condition: Condition.contains.rawValue)
         
-        viewModel.assignViewModelValues(filter: filter, matchRules: MatchRules.any.rawValue, type: DropdownType.smartCondition, limit: nil)
+        viewModel.assignViewModelValues(filter: filter, matchRules: MatchRules.any.rawValue, type: DropdownType.smartCondition, limit: nil, limitType: nil, limitSortType: nil)
         
         XCTAssertTrue(viewModel.filter?.condition == Condition.contains.rawValue)
     }
