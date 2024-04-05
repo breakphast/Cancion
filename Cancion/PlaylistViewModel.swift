@@ -15,6 +15,7 @@ import MusicKit
     var selectedFilter: String? = nil
     var songSort: LimitSortType = .artist
     var sortTitle: String = ""
+    var cover: Data?
     
     var playlistSongs: [Song] = []
     var ogPlaylistSongs = [Song]()

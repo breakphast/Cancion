@@ -26,12 +26,19 @@ struct PlaylistView: View {
     @Binding var activePlaylist: Playlista?
     @State private var showGenerator = false
     @State private var scrollID: String?
-    @State private var coverImage: Image?
     
     var playlist: Playlista
     var songs: [Song] {
         let playlistSongs = viewModel.playlistSongs
         return text.isEmpty ? playlistSongs : playlistSongs.filter { $0.title.contains(text) || $0.artistName.contains(text) }
+    }
+    var coverImage: Image? {
+        if let cover = playlistGeneratorViewModel.coverData {
+            if let uiImage = UIImage(data: cover) {
+                return Image(uiImage: uiImage)
+            }
+        }
+        return nil
     }
     
     var body: some View {
@@ -40,7 +47,7 @@ struct PlaylistView: View {
                 .padding(.horizontal, 24)
             
             ScrollView {
-                VStack(alignment: .leading) {
+                VStack(alignment: .center) {
                     songSearchTextField
                     playlistCover
                         .id("cover")
@@ -65,9 +72,6 @@ struct PlaylistView: View {
         }
         .onChange(of: playlist.cover ?? Data(), { _, newCover in
             playlistGeneratorViewModel.coverData = newCover
-            if let uiImage = UIImage(data: newCover) {
-                coverImage = Image(uiImage: uiImage)
-            }
         })
         .onAppear {
             scrollID = "cover"
@@ -176,7 +180,7 @@ struct PlaylistView: View {
                 coverImage
                     .resizable()
                     .scaledToFill()
-                    .frame(height: 200)
+                    .frame(width: UIScreen.main.bounds.width * 0.8, height: 200)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .background(

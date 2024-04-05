@@ -88,6 +88,7 @@ struct EditPlaylistView: View {
                         .resizable()
                         .scaledToFill()
                         .frame(height: 200)
+                        .frame(maxWidth: UIScreen.main.bounds.width * 0.8)
                         .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .background(

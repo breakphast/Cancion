@@ -17,7 +17,6 @@ import PhotosUI
     var coverImage: Image?
     var playlist: Playlista?
     var playlistFilters: [Filter]?
-//    var filters: [FilterModel] = []
     var filteredDates: [String : String] = [:]
     var genError: GenErrors?
     var playlistSongSort: LimitSortType?
@@ -36,6 +35,7 @@ import PhotosUI
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false
+        coverData = playlist.cover
         if let playlistFilterStrings = playlist.filters {
             let matchingFilters = filters.filter {
                 playlistFilterStrings.contains($0.id.uuidString)

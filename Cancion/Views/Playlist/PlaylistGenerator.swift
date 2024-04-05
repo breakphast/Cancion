@@ -122,6 +122,7 @@ struct PlaylistGenerator: View {
             Task {
                 if let loaded = try? await item?.loadTransferable(type: Data.self) {
                     imageData = loaded
+                    viewModel.coverData = loaded
                 } else {
                     print("Failed")
                 }

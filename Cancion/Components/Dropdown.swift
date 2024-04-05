@@ -74,6 +74,9 @@ struct Dropdown: View {
             .onChange(of: dropdownViewModel.limitType, { _, newLimitType in
                 limitType = newLimitType
             })
+            .onChange(of: dropdownViewModel.limitSortType, { _, newLimitSortType in
+                limitSortType = newLimitSortType
+            })
             .onChange(of: limitType, { _, newLimit in
                 dropdownViewModel.limitType = newLimit
             })

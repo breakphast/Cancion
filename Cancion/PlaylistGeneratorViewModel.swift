@@ -244,6 +244,7 @@ import SwiftData
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false
+        coverData = playlist.cover
         
         if let playlistFilters = playlist.filters, playlistFilters.isEmpty {
             let matchingFilters = filters.filter {

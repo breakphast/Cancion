@@ -44,7 +44,7 @@ import MusicKit
     }
     
     func fetchUserPlaylists() async throws {
-        var libraryRequest = MusicLibraryRequest<Playlist>()
+        let libraryRequest = MusicLibraryRequest<Playlist>()
         
         do {
             let libraryResponse = try await libraryRequest.response()
