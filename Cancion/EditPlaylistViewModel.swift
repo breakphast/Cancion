@@ -54,6 +54,7 @@ import PhotosUI
         }
     }
     
+    @MainActor
     func handleEditPlaylist(songService: SongService, playlist: Playlista, filters: [Filter]) async -> Bool {
         let songIDs = await songService.fetchMatchingSongIDs(dates: filteredDates, filterrs: filters, limit: limit, limitType: limitType, limitSortType: limitSortType, matchRules: matchRules, smartRules: smartRulesActive)
         let filterStrings = filters.map {$0.id.uuidString}

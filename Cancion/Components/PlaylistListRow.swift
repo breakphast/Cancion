@@ -16,15 +16,13 @@ struct PlaylistListRow: View {
     @Environment(PlaylistGeneratorViewModel.self) var playlistGenViewModel
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
+    @Environment(\.openURL) var openURL
     @State private var showMenu = false
     @State private var activePlaylist = false
     @State private var coverImage: Image?
     @Query var playlistas: [Playlista]
     @Query var filtersQuery: [Filter]
-    
-    var addedToApple: Bool {
-        return playlistGenViewModel.addedToApple
-    }
+    @State private var showAlert = false
     
     var song: Song? {
         if let songID = playlist.songs.first, let song = Array(songService.ogSongs).first(where: {$0.id.rawValue == songID}) {
@@ -35,6 +33,13 @@ struct PlaylistListRow: View {
     
     var name: String {
         return playlist.name
+    }
+    
+    var playlistURL: URL? {
+        if let urlString = playlist.urlString, let url = URL(string: urlString) {
+            return url
+        }
+        return nil
     }
     
     var body: some View {
@@ -76,6 +81,13 @@ struct PlaylistListRow: View {
                                 let updatedSongs = await playlistGenViewModel.fetchMatchingSongIDs(songs: songService.sortedSongs, filters: matchingFilters, matchRules: playlist.matchRules, limit: playlist.limit, limitType: playlist.limitType, limitSortType: playlist.limitSortType)
                                 if updatedSongs != playlist.songs && !updatedSongs.isEmpty {
                                     playlist.songs = updatedSongs
+                                    if let matchingPlaylist = songService.userAppleMusicPlaylists.first(where: {$0.url?.absoluteString == playlist.urlString}) {
+                                        let lib = MusicLibrary.shared
+                                        let songs = songService.ogSongs.filter {
+                                            playlist.songs.contains($0.id.rawValue)
+                                        }
+                                        try await lib.edit(matchingPlaylist, name: playlist.name, items: songs)
+                                    }
                                 }
                             }
                         }
@@ -87,44 +99,31 @@ struct PlaylistListRow: View {
                 Menu {
                     Button {
                         Task { @MainActor in
-                            self.activePlaylist = true
-                            playlistGenViewModel.createAppleMusicPlaylist(using: playlist, songs: songService.ogSongs)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
-                                withAnimation {
-                                    activePlaylist = false
-                                }
+                            if let playlistURL {
+                                openURL(playlistURL)
+                            } else {
+                                playlistGenViewModel.createAppleMusicPlaylist(using: playlist, songs: songService.ogSongs)
+                                showAlert = true
                             }
                         }
                     } label: {
-                        Label("Add To Apple Music", systemImage: "folder.fill.badge.plus")
+                        let text = playlist.urlString == nil ? "Add To" : "View In"
+                        let icon = playlist.urlString == nil ? "folder.fill.badge.plus" : "eyes"
+                        Label("\(text) Apple Music", systemImage: icon)
                     }
                 } label: {
-                    if !activePlaylist {
-                        Image(.appleMusic)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 33, height: 33)
-                            .clipped()
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(.white)
-                                    .shadow(radius: 2)
-                            )
-                    } else if addedToApple {
-                        Image(systemName: "checkmark")
-                            .font(.title2)
-                            .fontWeight(.heavy)
-                            .frame(width: 33, height: 33)
-                            .contentShape(Rectangle())
-                            .foregroundStyle(.naranja)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(.white)
-                            )
-                    }
+                    Image(.appleMusic)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 33, height: 33)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(.white)
+                                .shadow(radius: 2)
+                        )
                 }
-                .disabled(addedToApple)
                 
                 Menu {
                     Button {
@@ -157,6 +156,14 @@ struct PlaylistListRow: View {
         .onChange(of: playlistas.map {$0.cover}) { _, _ in
             if let cover = playlist.cover, let uiImage = UIImage(data: cover) {
                 coverImage = Image(uiImage: uiImage)
+            }
+        }
+        .alert("Playlist added to Apple Music!", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+            Button("View") {
+                if let playlistURL {
+                    openURL(playlistURL)
+                }
             }
         }
     }

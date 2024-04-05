@@ -34,7 +34,6 @@ import SwiftData
     var limitType: String?
     var limitSortType: String?
     var liveUpdating: Bool = true
-    var addedToApple = false
     
     var genError: GenErrors?
     
@@ -162,9 +161,8 @@ import SwiftData
             let lib = MusicLibrary.shared
             let listt = try await MusicLibrary.shared.createPlaylist(name: playlist.name)
             withAnimation {
-                addedToApple = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 6) { [weak self] in
-                    self?.addedToApple = false
+                if let url = listt.url {
+                    playlist.urlString = url.absoluteString
                 }
             }
             var playlistSongs = [Song]()

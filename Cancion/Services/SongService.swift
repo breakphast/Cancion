@@ -19,6 +19,7 @@ import MusicKit
     var ogPlaylistSongs = [Song]()
     var playlistSongs = [Song]()
     var emptyLibrary = false
+    var userAppleMusicPlaylists = [Playlist]()
     
     public func smartFilterSongs(limit: Int, by sortProperty: LibrarySongSortProperties, artist: String? = nil) async throws {
         var libraryRequest = MusicLibraryRequest<Song>()
@@ -37,6 +38,17 @@ import MusicKit
         do {
             let libraryResponse = try await libraryRequest.response()
             await self.apply(libraryResponse)
+        } catch {
+            emptyLibrary = true
+        }
+    }
+    
+    func fetchUserPlaylists() async throws {
+        var libraryRequest = MusicLibraryRequest<Playlist>()
+        
+        do {
+            let libraryResponse = try await libraryRequest.response()
+            await self.applyPlaylists(libraryResponse)
         } catch {
             emptyLibrary = true
         }
@@ -133,5 +145,10 @@ import MusicKit
         self.ogSongs = Array(libraryResponse.items).filter { $0.artwork != nil }.filter  {$0.playParameters != nil}
         self.sortedSongs = Array(libraryResponse.items).filter { $0.artwork != nil }.filter  {$0.playParameters != nil}
         self.randomSongs = self.sortedSongs.filter { $0.artwork != nil }.shuffled()
+    }
+    
+    @MainActor
+    private func applyPlaylists(_ libraryResponse: MusicLibraryResponse<Playlist>) {
+        self.userAppleMusicPlaylists = Array(libraryResponse.items)
     }
 }

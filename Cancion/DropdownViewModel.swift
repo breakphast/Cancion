@@ -109,7 +109,7 @@ import SwiftUI
                     self.selection = condition.rawValue
                     handleSmartConditions(option: condition.rawValue)
                 case FilterType.plays.rawValue:
-                    self.options = [Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
+                    self.options = [Condition.equals, Condition.greaterThan, Condition.lessThan].map {$0.rawValue}
                     self.selection = condition.rawValue
                     handleSmartConditions(option: condition.rawValue)
                 case FilterType.dateAdded.rawValue, FilterType.lastPlayedDate.rawValue:

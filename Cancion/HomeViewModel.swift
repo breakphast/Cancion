@@ -42,7 +42,6 @@ import MusicKit
     var sortedSongs = [Song]()
     var randomSongs = [Song]()
     
-    
     var moveSet: CGFloat {
         switch currentScreen {
         case .player:
@@ -91,6 +90,7 @@ import MusicKit
         do {
             try await songService.smartFilterSongs(limit: 1500, by: .playCount)
             ogSongs = songService.ogSongs
+            try await songService.fetchUserPlaylists()
             await initializeQueue(songs: songService.randomSongs)
         } catch {
             print("Failed to initialize queue.")

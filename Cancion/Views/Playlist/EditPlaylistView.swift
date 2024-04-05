@@ -224,6 +224,13 @@ struct EditPlaylistView: View {
                         dismiss()
                         editPlaylistViewModel.resetViewModelValues()
                         homeViewModel.generatorActive = false
+                        if let matchingPlaylist = songService.userAppleMusicPlaylists.first(where: {$0.url?.absoluteString == playlist.urlString}) {
+                            let lib = MusicLibrary.shared
+                            let songs = songService.ogSongs.filter {
+                                playlist.songs.contains($0.id.rawValue)
+                            }
+                            try await lib.edit(matchingPlaylist, name: playlist.name ,items: songs)
+                        }
                         do {
                             try modelContext.save()
                         } catch {

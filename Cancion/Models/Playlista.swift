@@ -23,8 +23,9 @@ class Playlista {
     var songs: [String]
     var cover: Data? = nil
     var matchRules: String?
+    var urlString: String?
     
-    init(id: UUID = UUID(), title: String = "", smartRules: Bool? = true, limit: Int? = 25, limitType: String? = "items", limitSortType: String? = "most played", filters: [String] = [], liveUpdating: Bool = true, sortOption: String? = "most played", songs: [String] = [], cover: Data? = nil, matchRules: String? = "any") {
+    init(id: UUID = UUID(), title: String = "", smartRules: Bool? = true, limit: Int? = 25, limitType: String? = "items", limitSortType: String? = "most played", filters: [String] = [], liveUpdating: Bool = true, sortOption: String? = "most played", songs: [String] = [], cover: Data? = nil, matchRules: String? = "any", urlString: String? = nil) {
         self.id = id
         self.name = title
         self.smartRules = smartRules
@@ -37,6 +38,7 @@ class Playlista {
         self.songs = songs
         self.cover = cover
         self.matchRules = matchRules
+        self.urlString = urlString
     }
 }
 
