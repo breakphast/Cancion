@@ -60,10 +60,12 @@ final class EditPlaylistTests: XCTestCase {
     func testEditPlaylistSongs() async throws {
         playlista.name = "JOJO"
         let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
         let originalSongs = playlista.songs
 
         let filter1 = Filter(type: FilterType.artist.rawValue, value: "Lil Wop", condition: Condition.equals.rawValue)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter1])
         let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter1])
         let newSongs = playlista.songs
         XCTAssertNotEqual(originalSongs, newSongs)
@@ -72,6 +74,7 @@ final class EditPlaylistTests: XCTestCase {
     func testEditPlaylistSongsWithInvalidFilter() async throws {
         playlista.name = "JOJO"
         let filter = Filter(type: FilterType.artist.rawValue, value: "Yeaters", condition: Condition.equals.rawValue)
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         let edit = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
         
         XCTAssertFalse(edit)
@@ -94,11 +97,10 @@ final class EditPlaylistTests: XCTestCase {
     
     func testEditPlaylisLimitValues() async throws {
         playlista.name = "Elllo"
+        playlista.limitType = LimitType.hours.rawValue
+        playlista.limitSortType = LimitSortType.lastPlayed.rawValue
         let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
-        viewModel.limit = 50
-        viewModel.limitType = LimitType.hours.rawValue
-        viewModel.limitSortType = LimitSortType.lastPlayed.rawValue
-        
+        await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         let _ = await viewModel.handleEditPlaylist(songService: songService, playlist: playlista, filters: [filter])
         
         XCTAssertTrue(playlista.limit == 25)
@@ -133,7 +135,7 @@ final class EditPlaylistTests: XCTestCase {
         let dateString1 = "Jan 20, 2023"
         let filter1 = Filter(type: FilterType.dateAdded.rawValue, value: "", condition: Condition.equals.rawValue, date: dateString1)
         await viewModel.assignViewModelValues(playlist: playlista, filters: [filter1])
-        let newSongs = await songService.fetchMatchingSongIDs(playlist: playlista, dates: viewModel.filteredDates, filterrs: [filter1])
+        let newSongs = await songService.fetchMatchingSongIDs(dates: viewModel.filteredDates, filterrs: [filter1], limit: viewModel.limit, limitType: viewModel.limitSortType, limitSortType: viewModel.limitSortType, matchRules: viewModel.matchRules, smartRules: viewModel.smartRulesActive)
         let matchingSongs = songService.ogSongs.filter {
             newSongs.contains($0.id.rawValue)
         }
