@@ -18,11 +18,24 @@ struct AuthView: View {
                 Button {
                     authorizeAction()
                 } label: {
-                    Text("Authorize")
-                        .font(.title.bold())
+                    HStack(spacing: 12) {
+                        Text("Authorize")
+                            .kerning(1.2)
+                        Image(.appleMusic)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 40)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical)
+                    .background(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(.white)
+                            .shadow(radius: 6)
+                    )
+                    .font(.title.bold())
+                    .foregroundStyle(.appleMusic)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.naranja)
             }
         }
     }

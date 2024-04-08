@@ -86,6 +86,7 @@ struct PlaylistListRow: View {
                                         let songs = songService.ogSongs.filter {
                                             playlist.songs.contains($0.id.rawValue)
                                         }
+                                        viewModel.playlistSongs = songs
                                         try await lib.edit(matchingPlaylist, name: playlist.name, items: songs)
                                     }
                                 }
