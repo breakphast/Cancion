@@ -179,7 +179,7 @@ struct PlaylistGenerator: View {
     private var headerTitle: some View {
         HStack {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     Task {
                        await viewModel.resetViewModelValues()
                     }

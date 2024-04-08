@@ -87,12 +87,12 @@ struct PlaylistView: View {
     private var navHeaderItems: some View {
         HStack {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     dismiss()
                     showView = false
                     homeViewModel.playlistSongSort = nil
                 }
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     Task {
                         await playlistGeneratorViewModel.resetViewModelValues()
                         await viewModel.resetPlaylistViewModelValues()
@@ -124,7 +124,7 @@ struct PlaylistView: View {
             Spacer()
             
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     showGenerator.toggle()
                 }
             } label: {

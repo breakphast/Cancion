@@ -85,7 +85,7 @@ struct PlaylistList: View {
     }
     private var newPlaylistButton: some View {
         Button {
-            withAnimation(.bouncy(duration: 0.4)) {
+            withAnimation {
                 homeViewModel.generatorActive = true
                 showGenerator = true
             }
@@ -108,7 +108,7 @@ struct PlaylistList: View {
     private var navHeaderItems: some View {
         HStack {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     homeViewModel.currentScreen = .songs
                 }
             } label: {

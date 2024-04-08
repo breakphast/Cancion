@@ -73,7 +73,7 @@ struct PlayerView: View {
             Spacer()
             
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     viewModel.currentScreen = .songs
                 }
             } label: {
@@ -151,7 +151,6 @@ struct PlayerView: View {
                 .foregroundStyle(.white)
             }
         }
-        .offset(x: viewModel.moveSet, y: 0)
     }
     private var playsCapsule: some View {
         HStack(alignment: .center ,spacing: 4) {

@@ -39,7 +39,7 @@ struct Dropdown: View {
                     .onTapGesture {
                         index += 100
                         zIndex = index
-                        withAnimation(.bouncy) {
+                        withAnimation {
                             dropdownViewModel.showOptions.toggle()
                             if type == .limitSortType || type == .limit {
                                 dropdownActive.toggle()

@@ -89,7 +89,7 @@ struct Home: View {
             Spacer()
             TabIcon(icon: isPlaying ?  "pause.fill" : "play.fill", playButton: true, progress: viewModel.progress, isPlaying: isPlaying)
                 .onTapGesture {
-                    withAnimation(.bouncy) {
+                    withAnimation {
                         viewModel.handlePlayButtonSelected()
                     }
                 }
@@ -116,7 +116,7 @@ struct Home: View {
             
         } label: {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     viewModel.currentScreen = .player
                 }
             } label: {

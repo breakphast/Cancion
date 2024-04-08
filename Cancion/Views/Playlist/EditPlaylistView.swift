@@ -192,7 +192,7 @@ struct EditPlaylistView: View {
     private var headerTitle: some View {
         HStack {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     Task {
                         await editPlaylistViewModel.resetViewModelValues()
                     }

@@ -48,7 +48,7 @@ struct SmartFilterStack: View {
     private var addFilterButton: some View {
         HStack(spacing: 4) {
             Button {
-                withAnimation(.bouncy) {
+                withAnimation {
                     filters?.append(Filter())
                 }
             } label: {
@@ -66,7 +66,7 @@ struct SmartFilterStack: View {
             .animation(.none, value: filters?.count)
             
             Button {
-                withAnimation(.bouncy) {
+                withAnimation {
                     guard let count = filters?.count, count > 1 else { return }
                     filters?.removeAll(where: { $0.id == filter.id })
                 }

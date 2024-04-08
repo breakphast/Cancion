@@ -28,7 +28,7 @@ struct SortDropdown: View {
                     .onTapGesture {
                         index += 100
                         zIndex = index
-                        withAnimation(.bouncy) {
+                        withAnimation {
                             showOptions.toggle()
                         }
                     }

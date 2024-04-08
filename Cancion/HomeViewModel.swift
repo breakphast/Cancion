@@ -219,7 +219,7 @@ import MusicKit
                 
                 if isHorizontalSwipe && abs(horizontalDistance) > self.swipeThreshold {
                     if horizontalDistance < 0 {
-                        withAnimation(.bouncy(duration: 0.4)) {
+                        withAnimation {
                             switch self.currentScreen {
                             case .player:
                                 self.currentScreen = .songs
@@ -234,7 +234,7 @@ import MusicKit
                             }
                         }
                     } else if horizontalDistance > 0 {
-                        withAnimation(.bouncy(duration: 0.4)) {
+                        withAnimation {
                             switch self.currentScreen {
                             case .player:
                                 return

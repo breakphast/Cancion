@@ -96,7 +96,7 @@ struct SongList: View {
     private var navHeaderItems: some View {
         HStack {
             Button {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     homeViewModel.currentScreen = .player
                 }
             } label: {
@@ -132,7 +132,7 @@ struct SongList: View {
                     .foregroundStyle(.white)
             }
             .onTapGesture {
-                withAnimation(.bouncy(duration: 0.4)) {
+                withAnimation {
                     homeViewModel.currentScreen = .playlists
                 }
             }
