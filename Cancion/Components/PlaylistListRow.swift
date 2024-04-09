@@ -58,6 +58,14 @@ struct PlaylistListRow: View {
                     Task { @MainActor in
                         viewModel.playlist = playlist
                         viewModel.assignSongs(sortType: homeViewModel.playlistSongSort ?? LimitSortType.artist)
+                        switch LimitSortType(rawValue: playlist.limitSortType ?? LimitSortType.artist.rawValue) {
+                        case .mostRecentlyAdded:
+                            homeViewModel.playlistSongSort = .mostRecentlyAdded
+                        case .lastPlayed:
+                            homeViewModel.playlistSongSort = .lastPlayed
+                        default:
+                            homeViewModel.playlistSongSort = .mostPlayed
+                        }
                         let setSongs = await viewModel.setPlaylistSongs(songs: songService.ogSongs)
                         if setSongs {
                             playlistGenViewModel.activePlaylist = playlist
