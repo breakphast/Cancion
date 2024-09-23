@@ -194,7 +194,7 @@ struct EditPlaylistView: View {
             Button {
                 withAnimation {
                     Task {
-                        await editPlaylistViewModel.resetViewModelValues()
+                        editPlaylistViewModel.resetViewModelValues()
                     }
                     dismiss()
                 }

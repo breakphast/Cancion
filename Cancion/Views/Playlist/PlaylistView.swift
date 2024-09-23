@@ -94,8 +94,8 @@ struct PlaylistView: View {
                 }
                 withAnimation {
                     Task {
-                        await playlistGeneratorViewModel.resetViewModelValues()
-                        await viewModel.resetPlaylistViewModelValues()
+                        playlistGeneratorViewModel.resetViewModelValues()
+                        viewModel.resetPlaylistViewModelValues()
                     }
                     dismiss()
                     showView = false
@@ -221,7 +221,9 @@ struct PlaylistView: View {
                     .onTapGesture {
                         Task {
                             let upperBound = index + 50 > viewModel.playlistSongs.count ? viewModel.playlistSongs.count : index + 20
-                            let _ = await homeViewModel.handleSongSelected(song: song, songs: Array(viewModel.playlistSongs[index..<upperBound]))
+                            let selectedSongs = Array(viewModel.playlistSongs[index..<upperBound])
+                            
+                            await homeViewModel.handleSongSelected(song: song, songs: selectedSongs)
                         }
                     }
             }

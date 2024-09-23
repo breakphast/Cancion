@@ -83,7 +83,7 @@ struct Home: View {
                 .disabled(!viewModel.queueActive)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleChangePress(songs: songService.randomSongs, forward: false)
+                        try await viewModel.handleChangePress(forward: false)
                     }
                 }
             Spacer()
@@ -97,7 +97,7 @@ struct Home: View {
             TabIcon(icon: "forward.fill", progress: viewModel.progress, isPlaying: viewModel.isPlaying)
                 .onTapGesture {
                     Task {
-                        try await viewModel.handleChangePress(songs: songService.randomSongs, forward: true)
+                        try await viewModel.handleChangePress(forward: true)
                     }
                 }
             Spacer()

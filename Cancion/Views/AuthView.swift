@@ -52,7 +52,7 @@ struct AuthView: View {
         case .notDetermined:
             Task {
                 let status = await MusicAuthorization.request()
-                await update(status: status)
+                update(status: status)
             }
         case .denied:
             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {

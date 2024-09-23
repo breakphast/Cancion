@@ -176,7 +176,7 @@ import MusicKit
         }
     }
     
-    func handleChangePress(songs: [Song], forward: Bool) async throws {
+    func handleChangePress(forward: Bool) async throws {
         Task { @MainActor in
             progress = .zero
         }
@@ -188,7 +188,8 @@ import MusicKit
     }
     
     @MainActor
-    func handleSongSelected(song: Song, songs: [Song]? = nil) async -> Bool {
+    func handleSongSelected(song: Song, songs: [Song]? = nil) async {
+        print(song.title)
         var index = 0
         if let songs {
             if let indexx = songs.firstIndex(where: {$0.id.rawValue == song.id.rawValue}) {
@@ -198,15 +199,17 @@ import MusicKit
         selectionChange = true
         do {
             try await player.queue.insert(songs?[index...] ?? [song], position: .afterCurrentEntry)
-            try await player.skipToNextEntry()
-            isPlaybackQueueSet = true
-            try await player.play()
-            return true
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            do {
+                try await player.skipToNextEntry()
+                try await player.play()
+            } catch {
+                print("Error skipping to next entry or playing: \(error)")
+            }
         } catch {
             player = ApplicationMusicPlayer.shared
             player.queue.entries.removeAll()
             isPlaybackQueueSet = false
-            return false
         }
     }
     

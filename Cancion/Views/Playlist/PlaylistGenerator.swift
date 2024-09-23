@@ -181,7 +181,7 @@ struct PlaylistGenerator: View {
             Button {
                 withAnimation {
                     Task {
-                       await viewModel.resetViewModelValues()
+                       viewModel.resetViewModelValues()
                     }
                     dismiss()
                     homeViewModel.generatorActive = false
