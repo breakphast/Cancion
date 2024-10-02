@@ -13,13 +13,13 @@ struct PlaylistList: View {
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(PlaylistViewModel.self) var playlistViewModel
     @Environment(\.modelContext) var modelContext
-    @State var viewModel = PlaylistGeneratorViewModel()
+    @Bindable var viewModel: PlaylistGeneratorViewModel
     @State private var text: String = ""
     @State private var showGenerator = false
     @FocusState var isFocused: Bool
-    @Query var playlistas: [Playlista]
+    @Query var playlistas: [Playlistt]
 
-    private var playlists: [Playlista] {
+    private var playlists: [Playlistt] {
         if text.isEmpty {
             return playlistas
         } else {

@@ -14,7 +14,7 @@ final class EditPlaylistTests: XCTestCase {
     var authService: AuthService!
     var viewModel: EditPlaylistViewModel!
     var songService: SongService!
-    var playlista: Playlista!
+    var playlista: Playlistt!
     
     override func setUpWithError() throws {
         super.setUp()
@@ -22,7 +22,7 @@ final class EditPlaylistTests: XCTestCase {
         authService = AuthService()
         viewModel = EditPlaylistViewModel()
         songService = SongService()
-        playlista = Playlista()
+        playlista = Playlistt()
 
         let expectation = XCTestExpectation(description: "Setup async operations")
         

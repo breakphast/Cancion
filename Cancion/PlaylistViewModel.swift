@@ -8,7 +8,9 @@
 import Foundation
 import SwiftUI
 import MusicKit
+import SwiftData
 
+@MainActor
 @Observable class PlaylistViewModel {
     var playCountAscending = false
     var searchActive = false
@@ -19,7 +21,8 @@ import MusicKit
     
     var playlistSongs: [Song] = []
     var ogPlaylistSongs = [Song]()
-    var playlist: Playlista?
+    var playlist: Playlistt?
+    var playlistas = [Playlistt]()
         
     func filterSongsByText(text: String, songs: inout [Song], using staticSongs: [Song]){
         if !text.isEmpty {

@@ -10,11 +10,12 @@ import SwiftUI
 import MusicKit
 import SwiftData
 
+@MainActor
 @Observable class PlaylistGeneratorViewModel {
     // MARK: - UI State Properties
     var keyboardHeight: CGFloat = 0
     var mainZIndex: CGFloat = 1000
-    var activePlaylist: Playlista? = nil
+    var activePlaylist: Playlistt? = nil
     var showView = false
     var dropdownActive = false
     var showError = false
@@ -118,7 +119,7 @@ import SwiftData
     }
     
     @MainActor
-    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter], limit: Int?, limitType: String?, limitSortType: String?) async -> Playlista? {
+    func generatePlaylist(songs: [Song], name: String, cover: Data? = nil, filters: [Filter], limit: Int?, limitType: String?, limitSortType: String?) async -> Playlistt? {
         if let cover, let uiImage = UIImage(data: cover) {
             image = Image(uiImage: uiImage)
         }
@@ -135,7 +136,7 @@ import SwiftData
         }
         
         do {
-            let model = Playlista()
+            let model = Playlistt()
             model.name = name
             model.smartRules = smartRulesActive
             model.songs = songIDS
@@ -156,7 +157,7 @@ import SwiftData
         }
     }
     
-    func createAppleMusicPlaylist(using playlist: Playlista, songs: [Song]) {
+    func createAppleMusicPlaylist(using playlist: Playlistt, songs: [Song]) {
         Task { @MainActor in
             let lib = MusicLibrary.shared
             let listt = try await MusicLibrary.shared.createPlaylist(name: playlist.name)
@@ -180,13 +181,13 @@ import SwiftData
     }
     
     @MainActor
-    func addPlaylist(songs: [Song]) async -> Playlista? {
+    func addPlaylist(songs: [Song]) async -> Playlistt? {
         let playlista = await addPlaylistToDatabase(songs: songs)
         return playlista
     }
     
     @MainActor
-    func addPlaylistToDatabase(songs: [Song]) async -> Playlista? {
+    func addPlaylistToDatabase(songs: [Song]) async -> Playlistt? {
         if let model = await generatePlaylist(songs: songs, name: playlistName, cover: coverData, filters: filterModels ?? [], limit: limit, limitType: limitType, limitSortType: limitSortType) {
             filters = []
             
@@ -196,7 +197,7 @@ import SwiftData
         return nil
     }
     
-    func addModelAndFiltersToDatabase(model: Playlista, modelContext: ModelContext) -> Bool {
+    func addModelAndFiltersToDatabase(model: Playlistt, modelContext: ModelContext) -> Bool {
         modelContext.insert(model)
         if let playlistFilters = model.filters {
             let matchingFilters = filterModels?.filter {
@@ -240,7 +241,7 @@ import SwiftData
     }
     
     @MainActor
-    func assignViewModelValues(playlist: Playlista, filters: [Filter]) {
+    func assignViewModelValues(playlist: Playlistt, filters: [Filter]) {
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false

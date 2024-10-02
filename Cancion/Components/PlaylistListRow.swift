@@ -10,7 +10,7 @@ import MusicKit
 import SwiftData
 
 struct PlaylistListRow: View {
-    @State var playlist: Playlista
+    @State var playlist: Playlistt
     @Environment(PlaylistViewModel.self) var viewModel
     @Environment(SongService.self) var songService
     @Environment(PlaylistGeneratorViewModel.self) var playlistGenViewModel
@@ -20,7 +20,7 @@ struct PlaylistListRow: View {
     @State private var showMenu = false
     @State private var activePlaylist = false
     @State private var coverImage: Image?
-    @Query var playlistas: [Playlista]
+    @Query var playlistas: [Playlistt]
     @Query var filtersQuery: [Filter]
     @State private var showAlert = false
     

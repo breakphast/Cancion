@@ -11,6 +11,8 @@ import MusicKit
 struct Home: View {
     @Environment(HomeViewModel.self) var viewModel
     @Environment(SongService.self) var songService
+    @Environment(PlaylistViewModel.self) var playlistViewModel
+    @Environment(PlaylistGeneratorViewModel.self) var playlistGenViewModel
     @ObservedObject private var playerState = ApplicationMusicPlayer.shared.state
     private var isPlaying: Bool {
         return (playerState.playbackStatus == .playing)
@@ -30,7 +32,7 @@ struct Home: View {
                         
                         SongList()
                         
-                        PlaylistList()
+                        PlaylistList(viewModel: playlistGenViewModel)
                         
                         tabs(UIScreen.main.bounds.size)
                             .padding(.horizontal)

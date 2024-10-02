@@ -15,7 +15,7 @@ struct EditPlaylistView: View {
     @Environment(HomeViewModel.self) var homeViewModel
     @Environment(\.modelContext) var modelContext
     @Environment(\.dismiss) var dismiss
-    @Query var playlistas: [Playlista]
+    @Query var playlistas: [Playlistt]
     @Query var filtersQuery: [Filter]
     @State private var coverImage: Image?
     
@@ -26,7 +26,7 @@ struct EditPlaylistView: View {
         return editPlaylistViewModel.genError != nil
     }
     
-    var playlist: Playlista
+    var playlist: Playlistt
     
     var body: some View {
         ZStack {

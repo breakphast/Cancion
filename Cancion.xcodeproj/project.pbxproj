@@ -29,7 +29,7 @@
 		3E46EB462BBC474B00274BB4 /* DropdownViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB452BBC474B00274BB4 /* DropdownViewModel.swift */; };
 		3E46EB482BBC719600274BB4 /* DropdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB472BBC719600274BB4 /* DropdownTests.swift */; };
 		3E46EB4A2BBCB77500274BB4 /* PlaylistViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E46EB492BBCB77500274BB4 /* PlaylistViewTests.swift */; };
-		3E4D14EC2B9200960095D733 /* Playlista.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14EB2B9200960095D733 /* Playlista.swift */; };
+		3E4D14EC2B9200960095D733 /* Playlistt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14EB2B9200960095D733 /* Playlistt.swift */; };
 		3E59B9412B9A226E00B8EC74 /* PlaylistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E59B9402B9A226E00B8EC74 /* PlaylistViewModel.swift */; };
 		3E5B3BE72BA1FB83005DF2A5 /* DatePickr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5B3BE62BA1FB83005DF2A5 /* DatePickr.swift */; };
 		3E5D89202B920AAF00C9EEEB /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5D891F2B920AAF00C9EEEB /* Filter.swift */; };
@@ -37,6 +37,7 @@
 		3E5E9A052BB45E820066E3ED /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E9A042BB45E820066E3ED /* Enums.swift */; };
 		3E5E9A072BB45EE50066E3ED /* PlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E9A062BB45EE50066E3ED /* PlayerTests.swift */; };
 		3E6B174B2B94FF78004C7F9E /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6B174A2B94FF78004C7F9E /* PlayerView.swift */; };
+		3E7209572CAB2D76008CA4A7 /* OpenRecentPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7209562CAB2D76008CA4A7 /* OpenRecentPlaylist.swift */; };
 		3E7B2E392B7FAA1500476A76 /* Home.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7B2E382B7FAA1500476A76 /* Home.swift */; };
 		3E8C017D2BAC7C8400B8E53A /* AuthorizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8C017C2BAC7C8400B8E53A /* AuthorizationTests.swift */; };
 		3E8C017F2BAC82D300B8E53A /* SongServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8C017E2BAC82D300B8E53A /* SongServiceTests.swift */; };
@@ -89,7 +90,7 @@
 		3E46EB452BBC474B00274BB4 /* DropdownViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownViewModel.swift; sourceTree = "<group>"; };
 		3E46EB472BBC719600274BB4 /* DropdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropdownTests.swift; sourceTree = "<group>"; };
 		3E46EB492BBCB77500274BB4 /* PlaylistViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewTests.swift; sourceTree = "<group>"; };
-		3E4D14EB2B9200960095D733 /* Playlista.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlista.swift; sourceTree = "<group>"; };
+		3E4D14EB2B9200960095D733 /* Playlistt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlistt.swift; sourceTree = "<group>"; };
 		3E59B9402B9A226E00B8EC74 /* PlaylistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistViewModel.swift; sourceTree = "<group>"; };
 		3E5B3BE62BA1FB83005DF2A5 /* DatePickr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickr.swift; sourceTree = "<group>"; };
 		3E5D891F2B920AAF00C9EEEB /* Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
@@ -97,6 +98,7 @@
 		3E5E9A042BB45E820066E3ED /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		3E5E9A062BB45EE50066E3ED /* PlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerTests.swift; sourceTree = "<group>"; };
 		3E6B174A2B94FF78004C7F9E /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		3E7209562CAB2D76008CA4A7 /* OpenRecentPlaylist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenRecentPlaylist.swift; sourceTree = "<group>"; };
 		3E7B2E382B7FAA1500476A76 /* Home.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Home.swift; sourceTree = "<group>"; };
 		3E7D465E2B8C0615000849F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3E8C017C2BAC7C8400B8E53A /* AuthorizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationTests.swift; sourceTree = "<group>"; };
@@ -180,6 +182,7 @@
 			isa = PBXGroup;
 			children = (
 				3E244C242B7E4F4600193CA0 /* AuthView.swift */,
+				3E7209562CAB2D76008CA4A7 /* OpenRecentPlaylist.swift */,
 				3E244C182B7E4DE400193CA0 /* ContentView.swift */,
 				3E7B2E382B7FAA1500476A76 /* Home.swift */,
 				3EA42AAA2B83CF6B00F0A4C0 /* SongList.swift */,
@@ -267,7 +270,7 @@
 			isa = PBXGroup;
 			children = (
 				3E3AE4332B86703800FBDE10 /* SongFilterModel.swift */,
-				3E4D14EB2B9200960095D733 /* Playlista.swift */,
+				3E4D14EB2B9200960095D733 /* Playlistt.swift */,
 				3E5D891F2B920AAF00C9EEEB /* Filter.swift */,
 			);
 			path = Models;
@@ -391,6 +394,7 @@
 				3E3802E02B8E461200839017 /* CustomDivider.swift in Sources */,
 				3E244C192B7E4DE400193CA0 /* ContentView.swift in Sources */,
 				3E3AE4342B86703800FBDE10 /* SongFilterModel.swift in Sources */,
+				3E7209572CAB2D76008CA4A7 /* OpenRecentPlaylist.swift in Sources */,
 				3E3802EB2B8E550300839017 /* PlaylistView.swift in Sources */,
 				3E244C172B7E4DE400193CA0 /* CancionApp.swift in Sources */,
 				3E5E9A052BB45E820066E3ED /* Enums.swift in Sources */,
@@ -400,7 +404,7 @@
 				3EB45AED2B8541A5006F4EDB /* PlaylistGenerator.swift in Sources */,
 				3EA08C872B88175B0079BA18 /* SongListViewModel.swift in Sources */,
 				3E3AE43A2B86B48500FBDE10 /* SmartFilterStack.swift in Sources */,
-				3E4D14EC2B9200960095D733 /* Playlista.swift in Sources */,
+				3E4D14EC2B9200960095D733 /* Playlistt.swift in Sources */,
 				3EB45AEF2B86241D006F4EDB /* FilterCheckbox.swift in Sources */,
 				3E6B174B2B94FF78004C7F9E /* PlayerView.swift in Sources */,
 				3E3802E42B8E470D00839017 /* Extras.swift in Sources */,

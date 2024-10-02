@@ -8,6 +8,7 @@
 import SwiftUI
 import MusicKit
 import SwiftData
+import CoreData
 
 struct PlaylistView: View {
     @Environment(SongService.self) var songService
@@ -23,11 +24,11 @@ struct PlaylistView: View {
     
     @FocusState var isFocused: Bool
     @Binding var showView: Bool
-    @Binding var activePlaylist: Playlista?
+    @Binding var activePlaylist: Playlistt?
     @State private var showGenerator = false
     @State private var scrollID: String?
     
-    var playlist: Playlista
+    var playlist: Playlistt
     var songs: [Song] {
         let playlistSongs = viewModel.playlistSongs
         return text.isEmpty ? playlistSongs : playlistSongs.filter { $0.title.contains(text) || $0.artistName.contains(text) }
@@ -226,6 +227,79 @@ struct PlaylistView: View {
                             await homeViewModel.handleSongSelected(song: song, songs: selectedSongs)
                         }
                     }
+            }
+        }
+    }
+    
+    func deleteAnyCoreDataPersistentStore() {
+        let fileManager = FileManager.default
+        let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+
+        if let appSupportURL = urls.last {
+            do {
+                // List all files in the application support directory
+                let filePaths = try fileManager.contentsOfDirectory(atPath: appSupportURL.path)
+                
+                for filePath in filePaths {
+                    // Check for any file related to Core Data (e.g., .sqlite, .sqlite-shm, .sqlite-wal)
+                    if filePath.contains("sqlite") || filePath.contains("sqlite-shm") || filePath.contains("sqlite-wal") {
+                        let fullPath = appSupportURL.appendingPathComponent(filePath).path
+                        try fileManager.removeItem(atPath: fullPath)
+                        print("Deleted Core Data store: \(fullPath)")
+                    }
+                }
+            } catch {
+                print("Error deleting Core Data persistent store: \(error)")
+            }
+        }
+    }
+    
+    func countItemsInPersistentContainer() {
+        let persistentContainer = NSPersistentContainer(name: "Playlista")
+        persistentContainer.loadPersistentStores { _, error in
+            if let error = error {
+                print("Failed to load Core Data store: \(error)")
+                return
+            }
+
+            let context = persistentContainer.viewContext
+            let entityNames = persistentContainer.managedObjectModel.entities.compactMap { $0.name }
+            
+            var totalObjectsCount = 0
+            
+            for entityName in entityNames {
+                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+                
+                do {
+                    let count = try context.count(for: fetchRequest)
+                    totalObjectsCount += count
+                    print("Entity: \(entityName), Count: \(count)")
+                } catch {
+                    print("Failed to fetch count for entity \(entityName): \(error)")
+                }
+            }
+            
+            print("Total number of items in Core Data: \(totalObjectsCount)")
+            
+            // Now proceed to delete the persistent store
+            if totalObjectsCount > 0 {
+                deletePersistentStore()
+            } else {
+                print("Persistent store is already empty.")
+            }
+        }
+    }
+
+    // Function to delete the persistent store
+    func deletePersistentStore() {
+        let persistentContainer = NSPersistentContainer(name: "Playlista")
+        let storeURL = persistentContainer.persistentStoreDescriptions.first?.url
+        if let storeURL = storeURL {
+            do {
+                try FileManager.default.removeItem(at: storeURL)
+                print("Core Data store deleted successfully.")
+            } catch {
+                print("Failed to delete Core Data store: \(error)")
             }
         }
     }

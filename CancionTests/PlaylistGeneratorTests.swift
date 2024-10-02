@@ -86,7 +86,7 @@ final class PlaylistGeneratorTests: XCTestCase {
     }
     
     func testAssignValues() async throws {
-        let playlista = Playlista(title: "Desmond's")
+        let playlista = Playlistt(title: "Desmond's")
         let filter = Filter(date: Helpers().dateFormatter.string(from: Date()))
         await viewModel.assignViewModelValues(playlist: playlista, filters: [filter])
         XCTAssertTrue(viewModel.playlistName == playlista.name)
@@ -125,11 +125,11 @@ final class PlaylistGeneratorTests: XCTestCase {
     }
     
     func testSaveToModelContext() async throws {
-        let modelContxt: ModelContext = ModelContext(try ModelContainer(for: Playlista.self, Filter.self))
+        let modelContxt: ModelContext = ModelContext(try ModelContainer(for: Playlistt.self, Filter.self))
         let filter = Filter(type: FilterType.artist.rawValue, value: "Yeat", condition: Condition.equals.rawValue)
         viewModel.filterModels = [filter]
 
-        let playlista = Playlista(title: "ELlo", filters: [filter.id.uuidString])
+        let playlista = Playlistt(title: "ELlo", filters: [filter.id.uuidString])
         let addedToContext = viewModel.addModelAndFiltersToDatabase(model: playlista, modelContext: modelContxt)
         
         XCTAssertEqual(modelContxt.container.schema.entities.count, 2)

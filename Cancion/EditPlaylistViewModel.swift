@@ -15,7 +15,7 @@ import PhotosUI
     var item: PhotosPickerItem?
     var showError = false
     var coverImage: Image?
-    var playlist: Playlista?
+    var playlist: Playlistt?
     var playlistFilters: [Filter]?
     var filteredDates: [String : String] = [:]
     var genError: GenErrors?
@@ -31,7 +31,7 @@ import PhotosUI
     var limitSortType: String?
     
     @MainActor
-    func assignViewModelValues(playlist: Playlista, filters: [Filter]) {
+    func assignViewModelValues(playlist: Playlistt, filters: [Filter]) {
         playlistName = playlist.name
         matchRules = playlist.matchRules
         smartRulesActive = playlist.smartRules ?? false
@@ -55,7 +55,7 @@ import PhotosUI
     }
     
     @MainActor
-    func handleEditPlaylist(songService: SongService, playlist: Playlista, filters: [Filter]) async -> Bool {
+    func handleEditPlaylist(songService: SongService, playlist: Playlistt, filters: [Filter]) async -> Bool {
         let songIDs = await songService.fetchMatchingSongIDs(dates: filteredDates, filterrs: filters, limit: limit, limitType: limitType, limitSortType: limitSortType, matchRules: matchRules, smartRules: smartRulesActive)
         let filterStrings = filters.map {$0.id.uuidString}
         guard !songIDs.isEmpty else {

@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import MusicKit
 
+@MainActor
 @Observable final class HomeViewModel {
     var player = ApplicationMusicPlayer.shared
     var playerState = ApplicationMusicPlayer.shared.state
@@ -41,6 +42,8 @@ import MusicKit
     var ogSongs = [Song]()
     var sortedSongs = [Song]()
     var randomSongs = [Song]()
+    
+    var playlistas: [Playlistt] = []
     
     var moveSet: CGFloat {
         switch currentScreen {

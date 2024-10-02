@@ -7,9 +7,12 @@
 
 import SwiftUI
 import MusicKit
+import SwiftData
 
 struct ContentView: View {
     @Environment(AuthService.self) var authService
+    @Environment(PlaylistViewModel.self) var playlistViewModel
+    @Query var items: [Playlistt]
     
     var body: some View {
         ZStack {
@@ -24,6 +27,10 @@ struct ContentView: View {
         }
         .environment(authService)
         .preferredColorScheme(.light)
+        .task {
+            playlistViewModel.playlistas = items
+            print(playlistViewModel.playlistas.count, "ELLO")
+        }
     }
 }
 

@@ -14,7 +14,7 @@ final class DropdownTests: XCTestCase {
     var authService: AuthService!
     var viewModel: DropdownViewModel!
     var songService: SongService!
-    var playlista: Playlista!
+    var playlista: Playlistt!
     
     override func setUpWithError() throws {
         super.setUp()
@@ -22,7 +22,7 @@ final class DropdownTests: XCTestCase {
         authService = AuthService()
         viewModel = DropdownViewModel()
         songService = SongService()
-        playlista = Playlista()
+        playlista = Playlistt()
 
         let expectation = XCTestExpectation(description: "Setup async operations")
         
